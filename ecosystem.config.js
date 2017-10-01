@@ -14,6 +14,7 @@ module.exports = {
       name: 'display',
       script: './sigsegv.js',
       args: '"bash ./display.sh"',
+      cron_restart: '*/5 * * * *',
     },
     {
       name: 'broadcast',
