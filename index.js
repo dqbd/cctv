@@ -45,7 +45,7 @@ app.get('/:folder/stream.m3u8', (req, res, next) => {
         const buffer = [
             '#EXTM3U',
             '#EXT-X-VERSION:3',
-            '#EXT-X-TARGETDURATION:12',
+            `#EXT-X-TARGETDURATION:${initParams.SEGMENT_SIZE}`,
         ]
 
         if (files) {
