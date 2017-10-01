@@ -38,8 +38,9 @@ app.get('/:folder/stream.m3u8', (req, res, next) => {
         }
     }
 
-
     fs.readdir(path.join(initParams.BASE, folder), (err, files) => {
+        if (err) return next(err)
+ 
         const fromDate = Math.floor(Date.now() / 1000) - shift
         const buffer = [
             '#EXTM3U',
