@@ -49,7 +49,7 @@ app.get('/:folder/stream.m3u8', (req, res, next) => {
         ]
 
         if (files) {
-            const segments = files.sort((a, b) => a.localeCompare(b))
+            const segments = files.sort((a, b) => (a > b ? 1 : a < b ? -1 : 0))
                 .filter((a, index) => {
                     const segment = parseSegment(a)
                     return segment && (segment.timestamp >= fromDate || index >= files.length - showSegments)
@@ -64,11 +64,11 @@ app.get('/:folder/stream.m3u8', (req, res, next) => {
 
             buffer.push(`#EXT-X-MEDIA-SEQUENCE:${sequenceCache[shift].sequence}`)
 
-            segments
-                .forEach(segment => {
+            for(var i = 0; i < segments.length; segments++){
+                const segment = segments[i]
                     buffer.push(`#EXTINF:${parseSegment(segment).extinf},`)
                     buffer.push(segment)
-                })
+            }
         } else {
             buffer.push(`#EXT-X-MEDIA-SEQUENCE:${sequenceCache[shift].sequence}`)
         }
