@@ -29,6 +29,11 @@ initParams.BASE = initParams.BASE || __dirname
 
 app.get('/:folder/stream.m3u8', (req, res, next) => {
     const { folder } = req.params
+    if(!req.query.shift){
+        res.set('Content-Type', 'application/x-mpegURL')
+        res.sendFile(path.join(initParams.BASE, folder, initParams.MANIFEST_NAME))
+        return
+    }
     const shift = (req.query.shift && Number.parseInt(req.query.shift)) || 100
 
     if (!sequenceCache[shift]) {
