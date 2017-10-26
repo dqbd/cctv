@@ -64,7 +64,7 @@ app.get('/:folder/stream.m3u8', (req, res, next) => {
 
             buffer.push(`#EXT-X-MEDIA-SEQUENCE:${sequenceCache[shift].sequence}`)
 
-            for(var i = 0; i < segments.length; segments++){
+            for(var i = 0; i < segments.length; i++){
                 const segment = segments[i]
                     buffer.push(`#EXTINF:${parseSegment(segment).extinf},`)
                     buffer.push(segment)
