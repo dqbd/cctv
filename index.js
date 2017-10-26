@@ -5,6 +5,7 @@ const app = express()
 const fs = require('fs')
 
 const showSegments = 5
+const sliceDefaultLength = 300
 const initParams = fs.readFileSync(path.resolve(__dirname, 'init.sh'), { encoding: 'utf-8' }).split('\n').reduce((memo, line) => {
     if (line.indexOf('=') > 0) {
         const [key, value] = line.split('=', 2)
@@ -86,7 +87,35 @@ app.get(/([a-zA-Z0-9]*)\/([a-zA-Z0-9_]*)\.ts/, (req, res) => {
     const [folder, file] = Object.values(req.params)
     res.sendFile(path.join(folder, file + '.ts'), { root: initParams.BASE })
 })
+app.get('/:folder/slice.m3u8', (req, res, next) => {
+    if(!req.query.from) return next()
+    const { folder } = req.params, timeslice = {from: req.query.from, length: req.query.length || sliceDefaultLength}
+    fs.readdir(path.join(initParams.BASE, folder), (err, files) => {
+        if(err) return next(err)
+        const buffer = [
+            '#EXTM3U',
+            '#EXT-X-VERSION:3',
+            `#EXT-X-TARGETDURATION:${initParams.SEGMENT_SIZE}`,
+        ]
 
+        const segments = files.sort((a, b) => (a > b ? 1 : a < b ? -1 : 0))
+            .filter((a, index) => {
+                const segment = parseSegment(a)
+                return segment && (segment.timestamp >= timeslice.from || index >= files.length - showSegments)
+            })
+            .slice(0, timeslice.length / initParams.SEGMENT_SIZE)
+        buffer.push('#EXT-X-MEDIA-SEQUENCE:0')
+        for(var i = 0; i < segments.length; i++){
+            const segment = segments[i]
+            buffer.push(`#EXTINF:${parseSegment(segment).extinf},`)
+            buffer.push(segment)
+        }
+        buffer.push('#EXT-X-ENDLIST')
+
+        res.set('Content-Type', 'application/x-mpegURL')
+        res.send(buffer.join('\n') + '\n')
+    })
+})
 app.listen(8080, () => console.log('Listening on port 8080'))
 
 // http://localhost:8080/VENKU/stream.m3u8?shift=2800
