@@ -14,6 +14,10 @@ const initParams = fs.readFileSync(path.resolve(__dirname, 'init.sh'), { encodin
     return memo
 }, {})
 
+const tsCache = {}
+loadIntoCache('VENKU')
+loadIntoCache('OBCHOD')
+
 const sequenceCache = {}
 const parseSegment = (a) => {
     if (!a) return null
@@ -35,6 +39,7 @@ app.get('/:folder/stream.m3u8', (req, res, next) => {
         res.sendFile(path.join(initParams.BASE, folder, initParams.MANIFEST_NAME))
         return
     }
+    console.time('>request')
     const shift = (req.query.shift && Number.parseInt(req.query.shift)) || 100
 
     if (!sequenceCache[shift]) {
@@ -44,78 +49,112 @@ app.get('/:folder/stream.m3u8', (req, res, next) => {
         }
     }
 
-    fs.readdir(path.join(initParams.BASE, folder), (err, files) => {
-        if (err) return next(err)
- 
-        const fromDate = Math.floor(Date.now() / 1000) - shift
-        const buffer = [
-            '#EXTM3U',
-            '#EXT-X-VERSION:3',
-            `#EXT-X-TARGETDURATION:${initParams.SEGMENT_SIZE}`,
-        ]
+    if(!tsCache[folder]) return next()
+    const files = tsCache[folder]
+    const fromDate = Math.floor(Date.now() / 1000) - shift
+    const buffer = [
+        '#EXTM3U',
+        '#EXT-X-VERSION:3',
+        `#EXT-X-TARGETDURATION:${initParams.SEGMENT_SIZE}`,
+    ]
 
-        if (files) {
-            const segments = files.sort((a, b) => (a > b ? 1 : a < b ? -1 : 0))
-                .filter((a, index) => {
-                    const segment = parseSegment(a)
-                    return segment && (segment.timestamp >= fromDate || index >= files.length - showSegments)
-                })
-                .slice(0, showSegments)
+    if (files) {
+        const index = indexDatabase(files, fromDate)
+        const segments = files.slice(index, index + showSegments)
 
-            const serialized = segments.join()
-            if (sequenceCache[shift].data !== serialized) {
-                sequenceCache[shift].sequence += 1
-                sequenceCache[shift].data = serialized
-            }
-
-            buffer.push(`#EXT-X-MEDIA-SEQUENCE:${sequenceCache[shift].sequence}`)
-
-            for(var i = 0; i < segments.length; i++){
-                const segment = segments[i]
-                    buffer.push(`#EXTINF:${parseSegment(segment).extinf},`)
-                    buffer.push(segment)
-            }
-        } else {
-            buffer.push(`#EXT-X-MEDIA-SEQUENCE:${sequenceCache[shift].sequence}`)
+        const serialized = JSON.stringify(segments)
+        if (sequenceCache[shift].data !== serialized) {
+            sequenceCache[shift].sequence += 1
+            sequenceCache[shift].data = serialized
         }
 
-        res.set('Content-Type', 'application/x-mpegURL')
-        res.send(buffer.join('\n') + '\n')
-    })
+        buffer.push(`#EXT-X-MEDIA-SEQUENCE:${sequenceCache[shift].sequence}`)
+
+        for(var i = 0; i < segments.length; i++){
+            const segment = segments[i]
+            buffer.push(`#EXTINF:${segment.extinf},`)
+            buffer.push(segment.filename)
+        }
+    } else {
+        buffer.push(`#EXT-X-MEDIA-SEQUENCE:${sequenceCache[shift].sequence}`)
+    }
+
+    res.set('Content-Type', 'application/x-mpegURL')
+    res.send(buffer.join('\n') + '\n')
+    console.timeEnd('>request')
 })
 app.get(/([a-zA-Z0-9]*)\/([a-zA-Z0-9_]*)\.ts/, (req, res) => {
     const [folder, file] = Object.values(req.params)
     res.sendFile(path.join(folder, file + '.ts'), { root: initParams.BASE })
 })
-app.get('/:folder/slice.m3u8', (req, res, next) => {
-    if(!req.query.from) return next()
-    const { folder } = req.params, timeslice = {from: req.query.from, length: req.query.length || sliceDefaultLength}
-    fs.readdir(path.join(initParams.BASE, folder), (err, files) => {
-        if(err) return next(err)
-        const buffer = [
-            '#EXTM3U',
-            '#EXT-X-VERSION:3',
-            `#EXT-X-TARGETDURATION:${initParams.SEGMENT_SIZE}`,
-        ]
 
-        const segments = files.sort((a, b) => (a > b ? 1 : a < b ? -1 : 0))
-            .filter((a, index) => {
-                const segment = parseSegment(a)
-                return segment && (segment.timestamp >= timeslice.from || index >= files.length - showSegments)
-            })
-            .slice(0, timeslice.length / initParams.SEGMENT_SIZE)
-        buffer.push('#EXT-X-MEDIA-SEQUENCE:0')
-        for(var i = 0; i < segments.length; i++){
-            const segment = segments[i]
-            buffer.push(`#EXTINF:${parseSegment(segment).extinf},`)
-            buffer.push(segment)
-        }
-        buffer.push('#EXT-X-ENDLIST')
+// app.get('/:folder/slice.m3u8', (req, res, next) => {
+//     if(!req.query.from) return next()
+//     const { folder } = req.params, timeslice = {from: req.query.from, length: req.query.length || sliceDefaultLength}
 
-        res.set('Content-Type', 'application/x-mpegURL')
-        res.send(buffer.join('\n') + '\n')
-    })
-})
-app.listen(8080, () => console.log('Listening on port 8080'))
+//     const files = tsCache[folder]
+//     if(!files) return next()
+//     const buffer = [
+//         '#EXTM3U',
+//         '#EXT-X-VERSION:3',
+//         `#EXT-X-TARGETDURATION:${initParams.SEGMENT_SIZE}`,
+//     ]
+
+//     /*const segments = files.filter((a, index) => {
+//             const segment = parseSegment(a)
+//             return segment && (segment.timestamp >= timeslice.from || index >= files.length - showSegments)
+//         })
+//         .slice(0, timeslice.length / initParams.SEGMENT_SIZE)*/
+//     const index = indexDatabase(files, timeslice.from)
+//     const segments = files.slice(index, index + timeslice.length / initParams.SEGMENT_SIZE)
+//     buffer.push('#EXT-X-MEDIA-SEQUENCE:0')
+//     for(var i = 0; i < segments.length; i++){
+//         const segment = segments[i]
+//         buffer.push(`#EXTINF:${parseSegment(segment).extinf},`)
+//         buffer.push(segment)
+//     }
+//     buffer.push('#EXT-X-ENDLIST')
+
+//     res.set('Content-Type', 'application/x-mpegURL')
+//     res.send(buffer.join('\n') + '\n')
+// })
+
 
 // http://localhost:8080/VENKU/stream.m3u8?shift=2800
+
+function loadIntoCache(folder){
+    const absPath = path.join(initParams.BASE, folder)
+    var lastFilename = ''
+
+    tsCache[folder] = fs
+        .readdirSync(absPath)
+        .sort((a, b) => (a > b ? 1 : a < b ? -1 : 0))
+        .reduce((memo, item) => {
+            const segment = parseSegment(item)
+            if (segment && segment.timestamp) {
+                memo.push(segment)
+            }
+            return memo
+        }, [])
+
+    fs.watch(absPath, (event, filename) => {
+        if(event != 'change' || lastFilename == filename || !filename.startsWith('sg_')) return
+        tsCache[folder].push(filename)
+        lastFilename = filename
+    })
+}
+
+function indexDatabase(database, date){
+    const sliceAndFind = (min, max) => {
+        let check = Math.floor((max + min) / 2)
+        if (min === max) return check
+        if (date > database[check].timestamp) {
+            return sliceAndFind(check + 1, max)
+        } else {
+            return sliceAndFind(min, check - 1)
+        }
+    }
+    return sliceAndFind(0, database.length - 1)
+}
+
+app.listen(8080, () => console.log('Listening on port 8080'))
