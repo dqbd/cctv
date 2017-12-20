@@ -106,8 +106,8 @@ app.get('/:folder/slice.m3u8', (req, res, next) => {
     buffer.push('#EXT-X-MEDIA-SEQUENCE:0')
     for(var i = 0; i < segments.length; i++){
         const segment = segments[i]
-        buffer.push(`#EXTINF:${parseSegment(segment).extinf},`)
-        buffer.push(segment)
+        buffer.push(`#EXTINF:${segment.extinf},`)
+        buffer.push(segment.filename)
     }
     buffer.push('#EXT-X-ENDLIST')
 
