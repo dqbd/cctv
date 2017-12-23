@@ -10,8 +10,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "better-sqlite3": "^4.0.3",
     "chokidar": "^1.7.0",
     "express": "^4.16.1",
     "unquote": "^1.1.0"
+  },
+  "devDependencies": {
+    "node-gyp": "^3.6.2"
   }
 }

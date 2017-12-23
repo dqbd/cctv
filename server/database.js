@@ -1,69 +1,57 @@
-const fs = require('fs')
-const chokidar = require('chokidar')
-
+const Database = require('better-sqlite3')
 const { createSegment } = require('./segment')
 
-class Database {
-    constructor(config) {
-        this.config = config
-        this.database = new Map()
+module.exports = class Cache {
+    constructor(path) {
+        this.db = new Database(path)
+        this.hasCreated = {}
     }
 
-    clearAll() {
-        this.database.clear()
+    createTable(base) {
+        if (this.hasCreated[base]) return
+        this.db.prepare(`
+            CREATE TABLE IF NOT EXISTS ${base} (
+                timestamp int(12) NOT NULL,
+                filename varchar(180) NOT NULL,
+                extinf varchar(100) NOT NULL,
+                duration int(10) NOT NULL,
+                PRIMARY KEY (timestamp, duration)
+            )`
+        ).run()
+        this.hasCreated[base] = true
     }
 
-    
-    set(folder, list) {
-        this.database.set(folder, list)
+    insert(base, filename) {
+        const segment = createSegment(filename)
+        if (!segment) return null
+        this.createTable(base)
+        this.db
+            .prepare(`INSERT OR REPLACE INTO ${base} (filename, timestamp, duration, extinf) VALUES (@filename, @timestamp, @duration, @extinf)`)
+            .run(segment)
     }
 
-    clear(folder) {
-        this.set(folder, [])
+    remove(base, filename) {
+        this.db
+            .prepare(`DELETE FROM ${base} WHERE filename = ?`)
+            .run([filename])
     }
 
+    tooOld(base, maxAge) {
+        return this.db
+            .prepare(`SELECT filename FROM ${base} WHERE timestamp < ?`)
+            .all([(Date.now() / 1000) - maxAge])
+    }
 
-    insert(folder, item) {
+    seek(base, from, to) {
+        return this.db
+            .prepare(`SELECT * FROM ${base} WHERE timestamp >= ? AND timestamp <= ? ORDER BY timestamp DESC`)
+            .all([from, to])
         
     }
 
-    build(folder) {
-        this.clear()
-
-        fs.readdir(path.join(this.config.base(), folder), (err, files) => {
-            if (!err && files && files.length > 0) {
-
-                this.set(
-                    files.reduce((memo, file) => {
-                        const segment = createSegment(file)
-                        if (!segment) return memo
-
-                        if (segment.timestamp * 1000 <= ???) {
-                            fs.unlink(path.join(this.config.base(), folder, file), (err) => console.error)
-                        } else {
-                            memo.push(segment)
-                        }
-                        return memo
-                    }, [])
-                    .sort((a, b) => a.timestamp - b.timestamp)
-                )
-            }
-          })
-    }
-
-    startListening() {
-        
+    shift(base, shift = 0, limit = 5) {
+        return this.db
+            .prepare(`SELECT * FROM ${base} WHERE timestamp >= ? ORDER BY timestamp DESC LIMIT ${limit}`)
+            .all([(Date.now() / 1000) - shift])
     }
 }
-
-class Selector extends Database {
-    slice() {
-
-    }
-
-    shift() {
-
-    }
-}
-
-module.exports = Selector

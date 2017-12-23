@@ -34,9 +34,9 @@ class Manifest {
             tokens[token].hash = hash
         }
 
-        buffer[2] += tokens[token].seq
+        buffer[3] += tokens[token].seq
 
-        return buffer.join('\n')
+        return buffer.join('\n') + '\n'
     }
 }
 
