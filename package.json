@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "chokidar": "^1.7.0",
     "express": "^4.16.1",
     "unquote": "^1.1.0"
   }
