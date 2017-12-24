@@ -30,7 +30,7 @@ const performCleanup = (folder) => {
     console.time('- delete from DB')
     db.removeBulk(folder, toDelete)
     console.timeEnd('- delete from DB')
-    
+
     console.time('- delete from FS')
     toDelete.forEach(({ filename }) => {
         fs.unlink(path.resolve(config.base(), folder, filename), (error) => console.error)
@@ -41,9 +41,14 @@ const performCleanup = (folder) => {
 }
 
 const loadFolder = (folder, address) => {
-    console.log('LOADFOLDER', folder)
+    console.log('LOADFOLDER', folder, path.resolve(config.base(), folder))
     console.time(`initialize ${folder}`)
-    db.insertBulk(folder, fs.readdirSync(path.resolve(config.base(), folder)))
+
+    console.time(`ls ${folder}`)
+    const files = fs.readdirSync(path.resolve(config.base(), folder))
+    console.timeEnd(`ls ${folder}`)
+
+    db.insertBulk(folder, files)
     console.timeEnd(`initialize ${folder}`)
 
     console.time(`cleanup ${folder}`)
@@ -69,7 +74,7 @@ app.get('/:folder/stream.m3u8', (req, res) => {
     const { shift } = req.query
 
     if (!folder) return res.status(400).send('Invalid parameters')
-    
+
     res.set('Content-Type', 'application/x-mpegURL')
     if(!shift) {
         console.log('receiving stream file')
@@ -102,5 +107,6 @@ process.on("SIGTERM", () => {
 })
 
 app.listen(8080, () => {
+    instances.forEach(instance => instance.loop())
     console.log('Listening at 8080')
 })

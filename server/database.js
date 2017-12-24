@@ -3,7 +3,7 @@ const { createSegment } = require('./segment')
 
 module.exports = class Cache {
     constructor(path) {
-        this.db = new Database(path)
+        this.db = new Database(path, { memory: true })
         this.hasCreated = {}
     }
 
@@ -45,8 +45,9 @@ module.exports = class Cache {
 
     insert(base, filename) {
         const segment = createSegment(filename)
-        if (!segment) return null
+        if (!segment || segment.duration <= 0) return null
         this.createTable(base)
+	console.log('inserting new file', base, filename)
         this.db
             .prepare(`INSERT OR REPLACE INTO ${base} (filename, timestamp, duration, extinf) VALUES (@filename, @timestamp, @duration, @extinf)`)
             .run(segment)
