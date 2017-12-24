@@ -38,10 +38,9 @@ module.exports = class Cache {
             console.timeEnd('- batch processing')
             
             console.time('- insert batch processing')
-	        this.db.transaction(transactions).run()
+            this.db.transaction(transactions).run()
             console.timeEnd('- insert batch processing')
         }
-        
     }
 
     insert(base, filename) {
@@ -57,6 +56,28 @@ module.exports = class Cache {
         this.db
             .prepare(`DELETE FROM ${base} WHERE filename = ?`)
             .run([filename])
+    }
+
+    removeBulk(base, filenames, len = 3 * 24 * 3600) {
+        this.createTable(base)
+        console.log('received files', filenames.length)
+        let i = 0, n = filenames.length
+        while (i < n) {
+            console.log(`deleting batch ${Math.ceil((i+1) / len)} of ${Math.ceil(n / len)}`)
+
+            console.time('- batch processing')
+            const transactions = filenames.slice(i, i += len).reduce((memo, { filename }) => {
+                const segment = createSegment(filename)
+                if (!segment) return memo
+                memo.push(`DELETE FROM ${base} WHERE filename = '${filename}'`)
+                return memo
+            }, [])
+            console.timeEnd('- batch processing')
+            
+            console.time('- remove batch processing')
+            this.db.transaction(transactions).run()
+            console.timeEnd('- remove batch processing')
+        }
     }
 
     tooOld(base, maxAge) {

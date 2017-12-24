@@ -23,16 +23,26 @@ const mappings = {
 }
 
 const performCleanup = (folder) => {
-    db.tooOld(folder, maxAge).forEach(({ filename }) => {
-        db.remove(folder, filename)
+    console.log('CLEANUP', folder)
+
+    const toDelete = db.tooOld(folder, maxAge)
+
+    console.time('- to delete from FS')
+    db.removeBulk(folder, toDelete)
+    console.timeEnd('- to delete from FS')
+    
+    console.log('- to delete', toDelete.length)
+    console.time('- to delete')
+    toDelete.forEach(({ filename }) => {
         fs.unlink(path.resolve(config.base(), folder, filename), (error) => console.error)
     })
+    console.timeEnd('- to delete')
 
     setTimeout(() => this.performCleanup(folder), cleanupPolling * 1000)
 }
 
 const loadFolder = (folder, address) => {
-    console.log('Initializing folder', folder)
+    console.log('LOADFOLDER', folder)
     console.time(`initialize ${folder}`)
     db.insertBulk(folder, fs.readdirSync(path.resolve(config.base(), folder)))
     console.timeEnd(`initialize ${folder}`)
