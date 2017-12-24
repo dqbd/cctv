@@ -66,16 +66,11 @@ module.exports = class Cache {
             console.log(`deleting batch ${Math.ceil((i+1) / len)} of ${Math.ceil(n / len)}`)
 
             console.time('- batch processing')
-            const transactions = filenames.slice(i, i += len).reduce((memo, { filename }) => {
-                const segment = createSegment(filename)
-                if (!segment) return memo
-                memo.push(`DELETE FROM ${base} WHERE filename = '${filename}'`)
-                return memo
-            }, [])
+            const list = filenames.slice(i, i += len).map(({ filename }) => `'${filename}'`)
             console.timeEnd('- batch processing')
             
             console.time('- remove batch processing')
-            this.db.transaction(transactions).run()
+            this.db.prepare(`DELETE FROM ${base} WHERE filename IN (${list.join(', ')})`).run()
             console.timeEnd('- remove batch processing')
         }
     }
