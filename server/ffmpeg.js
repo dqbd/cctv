@@ -21,6 +21,8 @@ module.exports = class Ffmpeg {
             `"${path.resolve(config.base(), folder, config.name())}"`,
         ]
 
+        console.log(folder, this.params)
+
         this.loop()
     }
 

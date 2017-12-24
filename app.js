@@ -62,7 +62,7 @@ const loadFolder = (folder, address) => {
     instances.push(new Ffmpeg(config, folder, address))
 }
 
-Object.keys(mappings).forEach(loadFolder)
+Object.keys(mappings).forEach((folder) => loadFolder(folder, mappings[folder]))
 
 app.get('/:folder/stream.m3u8', (req, res) => {
     const { folder } = req.params
