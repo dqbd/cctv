@@ -27,16 +27,15 @@ const performCleanup = (folder) => {
 
     const toDelete = db.tooOld(folder, maxAge)
 
-    console.time('- to delete from FS')
+    console.time('- delete from DB')
     db.removeBulk(folder, toDelete)
-    console.timeEnd('- to delete from FS')
+    console.timeEnd('- delete from DB')
     
-    console.log('- to delete', toDelete.length)
-    console.time('- to delete')
+    console.time('- delete from FS')
     toDelete.forEach(({ filename }) => {
         fs.unlink(path.resolve(config.base(), folder, filename), (error) => console.error)
     })
-    console.timeEnd('- to delete')
+    console.timeEnd('- delete from FS')
 
     setTimeout(() => this.performCleanup(folder), cleanupPolling * 1000)
 }
@@ -58,7 +57,7 @@ const loadFolder = (folder, address) => {
             db.insert(folder, filename)
         }
     })
-    console.time(`watch ${folder}`)
+    console.timeEnd(`watch ${folder}`)
 
     instances.push(new Ffmpeg(config, folder, address))
 }
