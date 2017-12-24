@@ -19,7 +19,7 @@ loadIntoCache('VENKU')
 loadIntoCache('OBCHOD')
 
 const sequenceCache = {}
-const parseSegment = (a) => {
+function parseSegment(a) {
     if (!a) return null
     let [_, timestamp, duration] = a.replace('.ts', '').split('_')
     if (!duration || !timestamp) return null
@@ -32,14 +32,15 @@ const parseSegment = (a) => {
 
 initParams.BASE = initParams.BASE || __dirname
 
-app.get('/:folder/stream.m3u8', (req, res, next) => {
+app.get('/:folder/stream.m3u8', (req, res, next) => {	
     const { folder } = req.params
     if(!req.query.shift){
         res.set('Content-Type', 'application/x-mpegURL')
         res.sendFile(path.join(initParams.BASE, folder, initParams.MANIFEST_NAME))
         return
     }
-    console.time('>request')
+    console.time(`stream.m3u8(${folder})`)
+
     const shift = (req.query.shift && Number.parseInt(req.query.shift)) || 100
 
     if (!sequenceCache[shift]) {
@@ -81,48 +82,45 @@ app.get('/:folder/stream.m3u8', (req, res, next) => {
 
     res.set('Content-Type', 'application/x-mpegURL')
     res.send(buffer.join('\n') + '\n')
-    console.timeEnd('>request')
+    console.timeEnd(`stream.m3u8(${folder})`)
+    
 })
 app.get(/([a-zA-Z0-9]*)\/([a-zA-Z0-9_]*)\.ts/, (req, res) => {
     const [folder, file] = Object.values(req.params)
     res.sendFile(path.join(folder, file + '.ts'), { root: initParams.BASE })
 })
 
-// app.get('/:folder/slice.m3u8', (req, res, next) => {
-//     if(!req.query.from) return next()
-//     const { folder } = req.params, timeslice = {from: req.query.from, length: req.query.length || sliceDefaultLength}
+app.get('/:folder/slice.m3u8', (req, res, next) => {
+    if(!req.query.from) return next()
+    const { folder } = req.params, timeslice = {from: req.query.from, length: req.query.length || sliceDefaultLength}
 
-//     const files = tsCache[folder]
-//     if(!files) return next()
-//     const buffer = [
-//         '#EXTM3U',
-//         '#EXT-X-VERSION:3',
-//         `#EXT-X-TARGETDURATION:${initParams.SEGMENT_SIZE}`,
-//     ]
+    const files = tsCache[folder]
+    if(!files) return next()
+    const buffer = [
+        '#EXTM3U',
+        '#EXT-X-VERSION:3',
+        `#EXT-X-TARGETDURATION:${initParams.SEGMENT_SIZE}`,
+    ]
+    const index = indexDatabase(files, timeslice.from)
+    const segments = files.slice(index, index + timeslice.length / initParams.SEGMENT_SIZE)
+    buffer.push('#EXT-X-MEDIA-SEQUENCE:0')
+    for(var i = 0; i < segments.length; i++){
+        const segment = segments[i]
+		//console.log('debug:', segment, segments, index)
+        buffer.push(`#EXTINF:${segment.extinf},`)
+        buffer.push(segment.filename)
+    }
+    buffer.push('#EXT-X-ENDLIST')
 
-//     /*const segments = files.filter((a, index) => {
-//             const segment = parseSegment(a)
-//             return segment && (segment.timestamp >= timeslice.from || index >= files.length - showSegments)
-//         })
-//         .slice(0, timeslice.length / initParams.SEGMENT_SIZE)*/
-//     const index = indexDatabase(files, timeslice.from)
-//     const segments = files.slice(index, index + timeslice.length / initParams.SEGMENT_SIZE)
-//     buffer.push('#EXT-X-MEDIA-SEQUENCE:0')
-//     for(var i = 0; i < segments.length; i++){
-//         const segment = segments[i]
-//         buffer.push(`#EXTINF:${parseSegment(segment).extinf},`)
-//         buffer.push(segment)
-//     }
-//     buffer.push('#EXT-X-ENDLIST')
-
-//     res.set('Content-Type', 'application/x-mpegURL')
-//     res.send(buffer.join('\n') + '\n')
-// })
+    res.set('Content-Type', 'application/x-mpegURL')
+    res.send(buffer.join('\n') + '\n')
+})
 
 
 // http://localhost:8080/VENKU/stream.m3u8?shift=2800
 
 function loadIntoCache(folder){
+    console.time(`loadIntoCache(${folder})`)
     const absPath = path.join(initParams.BASE, folder)
     var lastFilename = ''
 
@@ -136,7 +134,7 @@ function loadIntoCache(folder){
             }
             return memo
         }, [])
-
+    console.timeEnd(`loadIntoCache(${folder})`)
     fs.watch(absPath, (event, filename) => {
         if(event != 'change' || lastFilename == filename || !filename.startsWith('sg_')) return
         tsCache[folder].push(filename)
@@ -145,7 +143,7 @@ function loadIntoCache(folder){
 }
 
 function indexDatabase(database, date){
-    const sliceAndFind = (min, max) => {
+    function sliceAndFind (min, max) {
         let check = Math.floor((max + min) / 2)
         if (min === max) return check
         if (date > database[check].timestamp) {
