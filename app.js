@@ -12,7 +12,7 @@ const db = new Database(path.resolve(__dirname, 'app.db'), { memory: true })
 const factory = new Manifest(config)
 
 const maxAge = 7 * 24 * 60 * 60 /* keep records of one week */
-const cleanupPolling = 15 /* every day */
+const cleanupPolling = 60 /* every minute */
 
 const app = express()
 const instances = []
@@ -25,15 +25,12 @@ const mappings = {
 const performCleanup = (folder) => {
     console.log('CLEANUP', folder)
 
-    const toDelete = db.tooOld(folder, maxAge, (data) => {
-	console.log(data)
-    })
+    const toDelete = db.tooOld(folder, maxAge)
 
-    console.log(toDelete)
     console.time('- delete from DB')
     db.removeBulk(folder, toDelete)
     console.timeEnd('- delete from DB')
-
+    
     console.time('- delete from FS')
     toDelete.forEach(({ filename }) => {
         fs.unlink(path.resolve(config.base(), folder, filename), (error) => console.error)
@@ -52,7 +49,7 @@ const loadFolder = (folder, address) => {
     console.time(`cleanup ${folder}`)
     performCleanup(folder)
     console.timeEnd(`cleanup ${folder}`)
-
+    
     console.time(`watch ${folder}`)
     fs.watch(path.resolve(config.base(), folder), (event, filename) => {
         if (filename.indexOf('sg_') != 0) return
@@ -72,7 +69,7 @@ app.get('/:folder/stream.m3u8', (req, res) => {
     const { shift } = req.query
 
     if (!folder) return res.status(400).send('Invalid parameters')
-
+    
     res.set('Content-Type', 'application/x-mpegURL')
     if(!shift) {
         console.log('receiving stream file')
@@ -96,7 +93,7 @@ app.get('/:folder/slice.m3u8', (req, res) => {
 app.get('/:folder/:file', (req, res, next) => {
     const { folder, file } = req.params
     if (file.indexOf('.ts') < 0) return next()
-    res.sendFile(path.join(folder, file), { root: config.base() })
+    res.sendFile(path.join(folder, file + '.ts'), { root: config.base() })
 })
 
 process.on("SIGTERM", () => {
@@ -105,7 +102,5 @@ process.on("SIGTERM", () => {
 })
 
 app.listen(8080, () => {
-    console.log('Instances starting')
-    instances.forEach(instance => instance.loop())
     console.log('Listening at 8080')
 })

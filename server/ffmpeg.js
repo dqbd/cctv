@@ -12,28 +12,31 @@ module.exports = class Ffmpeg {
         this.params = [
             `-i`, address,
             `-c`, `copy`,
-            `-hls_time`, config.segmentSize(),
+            `-hls_time`, `${config.segmentSize()}`,
             `-hls_start_number_source`, `epoch`,
             `-use_localtime`, `1`,
             `-timeout`, `-1`,
             `-hls_flags`, `second_level_segment_duration`,
-            `-hls_segment_filename`, path.resolve(config.base(), folder, config.segmentName()),
-            path.resolve(config.base(), folder, config.name()),
+            `-hls_segment_filename`, `"${path.resolve(config.base(), folder, config.segmentName())}"`,
+            `"${path.resolve(config.base(), folder, config.name())}"`,
         ]
+
+        console.log(folder, this.params)
+
+        this.loop()
     }
 
     loop() {
         this.instance = cp.spawn('ffmpeg', this.params)
-	this.instance.stdout.on("data", (data) => {
+        this.instance.stdout.on("data", (data) => {
             console.log(data.toString())
         })
+    
         this.instance.stderr.on("data", (data) => {
             console.log(data.toString())
         })
         this.instance.on('exit', () => {
-            console.log('restarting', folder)
             if (!this.stopped) {
-                console.log('looping')
                 this.loop()
             }
         })

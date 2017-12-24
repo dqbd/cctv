@@ -35,10 +35,7 @@ class Manifest {
         }
 
         buffer[3] += tokens[token].seq
-
-	if (end) {
-            buffer.push('#EXT-X-ENDLIST')
-        }
+        buffer.push('#EXT-X-ENDLIST')
 
         return buffer.join('\n') + '\n'
     }
