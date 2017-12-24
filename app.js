@@ -8,7 +8,7 @@ const Database = require('./server/database')
 const Manifest = require('./server/manifest')
 
 const config = new Config(path.resolve(__dirname, 'init.sh'))
-const db = new Database(path.resolve(__dirname, 'app.db'))
+const db = new Database(path.resolve(__dirname, 'app.db'), { memory: true })
 const factory = new Manifest(config)
 
 const maxAge = 7 * 24 * 60 * 60 /* keep records of one week */
@@ -38,7 +38,7 @@ const loadFolder = (folder, address) => {
     console.timeEnd(`initialize ${folder}`)
 
     console.time(`cleanup ${folder}`)
-    performCleanup()
+    performCleanup(folder)
     console.timeEnd(`cleanup ${folder}`)
     
     console.time(`watch ${folder}`)
