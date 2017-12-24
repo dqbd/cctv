@@ -1,8 +1,11 @@
+import { setTimeout } from 'timers';
+
 const express = require('express')
 const path = require('path')
 const fs = require('fs')
 
 const Config = require('./server/config')
+const Ffmpeg = require('./server/ffmpeg')
 const Database = require('./server/database')
 const Manifest = require('./server/manifest')
 
@@ -14,41 +17,45 @@ const maxAge = 7 * 24 * 60 * 60 /* keep records of one week */
 const cleanupPolling = 60 /* every minute */
 
 const app = express()
+const instances = []
 
-const loadFolder = (folder) => {
+const mappings = {
+    "OBCHOD": "rtsp://192.168.1.164:554/user=admin&password=&channel=1&stream=0.sdp?real_stream",
+    "VENKU": "rtsp://192.168.1.168:554/user=admin&password=&channel=1&stream=0.sdp?real_stream",
+}
+
+const performCleanup = (folder) => {
+    db.tooOld(folder, maxAge).forEach(({ filename }) => {
+        db.remove(folder, filename)
+        fs.unlink(path.resolve(config.base(), folder, filename), (error) => console.error)
+    })
+
+    setTimeout(() => this.performCleanup(folder), cleanupPolling * 1000)
+}
+
+const loadFolder = (folder, address) => {
     console.log('Initializing folder', folder)
+    console.time(`initialize ${folder}`)
     db.insertBulk(folder, fs.readdirSync(path.resolve(config.base(), folder)))
+    console.timeEnd(`initialize ${folder}`)
 
-    console.log('-- Hooking watch')
+    console.time(`cleanup ${folder}`)
+    performCleanup()
+    console.timeEnd(`cleanup ${folder}`)
+    
+    console.time(`watch ${folder}`)
     fs.watch(path.resolve(config.base(), folder), (event, filename) => {
         if (filename.indexOf('sg_') != 0) return
         if (fs.existsSync(path.resolve(config.base(), folder, filename))) {
             db.insert(folder, filename)
-        } else {
-            db.remove(folder, filename)
         }
     })
+    console.time(`watch ${folder}`)
 
-    console.log('-- Hooking delete')
-    setInterval(() => {
-        db.tooOld(folder, maxAge).forEach(({ filename }) => {
-            fs.unlink(path.resolve(config.base(), folder, filename), (error) => console.error)
-        })
-    }, cleanupPolling * 1000)
+    instances.push(new Ffmpeg(config, folder, address))
 }
 
-const detect = () => {
-    fs.readdir(config.base(), (err, files) => {
-        files
-            .filter((item) => {
-                const stat = fs.lstatSync(config.base(), item)
-                return stat.isDirectory() && fs.existsSync(path.resolve(config.base(), item, config.name()))
-            })
-            .forEach(loadFolder)
-    })
-}
-
-detect()
+Object.keys(mappings).forEach(loadFolder)
 
 app.get('/:folder/stream.m3u8', (req, res) => {
     const { folder } = req.params
@@ -79,6 +86,10 @@ app.get('/:folder/:file', (req, res, next) => {
     const { folder, file } = req.params
     if (file.indexOf('.ts') < 0) return next()
     res.sendFile(path.join(folder, file + '.ts'), { root: config.base() })
+})
+
+process.on("SIGTERM", () => {
+    instances.forEach(instance => instance.stop())
 })
 
 app.listen(8080, () => {
