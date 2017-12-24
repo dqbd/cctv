@@ -98,7 +98,7 @@ app.get('/:folder/slice.m3u8', (req, res) => {
 app.get('/:folder/:file', (req, res, next) => {
     const { folder, file } = req.params
     if (file.indexOf('.ts') < 0) return next()
-    res.sendFile(path.join(folder, file + '.ts'), { root: config.base() })
+    res.sendFile(path.join(folder, file), { root: config.base() })
 })
 
 process.on("SIGTERM", () => {
