@@ -71,8 +71,9 @@ app.get('/:folder/stream.m3u8', (req, res) => {
     if (!folder) return res.status(400).send('Invalid parameters')
     
     res.set('Content-Type', 'application/x-mpegURL')
-    if(!shift){
-        res.sendFile(path.join(config.base(), folder, config.name()))
+    if(!shift) {
+        console.log('receiving stream file')
+        res.sendFile(path.join(folder, config.name()), { root: config.base() })
     } else {
         res.send(factory.getManifest(shift, db.shift(folder, shift)))
     }

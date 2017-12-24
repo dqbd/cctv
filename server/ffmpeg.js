@@ -26,6 +26,13 @@ module.exports = class Ffmpeg {
 
     loop() {
         this.instance = cp.spawn('ffmpeg', this.params)
+        this.instance.stdout.on("data", (data) => {
+            console.log(data.toString())
+        })
+    
+        this.instance.stderr.on("data", (data) => {
+            console.log(data.toString())
+        })
         this.instance.on('exit', () => {
             if (!this.stopped) {
                 this.loop()
