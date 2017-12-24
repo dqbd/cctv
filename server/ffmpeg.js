@@ -24,7 +24,7 @@ module.exports = class Ffmpeg {
 
     loop() {
         this.instance = cp.spawn('ffmpeg', this.params)
-	this.instance.stdout.on("data", (data) => console.log(data.toString()))
+        this.instance.stdout.on("data", (data) => console.log(data.toString()))
         this.instance.stderr.on("data", (data) => console.log(data.toString()))
         this.instance.on('exit', () => {
             console.log('process stopped', folder, this.stopped)
@@ -36,7 +36,6 @@ module.exports = class Ffmpeg {
 
     stop() {
         this.stopped = true
-
         if (this.instance) {
             this.instance.stdin.pause()
             this.instance.kill()

@@ -67,7 +67,6 @@ const loadFolder = (folder, address) => {
     instances.push(new Ffmpeg(config, folder, address))
 }
 
-Object.keys(mappings).forEach((folder) => loadFolder(folder, mappings[folder]))
 
 app.get('/:folder/stream.m3u8', (req, res) => {
     const { folder } = req.params
@@ -100,6 +99,8 @@ app.get('/:folder/:file', (req, res, next) => {
     if (file.indexOf('.ts') < 0) return next()
     res.sendFile(path.join(folder, file), { root: config.base() })
 })
+
+Object.keys(mappings).forEach((folder) => loadFolder(folder, mappings[folder]))
 
 process.on("SIGTERM", () => {
     db.close()

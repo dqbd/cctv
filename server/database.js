@@ -2,8 +2,8 @@ const Database = require('better-sqlite3')
 const { createSegment } = require('./segment')
 
 module.exports = class Cache {
-    constructor(path) {
-        this.db = new Database(path, { memory: true })
+    constructor(path, options) {
+        this.db = new Database(path, options)
         this.hasCreated = {}
     }
 
@@ -47,7 +47,7 @@ module.exports = class Cache {
         const segment = createSegment(filename)
         if (!segment || segment.duration <= 0) return null
         this.createTable(base)
-	console.log('inserting new file', base, filename)
+        console.log('inserting new file', base, filename)
         this.db
             .prepare(`INSERT OR REPLACE INTO ${base} (filename, timestamp, duration, extinf) VALUES (@filename, @timestamp, @duration, @extinf)`)
             .run(segment)
@@ -84,14 +84,14 @@ module.exports = class Cache {
 
     seek(base, from, to) {
         return this.db
-            .prepare(`SELECT * FROM ${base} WHERE timestamp >= ? AND timestamp <= ? ORDER BY timestamp DESC`)
+            .prepare(`SELECT * FROM ${base} WHERE timestamp >= ? AND timestamp <= ? ORDER BY timestamp ASC`)
             .all([from, to])
         
     }
 
     shift(base, shift = 0, limit = 5) {
         return this.db
-            .prepare(`SELECT * FROM ${base} WHERE timestamp >= ? ORDER BY timestamp DESC LIMIT ${limit}`)
+            .prepare(`SELECT * FROM ${base} WHERE timestamp >= ? ORDER BY timestamp ASC LIMIT ${limit}`)
             .all([(Date.now() / 1000) - shift])
     }
 }
