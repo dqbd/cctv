@@ -1,5 +1,3 @@
-import { setTimeout } from 'timers';
-
 const express = require('express')
 const path = require('path')
 const fs = require('fs')
@@ -89,6 +87,7 @@ app.get('/:folder/:file', (req, res, next) => {
 })
 
 process.on("SIGTERM", () => {
+    db.close()
     instances.forEach(instance => instance.stop())
 })
 
