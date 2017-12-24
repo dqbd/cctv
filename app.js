@@ -8,7 +8,7 @@ const Database = require('./server/database')
 const Manifest = require('./server/manifest')
 
 const config = new Config(path.resolve(__dirname, 'init.sh'))
-const db = new Database(path.resolve(__dirname, 'app.db'))
+const db = new Database(path.resolve(__dirname, 'app.db'), { memory: true })
 const factory = new Manifest(config)
 
 const maxAge = 7 * 24 * 60 * 60 /* keep records of one week */
@@ -24,34 +24,50 @@ const mappings = {
 
 const performCleanup = (folder) => {
     console.log('CLEANUP', folder)
-    return db.tooOld(folder, maxAge).then((rows) => {
-        let promises = [db.removeBulk(folder, rows)]
-        rows.forEach(({ filename }) => {
-            promises.push(new Promise((resolve) => {
-                fs.unlink(path.resolve(config.base(), folder, filename), resolve)
-            }))
-        })
-    
-        return Promise.all(promises).then(() => {
-            setTimeout(() => performCleanup(folder), cleanupPolling * 1000)
-        })
+
+    const toDelete = db.tooOld(folder, maxAge, (data) => {
+	console.log(data)
     })
+
+    console.log(toDelete)
+    console.time('- delete from DB')
+    db.removeBulk(folder, toDelete)
+    console.timeEnd('- delete from DB')
+
+    console.time('- delete from FS')
+    toDelete.forEach(({ filename }) => {
+        fs.unlink(path.resolve(config.base(), folder, filename), (error) => console.error)
+    })
+    console.timeEnd('- delete from FS')
+
+    setTimeout(() => performCleanup(folder), cleanupPolling * 1000)
 }
 
-const loadFolder = async (folder, address) => {
-    await db.insertBulk(folder, fs.readdirSync(path.resolve(config.base(), folder)))
-    await performCleanup(folder)
+const loadFolder = (folder, address) => {
+    console.log('LOADFOLDER', folder)
+    console.time(`initialize ${folder}`)
+    db.insertBulk(folder, fs.readdirSync(path.resolve(config.base(), folder)))
+    console.timeEnd(`initialize ${folder}`)
+
+    console.time(`cleanup ${folder}`)
+    performCleanup(folder)
+    console.timeEnd(`cleanup ${folder}`)
+
+    console.time(`watch ${folder}`)
     fs.watch(path.resolve(config.base(), folder), (event, filename) => {
         if (filename.indexOf('sg_') != 0) return
         if (fs.existsSync(path.resolve(config.base(), folder, filename))) {
             db.insert(folder, filename)
         }
     })
+    console.timeEnd(`watch ${folder}`)
 
     instances.push(new Ffmpeg(config, folder, address))
 }
 
-app.get('/:folder/stream.m3u8', async (req, res) => {
+Object.keys(mappings).forEach((folder) => loadFolder(folder, mappings[folder]))
+
+app.get('/:folder/stream.m3u8', (req, res) => {
     const { folder } = req.params
     const { shift } = req.query
 
@@ -62,11 +78,11 @@ app.get('/:folder/stream.m3u8', async (req, res) => {
         console.log('receiving stream file')
         res.sendFile(path.join(folder, config.name()), { root: config.base() })
     } else {
-        res.send(factory.getManifest(shift, await db.shift(folder, shift)))
+        res.send(factory.getManifest(shift, db.shift(folder, shift)))
     }
 })
 
-app.get('/:folder/slice.m3u8', async (req, res) => {
+app.get('/:folder/slice.m3u8', (req, res) => {
     if(!req.query.from) return next()
     const { folder } = req.params
     const { from, to } = req.query
@@ -74,7 +90,7 @@ app.get('/:folder/slice.m3u8', async (req, res) => {
     if (!folder || !from || !to) return res.status(400).send("No query parameters set")
 
     res.set('Content-Type', 'application/x-mpegURL')
-    res.send(factory.getManifest(`${from}${to}`, await db.seek(folder, from, to), true))
+    res.send(factory.getManifest(`${from}${to}`, db.seek(folder, from, to), true))
 })
 
 app.get('/:folder/:file', (req, res, next) => {
@@ -88,14 +104,8 @@ process.on("SIGTERM", () => {
     instances.forEach(instance => instance.stop())
 })
 
-Promise.all(Object.keys(mappings).map((folder) => loadFolder(folder, mappings[folder])))
-    .then(() => {
-        app.listen(8080, () => {
-            console.log('Instances starting')
-            // instances.forEach(instance => instance.loop())
-            console.log('Listening at 8080')
-        })
-    })
-
-
-
+app.listen(8080, () => {
+    console.log('Instances starting')
+    instances.forEach(instance => instance.loop())
+    console.log('Listening at 8080')
+})
