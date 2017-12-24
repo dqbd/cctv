@@ -10,14 +10,14 @@ module.exports = class Ffmpeg {
         this.stopped = false
 
         this.params = [
-            '-i', address,
-            '-c', 'copy',
-            `-hls_time', '${config.segmentSize()}`,
-            `-hls_start_number_source', 'epoch`,
-            `-use_localtime', '1`
-            `-timeout', '-1`,
-            `-hls_flags', 'second_level_segment_duration`,
-            `-hls_segment_filename "${path.resolve(config.base(), folder, config.segmentName())}"`,
+            `-i`, address,
+            `-c`, `copy`,
+            `-hls_time`, `${config.segmentSize()}`,
+            `-hls_start_number_source`, `epoch`,
+            `-use_localtime`, `1`,
+            `-timeout`, `-1`,
+            `-hls_flags`, `second_level_segment_duration`,
+            `-hls_segment_filename`, `"${path.resolve(config.base(), folder, config.segmentName())}"`,
             `"${path.resolve(config.base(), folder, config.name())}"`,
         ]
     }
