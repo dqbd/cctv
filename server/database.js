@@ -27,14 +27,19 @@ module.exports = class Cache {
         let i = 0, n = filenames.length
         while (i < n) {
             console.log(`inserting batch ${Math.ceil((i+1) / len)} of ${Math.ceil(n / len)}`)
-            console.time('batch processing')
-	        this.db.transaction(filenames.slice(i, i += len).reduce((memo, filename) => {
+
+            console.time('- batch processing')
+            const transactions = filenames.slice(i, i += len).reduce((memo, filename) => {
                 const segment = createSegment(filename)
                 if (!segment) return memo
                 memo.push(`INSERT OR REPLACE INTO ${base} (filename, timestamp, duration, extinf) VALUES ('${segment.filename}', '${segment.timestamp}', '${segment.duration}', '${segment.extinf}')`)
                 return memo
-            }, [])).run()
-            console.timeEnd('batch processing')
+            }, [])
+            console.timeEnd('- batch processing')
+            
+            console.time('- insert batch processing')
+	        this.db.transaction(transactions).run()
+            console.timeEnd('- insert batch processing')
         }
         
     }
