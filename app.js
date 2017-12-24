@@ -37,7 +37,7 @@ const performCleanup = (folder) => {
     })
     console.timeEnd('- delete from FS')
 
-    setTimeout(() => this.performCleanup(folder), cleanupPolling * 1000)
+    setTimeout(() => performCleanup(folder), cleanupPolling * 1000)
 }
 
 const loadFolder = (folder, address) => {

@@ -20,6 +20,8 @@ module.exports = class Ffmpeg {
             `-hls_segment_filename`, `"${path.resolve(config.base(), folder, config.segmentName())}"`,
             `"${path.resolve(config.base(), folder, config.name())}"`,
         ]
+
+        this.loop()
     }
 
     loop() {
