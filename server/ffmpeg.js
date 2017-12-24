@@ -11,6 +11,7 @@ module.exports = class Ffmpeg {
 
         this.params = [
             `-i`, address,
+            `-rtsp_transport`, `tcp`,
             `-c`, `copy`,
             `-hls_time`, config.segmentSize(),
             `-hls_start_number_source`, `epoch`,
