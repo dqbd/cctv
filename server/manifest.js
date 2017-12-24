@@ -10,7 +10,7 @@ class Manifest {
         this.tokens = {}
     }
 
-    getManifest(token, segments) {
+    getManifest(token, segments, end = false) {
         const { tokens, config } = this
         const buffer = [
             '#EXTM3U',
@@ -35,6 +35,7 @@ class Manifest {
         }
 
         buffer[3] += tokens[token].seq
+        buffer.push('#EXT-X-ENDLIST')
 
         return buffer.join('\n') + '\n'
     }

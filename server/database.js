@@ -15,7 +15,7 @@ module.exports = class Cache {
                 filename varchar(180) NOT NULL,
                 extinf varchar(100) NOT NULL,
                 duration int(10) NOT NULL,
-                PRIMARY KEY (timestamp, duration)
+                PRIMARY KEY (timestamp)
             )`
         ).run()
         this.hasCreated[base] = true

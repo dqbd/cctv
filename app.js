@@ -1,4 +1,3 @@
-const chokidar = require('chokidar')
 const express = require('express')
 const path = require('path')
 const fs = require('fs')
@@ -17,16 +16,24 @@ const cleanupPolling = 60 /* every minute */
 const app = express()
 
 const loadFolder = (folder) => {
-    chokidar.watch(path.resolve(config.base(), folder))
-        .on('add', (loc) => {
-            if (path.extname(loc) != '.ts') return
-            db.insert(folder, path.basename(loc))
-        })
-        .on('unlink', (loc) => {
-            if (path.extname(loc) != '.ts') return
-            db.remove(folder, path.basename(loc))
+    console.log('Initializing folder', folder)
+    fs.readdirSync(path.resolve(config.base(), folder))
+        .forEach((filename) => {
+            if (filename.indexOf('sg_') != 0) return
+            db.insert(folder, filename)
         })
 
+    console.log('-- Hooking watch')
+    fs.watch(path.resolve(config.base(), folder), (event, filename) => {
+        if (filename.indexOf('sg_') != 0) return
+        if (fs.existsSync(path.resolve(config.base(), folder, filename))) {
+            db.insert(folder, filename)
+        } else {
+            db.remove(folder, filename)
+        }
+    })
+
+    console.log('-- Hooking delete')
     setInterval(() => {
         db.tooOld(folder, maxAge).forEach(({ filename }) => {
             fs.unlink(path.resolve(config.base(), folder, filename), (error) => console.error)
@@ -41,10 +48,7 @@ const detect = () => {
                 const stat = fs.lstatSync(config.base(), item)
                 return stat.isDirectory() && fs.existsSync(path.resolve(config.base(), item, config.name()))
             })
-            .forEach((folder) => {
-                console.log('Loading folder:', folder)
-                loadFolder(folder)
-            })
+            .forEach(loadFolder)
     })
 }
 
@@ -72,11 +76,15 @@ app.get('/:folder/slice.m3u8', (req, res) => {
     if (!folder || !from || !to) return res.status(400).send("No query parameters set")
 
     res.set('Content-Type', 'application/x-mpegURL')
-    res.send(factory.getManifest(`${from}${to}`, db.seek(folder, from, to)))
+    res.send(factory.getManifest(`${from}${to}`, db.seek(folder, from, to), true))
 })
 
 app.get('/:folder/:file', (req, res, next) => {
     const { folder, file } = req.params
     if (file.indexOf('.ts') < 0) return next()
     res.sendFile(path.join(folder, file + '.ts'), { root: config.base() })
+})
+
+app.listen(8080, () => {
+    console.log('Listening at 8080')
 })
