@@ -39,6 +39,7 @@ const performCleanup = (folder) => {
 }
 
 const loadFolder = async (folder, address) => {
+    console.log('LOADFOLDER', folder)
     await db.insertBulk(folder, fs.readdirSync(path.resolve(config.base(), folder)))
     await performCleanup(folder)
     fs.watch(path.resolve(config.base(), folder), (event, filename) => {
