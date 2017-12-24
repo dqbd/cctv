@@ -21,19 +21,20 @@ module.exports = class Cache {
         this.hasCreated[base] = true
     }
 
-    insertBulk(base, filenames, len = 3600) {
+    insertBulk(base, filenames, len = 3 * 24 * 3600) {
         this.createTable(base)
-
+	console.log(filenames.length)
         let i = 0, n = filenames.length
-
         while (i < n) {
-            console.log(`inserting batch ${(i+1) / len} of ${Math.ceil(n / len)}`)
-            this.db.transaction(filenames.slice(i, i += len).reduce((memo, filename) => {
+            console.log(`inserting batch ${Math.ceil((i+1) / len)} of ${Math.ceil(n / len)}`)
+            console.time('batch processing')
+	    this.db.transaction(filenames.slice(i, i += len).reduce((memo, filename) => {
                 const segment = createSegment(filename)
                 if (!segment) return memo
                 memo.push(`INSERT OR REPLACE INTO ${base} (filename, timestamp, duration, extinf) VALUES ('${segment.filename}', '${segment.timestamp}', '${segment.duration}', '${segment.extinf}')`)
                 return memo
             }, [])).run()
+            console.timeEnd('batch processing')
         }
         
     }
