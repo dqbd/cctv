@@ -1,6 +1,7 @@
-const path = require('path')
 const chokidar = require('chokidar')
 const express = require('express')
+const path = require('path')
+const fs = require('fs')
 
 const Config = require('./server/config')
 const Database = require('./server/database')
@@ -15,7 +16,7 @@ const cleanupPolling = 60 /* every minute */
 
 const app = express()
 
-const init = (folder) => {
+const loadFolder = (folder) => {
     chokidar.watch(path.resolve(config.base(), folder))
         .on('add', (loc) => {
             if (path.extname(loc) != '.ts') return
@@ -33,13 +34,21 @@ const init = (folder) => {
     }, cleanupPolling * 1000)
 }
 
-init('VENKU')
-init('OBCHOD')
+const detect = () => {
+    fs.readdir(config.base(), (err, files) => {
+        files
+            .filter((item) => {
+                const stat = fs.lstatSync(config.base(), item)
+                return stat.isDirectory() && fs.existsSync(path.resolve(config.base(), item, config.name()))
+            })
+            .forEach((folder) => {
+                console.log('Loading folder:', folder)
+                loadFolder(folder)
+            })
+    })
+}
 
-app.get(/([a-zA-Z0-9]*)\/([a-zA-Z0-9_]*)\.ts/, (req, res) => {
-    const [folder, file] = Object.values(req.params)
-    res.sendFile(path.join(folder, file + '.ts'), { root: config.base() })
-})
+detect()
 
 app.get('/:folder/stream.m3u8', (req, res) => {
     const { folder } = req.params
@@ -64,4 +73,10 @@ app.get('/:folder/slice.m3u8', (req, res) => {
 
     res.set('Content-Type', 'application/x-mpegURL')
     res.send(factory.getManifest(`${from}${to}`, db.seek(folder, from, to)))
+})
+
+app.get('/:folder/:file', (req, res, next) => {
+    const { folder, file } = req.params
+    if (file.indexOf('.ts') < 0) return next()
+    res.sendFile(path.join(folder, file + '.ts'), { root: config.base() })
 })
