@@ -1,20 +1,17 @@
 const express = require('express')
 const unquote = require('unquote')
 const path = require('path')
-const chokidar = require('chokidar')
-const fs = require('fs')
 const app = express()
+const fs = require('fs')
 
 const showSegments = 5
 const sliceDefaultLength = 300
-const offset = 60 * 60 * 24 * 1 * 1000
-
 const initParams = fs.readFileSync(path.resolve(__dirname, 'init.sh'), { encoding: 'utf-8' }).split('\n').reduce((memo, line) => {
-  if (line.indexOf('=') > 0) {
-    const [key, value] = line.split('=', 2)
-    memo[key] = unquote(value)
-  }
-  return memo
+    if (line.indexOf('=') > 0) {
+        const [key, value] = line.split('=', 2)
+        memo[key] = unquote(value)
+    }
+    return memo
 }, {})
 
 const tsCache = {}
@@ -33,10 +30,7 @@ function parseSegment(a) {
     return { filename: a, timestamp, duration, extinf }
 }
 
-class Cache {
-  constructor() {
-    this.storage = new Map()
-  }
+initParams.BASE = initParams.BASE || __dirname
 
 app.get('/:folder/stream.m3u8', (req, res, next) => {	
     const { folder } = req.params
@@ -49,12 +43,12 @@ app.get('/:folder/stream.m3u8', (req, res, next) => {
 
     const shift = (req.query.shift && Number.parseInt(req.query.shift)) || 100
 
-  if (!sequenceCache[shift]) {
-    sequenceCache[shift] = {
-      sequence: 0,
-      data: undefined,
+    if (!sequenceCache[shift]) {
+        sequenceCache[shift] = {
+            sequence: 0,
+            data: undefined,
+        }
     }
-  }
 
     if(!tsCache[folder]) return next()
     const files = tsCache[folder]
@@ -92,8 +86,8 @@ app.get('/:folder/stream.m3u8', (req, res, next) => {
     
 })
 app.get(/([a-zA-Z0-9]*)\/([a-zA-Z0-9_]*)\.ts/, (req, res) => {
-  const [folder, file] = Object.values(req.params)
-  res.sendFile(path.join(folder, file + '.ts'), { root: initParams.BASE })
+    const [folder, file] = Object.values(req.params)
+    res.sendFile(path.join(folder, file + '.ts'), { root: initParams.BASE })
 })
 
 app.get('/:folder/slice.m3u8', (req, res, next) => {
@@ -112,6 +106,7 @@ app.get('/:folder/slice.m3u8', (req, res, next) => {
     buffer.push('#EXT-X-MEDIA-SEQUENCE:0')
     for(var i = 0; i < segments.length; i++){
         const segment = segments[i]
+		//console.log('debug:', segment, segments, index)
         buffer.push(`#EXTINF:${segment.extinf},`)
         buffer.push(segment.filename)
     }
