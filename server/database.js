@@ -21,6 +21,16 @@ module.exports = class Cache {
         this.hasCreated[base] = true
     }
 
+    insertBulk(base, filenames) {
+        this.createTable(base)
+        this.db.transaction(filenames.reduce((memo, filename) => {
+            const segment = createSegment(filename)
+            if (!segment) return memo
+            memo.push(`INSERT OR REPLACE INTO ${base} (filename, timestamp, duration, extinf) VALUES ('${segment.filename}', '${segment.timestamp}', '${segment.duration}', '${segment.extinf}')`)
+            return memo
+        }, [])).run()
+    }
+
     insert(base, filename) {
         const segment = createSegment(filename)
         if (!segment) return null

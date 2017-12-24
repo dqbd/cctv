@@ -17,11 +17,7 @@ const app = express()
 
 const loadFolder = (folder) => {
     console.log('Initializing folder', folder)
-    fs.readdirSync(path.resolve(config.base(), folder))
-        .forEach((filename) => {
-            if (filename.indexOf('sg_') != 0) return
-            db.insert(folder, filename)
-        })
+    db.insertBulk(folder, fs.readdirSync(path.resolve(config.base(), folder)))
 
     console.log('-- Hooking watch')
     fs.watch(path.resolve(config.base(), folder), (event, filename) => {
