@@ -21,6 +21,8 @@ module.exports = class Ffmpeg {
             `-hls_segment_filename`, path.resolve(config.base(), folder, config.segmentName()),
             path.resolve(config.base(), folder, config.name()),
         ]
+
+        console.log('ffmpeg', this.params.join(' '))
     }
 
     loop() {
@@ -28,7 +30,7 @@ module.exports = class Ffmpeg {
         this.instance.stdout.on("data", (data) => console.log(data.toString()))
         this.instance.stderr.on("data", (data) => console.log(data.toString()))
         this.instance.on('exit', () => {
-            console.log('process stopped', folder, this.stopped)
+            console.log('process stopped', this.folder, this.stopped)
             if (!this.stopped) {
                 setTimeout(() => this.loop(), 500)
             }

@@ -18,8 +18,8 @@ const app = express()
 const instances = []
 
 const mappings = {
-    "OBCHOD": "rtsp://192.168.1.164:554/user=admin&password=&channel=1&stream=0.sdp?real_stream",
-    "VENKU": "rtsp://192.168.1.168:554/user=admin&password=&channel=1&stream=0.sdp?real_stream",
+    "OBCHOD": "rtsp://192.168.2.10:554/user=admin&password=&channel=1&stream=0.sdp?real_stream",
+    "VENKU": "rtsp://192.168.2.11:554/user=admin&password=&channel=1&stream=0.sdp?real_stream",
 }
 
 const performCleanup = (folder) => {
