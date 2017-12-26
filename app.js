@@ -102,7 +102,7 @@ app.get('/data/:folder/:file', (req, res, next) => {
     res.sendFile(path.join(folder, file), { root: config.base() })
 })
 
-app.use('/client', express.static(path.resolve(__dirname, 'client', 'build')))
+app.use(express.static(path.resolve(__dirname, 'client', 'build')))
 
 Object.keys(mappings).forEach((folder) => loadFolder(folder, mappings[folder]))
 
