@@ -626,7 +626,7 @@ var camera_Camera = function (_Component) {
                 to = _ref.to,
                 shift = _ref.shift;
 
-            var baseUrl = 'http://192.168.1.133/' + name + '/';
+            var baseUrl = '/data/' + name + '/';
             var type = 'stream.m3u8';
 
             console.log(from, to);

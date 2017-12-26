@@ -16,7 +16,7 @@ export default class Camera extends Component {
     ref = undefined
 
     generateUrl = ({ name, from, to, shift }) => {
-        let baseUrl = `http://192.168.1.133/${name}/`
+        let baseUrl = `/data/${name}/`
         let type = 'stream.m3u8'
 
         console.log(from, to)

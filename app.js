@@ -70,7 +70,7 @@ const loadFolder = (folder, address) => {
 
 app.use(cors())
 
-app.get('/:folder/stream.m3u8', (req, res) => {
+app.get('/data/:folder/stream.m3u8', (req, res) => {
     const { folder } = req.params
     const { shift } = req.query
 
@@ -85,7 +85,7 @@ app.get('/:folder/stream.m3u8', (req, res) => {
     }
 })
 
-app.get('/:folder/slice.m3u8', (req, res) => {
+app.get('/data/:folder/slice.m3u8', (req, res) => {
     if(!req.query.from) return next()
     const { folder } = req.params
     const { from, to } = req.query
@@ -96,11 +96,13 @@ app.get('/:folder/slice.m3u8', (req, res) => {
     res.send(factory.getManifest(`${from}${to}`, db.seek(folder, from, to), true))
 })
 
-app.get('/:folder/:file', (req, res, next) => {
+app.get('/data/:folder/:file', (req, res, next) => {
     const { folder, file } = req.params
     if (file.indexOf('.ts') < 0) return next()
     res.sendFile(path.join(folder, file), { root: config.base() })
 })
+
+app.use('/client', express.static(path.resolve(__dirname, 'client', 'build')))
 
 Object.keys(mappings).forEach((folder) => loadFolder(folder, mappings[folder]))
 
