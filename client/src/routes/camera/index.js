@@ -16,12 +16,13 @@ export default class Camera extends Component {
     ref = undefined
 
     generateUrl = ({ name, from, to, shift }) => {
-        let baseUrl = `/${name}/`
+        let baseUrl = `http://192.168.1.133/${name}/`
         let type = 'stream.m3u8'
 
+        console.log(from, to)
         let params = []
         if (from > 0 && to > 0 && from < to) {
-            type = 'stream.m3u8'
+            type = 'slice.m3u8'
             params.push(`from=${from}`)
             params.push(`to=${to}`)
         } else if (shift > 0) {
@@ -107,6 +108,8 @@ export default class Camera extends Component {
     handleShiftChange = (e) => {
         const value = e.target.value
         this.setState({ shift: Number.parseInt(value, 10) })
+
+        console.log('shift change')
     }
 
     getValidInputString = (val) => {
