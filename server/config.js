@@ -2,37 +2,45 @@ const fs = require('fs')
 const unquote = require('unquote')
 
 class Config {
-    constructor(path) {
-        this.params = fs
-            .readFileSync(path, { encoding: 'utf-8' })
-            .split('\n')
-            .reduce((memo, line) => {
-                if (line.indexOf('=') > 0) {
-                const [key, value] = line.split('=', 2)
-                memo[key] = unquote(value)
-                }
-                return memo
-            }, {})
+    constructor(data) {
+        this.params = data
     }
 
     segmentSize() {
-        return Number.parseInt(this.params.SEGMENT_SIZE, 10)
+        return this.params.segmentSize
     }
 
     segmentName() {
-        return this.params.SEGMENT_NAME
-    }
-
-    ffmpeg() {
-        return this.params.FFMPEG_PARAMS
+        return this.params.segmentName
     }
 
     base() {
-        return this.params.BASE
+        return this.params.base
     }
 
     name() {
-        return this.params.MANIFEST_NAME
+        return this.params.manifest
+    }
+
+    port() {
+        return this.params.port
+    }
+
+    targets() {
+        return this.params.targets
+    }
+
+    source(folder) {
+        const data = this.params.targets[folder]
+        return data ? data.source : undefined
+    }
+
+    maxAge() {
+        this.params.maxAge
+    }
+
+    cleanupPolling() {
+        this.params.cleanupPolling
     }
 }
 

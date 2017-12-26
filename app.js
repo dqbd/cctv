@@ -8,25 +8,17 @@ const Ffmpeg = require('./server/ffmpeg')
 const Database = require('./server/database')
 const Manifest = require('./server/manifest')
 
-const config = new Config(path.resolve(__dirname, 'init.sh'))
+const config = new Config(require('./config.js'))
 const db = new Database(path.resolve(__dirname, 'app.db'), { memory: true })
 const factory = new Manifest(config)
-
-const maxAge = 7 * 24 * 60 * 60 /* keep records of one week */
-const cleanupPolling = 60 /* every minute */
 
 const app = express()
 const instances = []
 
-const mappings = {
-    "OBCHOD": "rtsp://192.168.1.164:554/user=admin&password=&channel=1&stream=0.sdp?real_stream",
-    "VENKU": "rtsp://192.168.1.168:554/user=admin&password=&channel=1&stream=0.sdp?real_stream",
-}
-
 const performCleanup = (folder) => {
     console.log('CLEANUP', folder)
 
-    const toDelete = db.tooOld(folder, maxAge)
+    const toDelete = db.tooOld(folder, config.maxAge())
 
     console.time('- delete from DB')
     db.removeBulk(folder, toDelete)
@@ -38,7 +30,7 @@ const performCleanup = (folder) => {
     })
     console.timeEnd('- delete from FS')
 
-    setTimeout(() => performCleanup(folder), cleanupPolling * 1000)
+    setTimeout(() => performCleanup(folder), config.cleanupPolling() * 1000)
 }
 
 const loadFolder = (folder, address) => {
@@ -104,14 +96,14 @@ app.get('/data/:folder/:file', (req, res, next) => {
 
 app.use(express.static(path.resolve(__dirname, 'client', 'build')))
 
-Object.keys(mappings).forEach((folder) => loadFolder(folder, mappings[folder]))
+Object.keys(config.targets()).forEach((folder) => loadFolder(folder, config.source(folder)))
 
 process.on("SIGTERM", () => {
     db.close()
     instances.forEach(instance => instance.stop())
 })
 
-app.listen(80, () => {
+app.listen(config.port(), () => {
     instances.forEach(instance => instance.loop())
-    console.log('Listening at 8080')
+    console.log(`Listening at ${config.port()}`)
 })
