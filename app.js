@@ -1,6 +1,7 @@
 const express = require('express')
 const path = require('path')
 const fs = require('fs')
+const cors = require('cors')
 
 const Config = require('./server/config')
 const Ffmpeg = require('./server/ffmpeg')
@@ -18,8 +19,8 @@ const app = express()
 const instances = []
 
 const mappings = {
-    "OBCHOD": "rtsp://192.168.2.10:554/user=admin&password=&channel=1&stream=0.sdp?real_stream",
-    "VENKU": "rtsp://192.168.2.11:554/user=admin&password=&channel=1&stream=0.sdp?real_stream",
+    "OBCHOD": "rtsp://192.168.1.164:554/user=admin&password=&channel=1&stream=0.sdp?real_stream",
+    "VENKU": "rtsp://192.168.1.168:554/user=admin&password=&channel=1&stream=0.sdp?real_stream",
 }
 
 const performCleanup = (folder) => {
@@ -54,7 +55,7 @@ const loadFolder = (folder, address) => {
     console.time(`cleanup ${folder}`)
     performCleanup(folder)
     console.timeEnd(`cleanup ${folder}`)
-    
+
     console.time(`watch ${folder}`)
     fs.watch(path.resolve(config.base(), folder), (event, filename) => {
         if (filename.indexOf('sg_') != 0) return
@@ -67,6 +68,7 @@ const loadFolder = (folder, address) => {
     instances.push(new Ffmpeg(config, folder, address))
 }
 
+app.use(cors())
 
 app.get('/:folder/stream.m3u8', (req, res) => {
     const { folder } = req.params
@@ -107,7 +109,7 @@ process.on("SIGTERM", () => {
     instances.forEach(instance => instance.stop())
 })
 
-app.listen(8080, () => {
+app.listen(80, () => {
     instances.forEach(instance => instance.loop())
     console.log('Listening at 8080')
 })

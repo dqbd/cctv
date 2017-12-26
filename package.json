@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "better-sqlite3": "^4.0.3",
+    "cors": "^2.8.4",
     "express": "^4.16.1",
     "unquote": "^1.1.0"
   },
