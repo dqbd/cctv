@@ -37,11 +37,13 @@ export default class Camera extends Component {
         return baseUrl
     }
 
-    getUrl = (props = this.props) => {
+    getUrl = (props = this.props, state = this.state) => {
         const { name } = props
-        const { from, to, shift } = this.state
-        
-        return this.generateUrl({ name, from, to, shift })
+        const { from, to, shift } = state
+
+        const url = this.generateUrl({ name, from, to, shift })
+        console.log('getUrl', url)        
+        return url
     }
 
 	// gets called when this route is navigated to
@@ -55,8 +57,9 @@ export default class Camera extends Component {
         }
     }
 
-    componentDidUpdate(oldProps) {
-        if (this.getUrl(oldProps) !== this.getUrl(this.props)) {
+    componentDidUpdate(oldProps, oldState) {
+        console.log('updated', oldProps)
+        if (this.getUrl(oldProps, oldState) !== this.getUrl(this.props, this.state)) {
             this.handlePlayback()
         }
     }
@@ -68,23 +71,31 @@ export default class Camera extends Component {
     
     handlePlayback = () => {
         const url = this.getUrl()
+
+        console.log('handlePlayback', url)
         if (url && this.ref) {
             clearTimeout(this.timer)
-            if (this.hls) {
-                this.hls.destroy()
-            }
 
-            this.hls = new Hls()
-            this.hls.loadSource(url)
-            this.hls.attachMedia(this.ref)
-            this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                this.timer = setTimeout(this.autoplay, 300)
-            });
+            if (Hls.isSupported()) {
+                if (this.hls) {
+                    this.hls.destroy()
+                }
+    
+                this.hls = new Hls()
+                this.hls.loadSource(url)
+                this.hls.attachMedia(this.ref)
+                this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    this.timer = setTimeout(this.autoplay, 300)
+                })
+            } else {
+                this.ref.src = url
+                setTimeout(this.autoplay, 300)
+            }
         }
     }
 
     autoplay = () => {
-        if (this.hls && this.ref) {
+        if (this.ref) {
             this.ref.play()
         }
     }
@@ -108,8 +119,6 @@ export default class Camera extends Component {
     handleShiftChange = (e) => {
         const value = e.target.value
         this.setState({ shift: Number.parseInt(value, 10) })
-
-        console.log('shift change')
     }
 
     getValidInputString = (val) => {
@@ -126,28 +135,41 @@ export default class Camera extends Component {
             ':' + pad(date.getMinutes())
     }
 
+    clearInput = (key) => {
+        this.setState({ [key]: undefined })
+    }
+
 	render({ name }, { url, shift, from, to, showTools }) {
 		return (
 			<div class={style.camera}>
-				<video class={style.video} ref={this.videoRef} />
+				<video class={style.video} autoplay playsinline ref={this.videoRef} />
                 <div class={style.controls}>
                     { showTools && <div class={style.panel}>
                         <div class={style.label}>
                             <label for="from">Od:</label>
-                            <input type="datetime-local" id="from" onChange={this.handleDateChange} value={this.getValidInputString(from)} />
+                            <div class={style.input}>
+                                <input type="datetime-local" id="from" onChange={this.handleDateChange} value={this.getValidInputString(from)} />
+                                { from && <div class={style.close} onClick={() => this.clearInput('from')}>❌</div> }
+                            </div>
                         </div>
                         <div class={style.label}>
                             <label for="to">Do:</label>
-                            <input type="datetime-local" id="to" onChange={this.handleDateChange} value={this.getValidInputString(to)}/>
+                            <div class={style.input}>
+                                <input type="datetime-local" id="to" onChange={this.handleDateChange} value={this.getValidInputString(to)}/>
+                                { to && <div class={style.close} onClick={() => this.clearInput('to')}>❌</div> }
+                            </div>
                         </div>
                         <div class={style.label}>
                             <label for="shift">Posun:</label>
-                            <input type="number" min="0" max="86400" id="shift" onChange={this.handleShiftChange} value={shift} />
+                            <div class={style.input}>
+                                <input type="number" min="0" max="86400" id="shift" onChange={this.handleShiftChange} step="10" value={shift} />
+                                { shift && <div class={style.close} onClick={() => this.clearInput('shift')}>❌</div> }
+                            </div>
                         </div>
                     </div> }
                     <div class={style.playback}>
-                        <div onClick={this.toggleTools}>👀</div>
-                        <div onClick={this.handlePlayback}>▶️</div>
+                        <div onClick={this.toggleTools}>{ showTools ? '🙈' : '🐵' }</div>
+                        <div onClick={this.handlePlayback}>🔄</div>
                     </div>
                 </div>
 			</div>
