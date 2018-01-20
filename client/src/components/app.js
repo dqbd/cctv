@@ -7,8 +7,8 @@ import Camera from '../routes/camera';
 
 export default class App extends Component {
 	handleRoute = e => {
-		this.currentUrl = e.url;
-	};
+		this.currentUrl = e.url
+	}
 
 	render() {
 		return (

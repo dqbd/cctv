@@ -83,10 +83,15 @@ module.exports = class Cache {
     }
 
     seek(base, from, to) {
+        if (!to) {
+            return this.db
+                .prepare(`SELECT * FROM ${base} WHERE timestamp >= ? ORDER BY timestamp ASC`)
+                .all([from])
+        }
+
         return this.db
             .prepare(`SELECT * FROM ${base} WHERE timestamp >= ? AND timestamp <= ? ORDER BY timestamp ASC`)
             .all([from, to])
-        
     }
 
     shift(base, shift = 0, limit = 5) {

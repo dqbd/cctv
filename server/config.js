@@ -1,6 +1,3 @@
-const fs = require('fs')
-const unquote = require('unquote')
-
 class Config {
     constructor(data) {
         this.params = data

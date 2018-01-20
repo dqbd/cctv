@@ -1,6 +1,7 @@
 import { h, Component } from 'preact';
 import style from './style';
 import Hls from 'hls.js';
+import Scrobber from '../../components/scrobber';
 
 export default class Camera extends Component {
 	state = {
@@ -19,12 +20,14 @@ export default class Camera extends Component {
         let baseUrl = `/data/${name}/`
         let type = 'stream.m3u8'
 
-        console.log(from, to)
         let params = []
-        if (from > 0 && to > 0 && from < to) {
+        if (from > 0) {
             type = 'slice.m3u8'
             params.push(`from=${from}`)
-            params.push(`to=${to}`)
+
+            if (to > 0 && from < to) {
+                params.push(`to=${to}`)
+            }
         } else if (shift > 0) {
             params.push(`shift=${shift}`)
         }
@@ -42,7 +45,6 @@ export default class Camera extends Component {
         const { from, to, shift } = state
 
         const url = this.generateUrl({ name, from, to, shift })
-        console.log('getUrl', url)        
         return url
     }
 
@@ -58,7 +60,6 @@ export default class Camera extends Component {
     }
 
     componentDidUpdate(oldProps, oldState) {
-        console.log('updated', oldProps)
         if (this.getUrl(oldProps, oldState) !== this.getUrl(this.props, this.state)) {
             this.handlePlayback()
         }
@@ -78,6 +79,7 @@ export default class Camera extends Component {
 
             if (Hls.isSupported()) {
                 if (this.hls) {
+                    this.ref.pause()
                     this.hls.destroy()
                 }
     
@@ -100,78 +102,26 @@ export default class Camera extends Component {
         }
     }
 
-    toggleTools = () => {
-        this.setState({ showTools: !this.state.showTools })
-    }
-
 	componentWillUnmount() {
         clearTimeout(this.timer)
         if (this.hls) this.hls.destroy()
     }
 
-    handleDateChange = (e) => {
-        const value = e.target.value
-        const name = e.target.id
-
-        this.setState({ [name]: Date.parse(value) / 1000 })
-    }
-
-    handleShiftChange = (e) => {
-        const value = e.target.value
-        this.setState({ shift: Number.parseInt(value, 10) })
-    }
-
-    getValidInputString = (val) => {
-        if (!val) return undefined
-        const date = new Date(val * 1000)
-        const pad = (num) => {
-            const norm = Math.floor(Math.abs(num))
-            return (norm < 10 ? '0' : '') + norm
+    handlePause = () => {
+        if (this.ref) {
+            this.ref.pause()
         }
-        return date.getFullYear() +
-            '-' + pad(date.getMonth() + 1) +
-            '-' + pad(date.getDate()) +
-            'T' + pad(date.getHours()) +
-            ':' + pad(date.getMinutes())
     }
 
-    clearInput = (key) => {
-        this.setState({ [key]: undefined })
+    handleShiftChange = (shift) => {
+        this.setState({ shift })
     }
 
 	render({ name }, { url, shift, from, to, showTools }) {
 		return (
 			<div class={style.camera}>
 				<video class={style.video} autoplay playsinline ref={this.videoRef} />
-                <div class={style.controls}>
-                    { showTools && <div class={style.panel}>
-                        <div class={style.label}>
-                            <label for="from">Od:</label>
-                            <div class={style.input}>
-                                <input type="datetime-local" id="from" onChange={this.handleDateChange} value={this.getValidInputString(from)} />
-                                { from && <div class={style.close} onClick={() => this.clearInput('from')}>❌</div> }
-                            </div>
-                        </div>
-                        <div class={style.label}>
-                            <label for="to">Do:</label>
-                            <div class={style.input}>
-                                <input type="datetime-local" id="to" onChange={this.handleDateChange} value={this.getValidInputString(to)}/>
-                                { to && <div class={style.close} onClick={() => this.clearInput('to')}>❌</div> }
-                            </div>
-                        </div>
-                        <div class={style.label}>
-                            <label for="shift">Posun:</label>
-                            <div class={style.input}>
-                                <input type="number" min="0" max="86400" id="shift" onChange={this.handleShiftChange} step="10" value={shift} />
-                                { shift && <div class={style.close} onClick={() => this.clearInput('shift')}>❌</div> }
-                            </div>
-                        </div>
-                    </div> }
-                    <div class={style.playback}>
-                        <div onClick={this.toggleTools}>{ showTools ? '🙈' : '🐵' }</div>
-                        <div onClick={this.handlePlayback}>🔄</div>
-                    </div>
-                </div>
+                <Scrobber onShift={this.handleShiftChange} onStop={this.handlePause} />
 			</div>
 		);
 	}

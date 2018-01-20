@@ -451,6 +451,13 @@ Router.Link = Link;
 
 /***/ }),
 
+/***/ "5eM3":
+/***/ (function(module, exports) {
+
+module.exports = 'data:video/mp4;base64,AAAAIGZ0eXBtcDQyAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAACKBtZGF0AAAC8wYF///v3EXpvebZSLeWLNgg2SPu73gyNjQgLSBjb3JlIDE0MiByMjQ3OSBkZDc5YTYxIC0gSC4yNjQvTVBFRy00IEFWQyBjb2RlYyAtIENvcHlsZWZ0IDIwMDMtMjAxNCAtIGh0dHA6Ly93d3cudmlkZW9sYW4ub3JnL3gyNjQuaHRtbCAtIG9wdGlvbnM6IGNhYmFjPTEgcmVmPTEgZGVibG9jaz0xOjA6MCBhbmFseXNlPTB4MToweDExMSBtZT1oZXggc3VibWU9MiBwc3k9MSBwc3lfcmQ9MS4wMDowLjAwIG1peGVkX3JlZj0wIG1lX3JhbmdlPTE2IGNocm9tYV9tZT0xIHRyZWxsaXM9MCA4eDhkY3Q9MCBjcW09MCBkZWFkem9uZT0yMSwxMSBmYXN0X3Bza2lwPTEgY2hyb21hX3FwX29mZnNldD0wIHRocmVhZHM9NiBsb29rYWhlYWRfdGhyZWFkcz0xIHNsaWNlZF90aHJlYWRzPTAgbnI9MCBkZWNpbWF0ZT0xIGludGVybGFjZWQ9MCBibHVyYXlfY29tcGF0PTAgY29uc3RyYWluZWRfaW50cmE9MCBiZnJhbWVzPTMgYl9weXJhbWlkPTIgYl9hZGFwdD0xIGJfYmlhcz0wIGRpcmVjdD0xIHdlaWdodGI9MSBvcGVuX2dvcD0wIHdlaWdodHA9MSBrZXlpbnQ9MzAwIGtleWludF9taW49MzAgc2NlbmVjdXQ9NDAgaW50cmFfcmVmcmVzaD0wIHJjX2xvb2thaGVhZD0xMCByYz1jcmYgbWJ0cmVlPTEgY3JmPTIwLjAgcWNvbXA9MC42MCBxcG1pbj0wIHFwbWF4PTY5IHFwc3RlcD00IHZidl9tYXhyYXRlPTIwMDAwIHZidl9idWZzaXplPTI1MDAwIGNyZl9tYXg9MC4wIG5hbF9ocmQ9bm9uZSBmaWxsZXI9MCBpcF9yYXRpbz0xLjQwIGFxPTE6MS4wMACAAAAAOWWIhAA3//p+C7v8tDDSTjf97w55i3SbRPO4ZY+hkjD5hbkAkL3zpJ6h/LR1CAABzgB1kqqzUorlhQAAAAxBmiQYhn/+qZYADLgAAAAJQZ5CQhX/AAj5IQAD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';
+
+/***/ }),
+
 /***/ "JkW7":
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -476,6 +483,10 @@ var match_default = /*#__PURE__*/__webpack_require__.n(match);
 var header_style = __webpack_require__("u3et");
 var header_style_default = /*#__PURE__*/__webpack_require__.n(header_style);
 
+// EXTERNAL MODULE: ../node_modules/nosleep.js/src/index.js
+var src = __webpack_require__("ZvC2");
+var src_default = /*#__PURE__*/__webpack_require__.n(src);
+
 // CONCATENATED MODULE: ./components/header/index.js
 
 
@@ -489,7 +500,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 
 
-var _ref = Object(preact_min["h"])(
+
+var header__ref2 = Object(preact_min["h"])(
 	'h1',
 	null,
 	'Kamera'
@@ -499,29 +511,61 @@ var header_Header = function (_Component) {
 	_inherits(Header, _Component);
 
 	function Header() {
+		var _temp, _this, _ret;
+
 		_classCallCheck(this, Header);
 
-		return _possibleConstructorReturn(this, _Component.apply(this, arguments));
+		for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+			args[_key] = arguments[_key];
+		}
+
+		return _ret = (_temp = (_this = _possibleConstructorReturn(this, _Component.call.apply(_Component, [this].concat(args))), _this), _this.state = {
+			streams: []
+		}, _this.enableNoSleep = function () {
+			if (_this.wakelock) {
+				_this.wakelock.enable();
+			}
+		}, _temp), _possibleConstructorReturn(_this, _ret);
 	}
 
+	Header.prototype.componentDidMount = function componentDidMount() {
+		var _this2 = this;
+
+		this.wakelock = new src_default.a();
+		fetch('/streams').then(function (a) {
+			return a.json();
+		}).then(function (_ref) {
+			var data = _ref.data;
+
+			_this2.setState({ streams: data });
+		});
+	};
+
+	Header.prototype.componentWillUnmount = function componentWillUnmount() {
+		if (this.wakelock) {
+			this.wakelock.disable();
+		}
+	};
+
 	Header.prototype.render = function render() {
+		var _this3 = this;
+
 		return Object(preact_min["h"])(
 			'header',
 			{ 'class': header_style_default.a.header },
-			_ref,
+			header__ref2,
 			Object(preact_min["h"])(
 				'nav',
 				null,
-				Object(preact_min["h"])(
-					match["Link"],
-					{ activeClassName: header_style_default.a.active, href: '/camera/VENKU' },
-					'Venku'
-				),
-				Object(preact_min["h"])(
-					match["Link"],
-					{ activeClassName: header_style_default.a.active, href: '/camera/OBCHOD' },
-					'Obchod'
-				)
+				this.state.streams.map(function (_ref3) {
+					var name = _ref3.name,
+					    key = _ref3.key;
+					return Object(preact_min["h"])(
+						match["Link"],
+						{ activeClassName: header_style_default.a.active, onClick: _this3.enableNoSleep, href: '/camera/' + key, key: key },
+						name
+					);
+				})
 			)
 		);
 	};
@@ -571,6 +615,226 @@ var camera_style_default = /*#__PURE__*/__webpack_require__.n(camera_style);
 var hls = __webpack_require__("ME5n");
 var hls_default = /*#__PURE__*/__webpack_require__.n(hls);
 
+// EXTERNAL MODULE: ./components/scrobber/style.css
+var scrobber_style = __webpack_require__("QYGn");
+var scrobber_style_default = /*#__PURE__*/__webpack_require__.n(scrobber_style);
+
+// CONCATENATED MODULE: ./components/scrobber/index.js
+
+
+function scrobber__classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function scrobber__possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function scrobber__inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+
+
+
+var DAY_LENGTH = 24 * 60 * 60 * 1000;
+var MAX_LENGTH = 7 * DAY_LENGTH;
+var SIZE_MULTIPLIER = 2;
+
+var scrobber_Scrobber = function (_Component) {
+	scrobber__inherits(Scrobber, _Component);
+
+	function Scrobber() {
+		var _temp, _this, _ret;
+
+		scrobber__classCallCheck(this, Scrobber);
+
+		for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+			args[_key] = arguments[_key];
+		}
+
+		return _ret = (_temp = (_this = scrobber__possibleConstructorReturn(this, _Component.call.apply(_Component, [this].concat(args))), _this), _this.state = {
+			shift: 0,
+			current: undefined,
+			paused: false,
+			visible: true
+		}, _this.onShift = function (shift) {
+			clearTimeout(_this.debounce);
+			_this.debounce = setTimeout(function () {
+				_this.props.onShift(Math.ceil(shift / 1000));
+			}, 200);
+		}, _this.performTick = function () {
+			if (!_this.interval) {
+				_this.interval = 0;
+			}
+
+			var current = Date.now();
+			var date = new Date(current);
+
+			if (!_this.state.paused) {
+				_this.setState({ current: current });
+			}
+
+			clearTimeout(_this.timer);
+			_this.timer = setTimeout(_this.performTick, Math.max(1000 - date.getMilliseconds(), 0));
+		}, _this.extendOpacity = function () {
+			_this.setState({ visible: true });
+			clearTimeout(_this.timeout);
+			_this.timeout = setTimeout(function () {
+				return _this.setState({ visible: false });
+			}, 8000);
+		}, _this.handleScroll = function () {
+			_this.extendOpacity();
+
+			if (_this.ref) {
+				if (!_this.state.paused) {
+					var shift = _this.ref.scrollLeft * DAY_LENGTH / _this.ref.offsetWidth / SIZE_MULTIPLIER;
+					_this.setState({ shift: shift });
+					_this.onShift(shift);
+				} else {
+					_this.ref.scrollLeft = _this.state.shift / DAY_LENGTH * _this.ref.offsetWidth * SIZE_MULTIPLIER;
+				}
+			}
+		}, _this.addRef = function (ref) {
+			_this.ref = ref;
+
+			if (_this.ref) {
+				_this.ref.addEventListener('scroll', _this.handleScroll);
+			}
+		}, _this.handleLive = function () {
+			navigator.vibrate(100);
+
+			if (_this.ref) {
+				_this.ref.scrollLeft = 0;
+				_this.setState({ paused: false, shift: 0 });
+				_this.onShift(0);
+			}
+		}, _this.handlePlayPause = function () {
+			var _this$state = _this.state,
+			    paused = _this$state.paused,
+			    current = _this$state.current,
+			    shift = _this$state.shift;
+
+			navigator.vibrate(100);
+
+			if (paused) {
+				var now = Date.now();
+				var newShift = shift + (now - current);
+
+				_this.setState({ paused: false, shift: newShift });
+				_this.performTick();
+
+				if (_this.ref) {
+					_this.ref.scrollLeft = newShift / DAY_LENGTH * _this.ref.offsetWidth * SIZE_MULTIPLIER;
+				}
+
+				_this.onShift(newShift);
+			} else {
+				_this.setState({ paused: true });
+				_this.props.onStop();
+			}
+		}, _this.getSegments = function () {
+			var current = _this.state.current;
+
+			var lastPossible = current - MAX_LENGTH;
+			var segments = [];
+			var pos = current;
+
+			var iteration = 0;
+
+			while (pos > lastPossible) {
+				var date = new Date(pos);
+
+				var previousDay = new Date(pos);
+				previousDay.setMilliseconds(999);
+				previousDay.setSeconds(59);
+				previousDay.setMinutes(59);
+				previousDay.setHours(23);
+				previousDay.setDate(date.getDate() - 1);
+
+				var prev = Math.max(lastPossible, previousDay.getTime());
+				var diff = pos - prev;
+
+				segments.push({ name: date.toLocaleDateString(), minWidth: diff * SIZE_MULTIPLIER * 100 / DAY_LENGTH + 'vw' });
+				pos -= diff;
+			}
+
+			return segments;
+		}, _temp), scrobber__possibleConstructorReturn(_this, _ret);
+	}
+
+	Scrobber.prototype.componentDidMount = function componentDidMount() {
+		this.extendOpacity();
+		document.addEventListener('mousedown', this.extendOpacity);
+		document.addEventListener('mousemove', this.extendOpacity);
+		this.performTick();
+	};
+
+	Scrobber.prototype.componentWillUnmount = function componentWillUnmount() {
+		if (this.ref) {
+			this.ref.removeEventListener('scroll', this.handleScroll);
+		}
+
+		document.removeEventListener('mousedown', this.extendOpacity);
+
+		clearTimeout(this.timer);
+		clearTimeout(this.debounce);
+		clearTimeout(this.timeout);
+	};
+
+	Scrobber.prototype.render = function render() {
+		var _state = this.state,
+		    current = _state.current,
+		    shift = _state.shift,
+		    paused = _state.paused,
+		    visible = _state.visible;
+
+		var segments = this.getSegments();
+
+		return Object(preact_min["h"])(
+			'div',
+			{ 'class': scrobber_style_default.a.timeline, style: { opacity: visible ? 1 : 0 } },
+			Object(preact_min["h"])(
+				'div',
+				{ 'class': scrobber_style_default.a.position },
+				Object(preact_min["h"])(
+					'div',
+					{ 'class': scrobber_style_default.a.button, onClick: this.handleLive },
+					'\uD83D\uDD34'
+				),
+				Object(preact_min["h"])(
+					'div',
+					{ 'class': scrobber_style_default.a.bubble },
+					new Date(current - shift).toLocaleString()
+				),
+				Object(preact_min["h"])(
+					'div',
+					{ 'class': scrobber_style_default.a.button, onClick: this.handlePlayPause },
+					paused ? '\uD83D\uDD25' : '\u2744\uFE0F'
+				)
+			),
+			Object(preact_min["h"])(
+				'div',
+				{ 'class': scrobber_style_default.a.scrobber, ref: this.addRef },
+				Object(preact_min["h"])(
+					'div',
+					{ 'class': scrobber_style_default.a.slider },
+					segments.map(function (_ref) {
+						var minWidth = _ref.minWidth,
+						    name = _ref.name;
+						return Object(preact_min["h"])(
+							'div',
+							{ 'class': scrobber_style_default.a.day, style: { minWidth: minWidth } },
+							Object(preact_min["h"])(
+								'span',
+								null,
+								name
+							)
+						);
+					})
+				)
+			)
+		);
+	};
+
+	return Scrobber;
+}(preact_min["Component"]);
+
+
 // CONCATENATED MODULE: ./routes/camera/index.js
 
 
@@ -584,23 +848,6 @@ function camera__inherits(subClass, superClass) { if (typeof superClass !== "fun
 
 
 
-var _ref4 = Object(preact_min["h"])(
-    'label',
-    { 'for': 'from' },
-    'Od:'
-);
-
-var _ref5 = Object(preact_min["h"])(
-    'label',
-    { 'for': 'to' },
-    'Do:'
-);
-
-var _ref6 = Object(preact_min["h"])(
-    'label',
-    { 'for': 'shift' },
-    'Posun:'
-);
 
 var camera_Camera = function (_Component) {
     camera__inherits(Camera, _Component);
@@ -629,12 +876,14 @@ var camera_Camera = function (_Component) {
             var baseUrl = '/data/' + name + '/';
             var type = 'stream.m3u8';
 
-            console.log(from, to);
             var params = [];
-            if (from > 0 && to > 0 && from < to) {
+            if (from > 0) {
                 type = 'slice.m3u8';
                 params.push('from=' + from);
-                params.push('to=' + to);
+
+                if (to > 0 && from < to) {
+                    params.push('to=' + to);
+                }
             } else if (shift > 0) {
                 params.push('shift=' + shift);
             }
@@ -655,7 +904,6 @@ var camera_Camera = function (_Component) {
 
 
             var url = _this.generateUrl({ name: name, from: from, to: to, shift: shift });
-            console.log('getUrl', url);
             return url;
         }, _this.videoRef = function (ref) {
             _this.ref = ref;
@@ -669,6 +917,7 @@ var camera_Camera = function (_Component) {
 
                 if (hls_default.a.isSupported()) {
                     if (_this.hls) {
+                        _this.ref.pause();
                         _this.hls.destroy();
                     }
 
@@ -687,30 +936,12 @@ var camera_Camera = function (_Component) {
             if (_this.ref) {
                 _this.ref.play();
             }
-        }, _this.toggleTools = function () {
-            _this.setState({ showTools: !_this.state.showTools });
-        }, _this.handleDateChange = function (e) {
-            var _this$setState;
-
-            var value = e.target.value;
-            var name = e.target.id;
-
-            _this.setState((_this$setState = {}, _this$setState[name] = Date.parse(value) / 1000, _this$setState));
-        }, _this.handleShiftChange = function (e) {
-            var value = e.target.value;
-            _this.setState({ shift: Number.parseInt(value, 10) });
-        }, _this.getValidInputString = function (val) {
-            if (!val) return undefined;
-            var date = new Date(val * 1000);
-            var pad = function pad(num) {
-                var norm = Math.floor(Math.abs(num));
-                return (norm < 10 ? '0' : '') + norm;
-            };
-            return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) + 'T' + pad(date.getHours()) + ':' + pad(date.getMinutes());
-        }, _this.clearInput = function (key) {
-            var _this$setState2;
-
-            _this.setState((_this$setState2 = {}, _this$setState2[key] = undefined, _this$setState2));
+        }, _this.handlePause = function () {
+            if (_this.ref) {
+                _this.ref.pause();
+            }
+        }, _this.handleShiftChange = function (shift) {
+            _this.setState({ shift: shift });
         }, _temp), camera__possibleConstructorReturn(_this, _ret);
     }
 
@@ -726,7 +957,6 @@ var camera_Camera = function (_Component) {
     };
 
     Camera.prototype.componentDidUpdate = function componentDidUpdate(oldProps, oldState) {
-        console.log('updated', oldProps);
         if (this.getUrl(oldProps, oldState) !== this.getUrl(this.props, this.state)) {
             this.handlePlayback();
         }
@@ -738,8 +968,6 @@ var camera_Camera = function (_Component) {
     };
 
     Camera.prototype.render = function render(_ref2, _ref3) {
-        var _this2 = this;
-
         var name = _ref2.name;
         var url = _ref3.url,
             shift = _ref3.shift,
@@ -751,79 +979,7 @@ var camera_Camera = function (_Component) {
             'div',
             { 'class': camera_style_default.a.camera },
             Object(preact_min["h"])('video', { 'class': camera_style_default.a.video, autoplay: true, playsinline: true, ref: this.videoRef }),
-            Object(preact_min["h"])(
-                'div',
-                { 'class': camera_style_default.a.controls },
-                showTools && Object(preact_min["h"])(
-                    'div',
-                    { 'class': camera_style_default.a.panel },
-                    Object(preact_min["h"])(
-                        'div',
-                        { 'class': camera_style_default.a.label },
-                        _ref4,
-                        Object(preact_min["h"])(
-                            'div',
-                            { 'class': camera_style_default.a.input },
-                            Object(preact_min["h"])('input', { type: 'datetime-local', id: 'from', onChange: this.handleDateChange, value: this.getValidInputString(from) }),
-                            from && Object(preact_min["h"])(
-                                'div',
-                                { 'class': camera_style_default.a.close, onClick: function onClick() {
-                                        return _this2.clearInput('from');
-                                    } },
-                                '\u274C'
-                            )
-                        )
-                    ),
-                    Object(preact_min["h"])(
-                        'div',
-                        { 'class': camera_style_default.a.label },
-                        _ref5,
-                        Object(preact_min["h"])(
-                            'div',
-                            { 'class': camera_style_default.a.input },
-                            Object(preact_min["h"])('input', { type: 'datetime-local', id: 'to', onChange: this.handleDateChange, value: this.getValidInputString(to) }),
-                            to && Object(preact_min["h"])(
-                                'div',
-                                { 'class': camera_style_default.a.close, onClick: function onClick() {
-                                        return _this2.clearInput('to');
-                                    } },
-                                '\u274C'
-                            )
-                        )
-                    ),
-                    Object(preact_min["h"])(
-                        'div',
-                        { 'class': camera_style_default.a.label },
-                        _ref6,
-                        Object(preact_min["h"])(
-                            'div',
-                            { 'class': camera_style_default.a.input },
-                            Object(preact_min["h"])('input', { type: 'number', min: '0', max: '86400', id: 'shift', onChange: this.handleShiftChange, step: '10', value: shift }),
-                            shift && Object(preact_min["h"])(
-                                'div',
-                                { 'class': camera_style_default.a.close, onClick: function onClick() {
-                                        return _this2.clearInput('shift');
-                                    } },
-                                '\u274C'
-                            )
-                        )
-                    )
-                ),
-                Object(preact_min["h"])(
-                    'div',
-                    { 'class': camera_style_default.a.playback },
-                    Object(preact_min["h"])(
-                        'div',
-                        { onClick: this.toggleTools },
-                        showTools ? '🙈' : '🐵'
-                    ),
-                    Object(preact_min["h"])(
-                        'div',
-                        { onClick: this.handlePlayback },
-                        '\uD83D\uDD04'
-                    )
-                )
-            )
+            Object(preact_min["h"])(scrobber_Scrobber, { onShift: this.handleShiftChange, onStop: this.handlePause })
         );
     };
 
@@ -3632,11 +3788,82 @@ observer.on(__WEBPACK_IMPORTED_MODULE_1__events__["a"/* default */].FRAG_PARSING
 
 /***/ }),
 
+/***/ "QYGn":
+/***/ (function(module, exports) {
+
+// removed by extract-text-webpack-plugin
+module.exports = {"timeline":"timeline__2d5AR","scrobber":"scrobber__2Xlca","slider":"slider__J_ByE","day":"day__1deFW","position":"position__7Iolv","bubble":"bubble__1puYI","button":"button__2SoLh","hidden":"hidden__m_e7A"};
+
+/***/ }),
+
 /***/ "ZAL5":
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
 module.exports = {"home":"home__2Q5nZ"};
+
+/***/ }),
+
+/***/ "ZvC2":
+/***/ (function(module, exports, __webpack_require__) {
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var mediaFile = __webpack_require__("5eM3");
+
+// Detect iOS browsers < version 10
+var oldIOS = typeof navigator !== 'undefined' && parseFloat(('' + (/CPU.*OS ([0-9_]{3,4})[0-9_]{0,1}|(CPU like).*AppleWebKit.*Mobile/i.exec(navigator.userAgent) || [0, ''])[1]).replace('undefined', '3_2').replace('_', '.').replace('_', '')) < 10 && !window.MSStream;
+
+var NoSleep = function () {
+  function NoSleep() {
+    _classCallCheck(this, NoSleep);
+
+    if (oldIOS) {
+      this.noSleepTimer = null;
+    } else {
+      // Set up no sleep video element
+      this.noSleepVideo = document.createElement('video');
+
+      this.noSleepVideo.setAttribute('playsinline', '');
+      this.noSleepVideo.setAttribute('src', mediaFile);
+
+      this.noSleepVideo.addEventListener('timeupdate', function (e) {
+        if (this.noSleepVideo.currentTime > 0.5) {
+          this.noSleepVideo.currentTime = Math.random();
+        }
+      }.bind(this));
+    }
+  }
+
+  NoSleep.prototype.enable = function enable() {
+    if (oldIOS) {
+      this.disable();
+      this.noSleepTimer = window.setInterval(function () {
+        window.location.href = '/';
+        window.setTimeout(window.stop, 0);
+      }, 15000);
+    } else {
+      this.noSleepVideo.play();
+    }
+  };
+
+  NoSleep.prototype.disable = function disable() {
+    if (oldIOS) {
+      if (this.noSleepTimer) {
+        window.clearInterval(this.noSleepTimer);
+        this.noSleepTimer = null;
+      }
+    } else {
+      this.noSleepVideo.pause();
+    }
+  };
+
+  return NoSleep;
+}();
+
+;
+
+module.exports = NoSleep;
 
 /***/ }),
 

@@ -62,6 +62,16 @@ const loadFolder = (folder, address) => {
 
 app.use(cors())
 
+app.get('/streams', (req, res) => {
+    res.set('Content-Type', 'application/json')
+    console.log(config.targets())
+    res.send({
+        data: Object.keys(config.targets()).map((key) => (
+            { key, name: config.targets()[key].name }
+        )),
+    })
+})
+
 app.get('/data/:folder/stream.m3u8', (req, res) => {
     const { folder } = req.params
     const { shift } = req.query
@@ -82,10 +92,10 @@ app.get('/data/:folder/slice.m3u8', (req, res) => {
     const { folder } = req.params
     const { from, to } = req.query
 
-    if (!folder || !from || !to) return res.status(400).send("No query parameters set")
+    if (!folder || !from) return res.status(400).send("No query parameters set")
 
     res.set('Content-Type', 'application/x-mpegURL')
-    res.send(factory.getManifest(`${from}${to}`, db.seek(folder, from, to), true))
+    res.send(factory.getManifest(`${from}${to}`, db.seek(folder, from, to), !!to))
 })
 
 app.get('/data/:folder/:file', (req, res, next) => {
@@ -96,7 +106,7 @@ app.get('/data/:folder/:file', (req, res, next) => {
 
 app.use(express.static(path.resolve(__dirname, 'client', 'build')))
 
-Object.keys(config.targets()).forEach((folder) => loadFolder(folder, config.source(folder)))
+// Object.keys(config.targets()).forEach((folder) => loadFolder(folder, config.source(folder)))
 
 process.on("SIGTERM", () => {
     db.close()
