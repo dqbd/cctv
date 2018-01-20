@@ -696,7 +696,9 @@ var scrobber_Scrobber = function (_Component) {
 				_this.ref.addEventListener('scroll', _this.handleScroll);
 			}
 		}, _this.handleLive = function () {
-			navigator.vibrate(100);
+			try {
+				navigator.vibrate(100);
+			} catch (err) {}
 
 			if (_this.ref) {
 				_this.ref.scrollLeft = 0;
@@ -709,7 +711,9 @@ var scrobber_Scrobber = function (_Component) {
 			    current = _this$state.current,
 			    shift = _this$state.shift;
 
-			navigator.vibrate(100);
+			try {
+				navigator.vibrate(100);
+			} catch (err) {}
 
 			if (paused) {
 				var now = Date.now();
@@ -759,6 +763,7 @@ var scrobber_Scrobber = function (_Component) {
 
 	Scrobber.prototype.componentDidMount = function componentDidMount() {
 		this.extendOpacity();
+		document.addEventListener('touchstart', this.extendOpacity);
 		document.addEventListener('mousedown', this.extendOpacity);
 		document.addEventListener('mousemove', this.extendOpacity);
 		this.performTick();
