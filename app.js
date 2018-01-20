@@ -106,7 +106,8 @@ app.get('/data/:folder/:file', (req, res, next) => {
 
 app.use(express.static(path.resolve(__dirname, 'client', 'build')))
 
-// Object.keys(config.targets()).forEach((folder) => loadFolder(folder, config.source(folder)))
+app.get('*', (req, res) => res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html')))
+Object.keys(config.targets()).forEach((folder) => loadFolder(folder, config.source(folder)))
 
 process.on("SIGTERM", () => {
     db.close()
