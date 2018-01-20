@@ -45,6 +45,7 @@ export default class Scrobber extends Component {
 
 	componentDidMount() {
 		this.extendOpacity()
+		document.addEventListener('touchstart', this.extendOpacity)
 		document.addEventListener('mousedown', this.extendOpacity)
 		document.addEventListener('mousemove', this.extendOpacity)
 		this.performTick()
@@ -85,7 +86,9 @@ export default class Scrobber extends Component {
 	}
 
 	handleLive = () => {
-		navigator.vibrate(100)
+		try {
+			navigator.vibrate(100)
+		} catch (err) {}
 		
 		if (this.ref) {
 			this.ref.scrollLeft = 0
@@ -96,11 +99,14 @@ export default class Scrobber extends Component {
 
 	handlePlayPause = () => {
 		const { paused, current, shift } = this.state
-		navigator.vibrate(100)
+		try {
+			navigator.vibrate(100)
+		} catch (err) {}
 
 		if (paused) {
 			const now = Date.now()
 			const newShift = shift + (now - current)
+
 
 
 			this.setState({ paused: false, shift: newShift })
