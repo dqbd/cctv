@@ -82,7 +82,7 @@ module.exports = class Cache {
             .all([(Date.now() / 1000) - maxAge])
     }
 
-    seek(base, from, to) {
+    seek(base, from, to, limit = 5) {
         if (!to) {
             return this.db
                 .prepare(`SELECT * FROM ${base} WHERE timestamp >= ? ORDER BY timestamp ASC`)
@@ -92,6 +92,12 @@ module.exports = class Cache {
         return this.db
             .prepare(`SELECT * FROM ${base} WHERE timestamp >= ? AND timestamp <= ? ORDER BY timestamp ASC`)
             .all([from, to])
+    }
+
+    seekFrom(base, from, limit = 5) {
+        return this.db
+            .prepare(`SELECT * FROM ${base} WHERE timestamp >= ? ORDER BY timestamp ASC LIMIT ${limit}`)
+            .all([from])
     }
 
     shift(base, shift = 0, limit = 5) {

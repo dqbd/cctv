@@ -7,10 +7,12 @@ const Config = require('./server/config')
 const Ffmpeg = require('./server/ffmpeg')
 const Database = require('./server/database')
 const Manifest = require('./server/manifest')
+const Smooth = require('./server/smooth')
 
 const config = new Config(require('./config.js'))
 const db = new Database(path.resolve(__dirname, 'app.db'), { memory: true })
 const factory = new Manifest(config)
+const valve = new Smooth(db)
 
 const app = express()
 const instances = []
@@ -83,7 +85,8 @@ app.get('/data/:folder/stream.m3u8', (req, res) => {
         console.log('receiving stream file')
         res.sendFile(path.join(folder, config.name()), { root: config.base() })
     } else {
-        res.send(factory.getManifest(shift, db.shift(folder, shift)))
+        const { seq, segments } = valve.seek(folder, shift)
+        res.send(factory.getManifest(shift, segments, seq))
     }
 })
 
@@ -92,10 +95,10 @@ app.get('/data/:folder/slice.m3u8', (req, res) => {
     const { folder } = req.params
     const { from, to } = req.query
 
-    if (!folder || !from) return res.status(400).send("No query parameters set")
+    if (!folder || !from || !to) return res.status(400).send("No query parameters set")
 
     res.set('Content-Type', 'application/x-mpegURL')
-    res.send(factory.getManifest(`${from}${to}`, db.seek(folder, from, to), !!to))
+    res.send(factory.getManifest(`${from}${to}`, db.seek(folder, from, to), 1, true))
 })
 
 app.get('/data/:folder/:file', (req, res, next) => {
