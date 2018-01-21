@@ -33,11 +33,11 @@ class Config {
     }
 
     maxAge() {
-        this.params.maxAge
+        return this.params.maxAge
     }
 
     cleanupPolling() {
-        this.params.cleanupPolling
+        return this.params.cleanupPolling
     }
 }
 

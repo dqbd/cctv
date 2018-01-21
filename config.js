@@ -4,7 +4,7 @@ module.exports = {
     segmentName: "sg_%s_%%t.ts",
     maxAge: 7 * 24 * 60 * 60, /* keep records of one week */
     cleanupPolling: 60, /* every minute */
-    segmentSize: 2,
+    segmentSize: 3,
     port: 80,
     targets: {
         OBCHOD: {
