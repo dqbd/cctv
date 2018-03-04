@@ -41,7 +41,7 @@ const loadFolder = (folder, address) => {
     console.log('LOADFOLDER', folder, folderTarget)
     console.time(`initialize ${folder}`)
 
-    mkdirp(folderTarget)
+    mkdirp.sync(folderTarget)
 
     console.time(`ls ${folder}`)
     const files = fs.readdirSync(folderTarget)
