@@ -7,13 +7,29 @@ module.exports = {
     segmentSize: 3,
     port: 80,
     targets: {
-        OBCHOD: {
-            name: "Obchod",
-            source: "rtsp://192.168.1.164:554/user=admin&password=&channel=1&stream=0.sdp?real_stream"
+        VZADU_PROSTERADLA: {
+            name: "Vzadu prosteradla",
+            source: "rtsp://192.168.2.164:554/user=admin&password=&channel=1&stream=0.sdp?real_stream"
         },
         VENKU: {
             name: "Venku",
-            source: "rtsp://192.168.1.168:554/user=admin&password=&channel=1&stream=0.sdp?real_stream"
-        }
+            source: "rtsp://192.168.2.168:554/user=admin&password=&channel=1&stream=0.sdp?real_stream"
+        },
+	STARY_VCHOD: {
+            name: "Stary vchod",
+            source: "rtsp://192.168.2.172:554/user=admin&password=&channel=1&stream=0.sdp?real_stream"
+	},
+	STARY_SPODNI: {
+            name: "Stary spodni",
+            source: "rtsp://192.168.2.176:554/user=admin&password=&channel=1&stream=0.sdp?real_stream"
+	},
+	VPREDU_VCHOD: {
+            name: "Vpredu vchod",
+            source: "rtsp://192.168.2.180:554/user=admin&password=&channel=1&stream=0.sdp?real_stream"
+	},
+	VZADU_KOSILE: {
+	    name: "Vzadu kosile",
+            source: "rtsp://192.168.2.184:554/user=admin&password=&channel=1&stream=0.sdp?real_stream"
+	}
     }
 }
