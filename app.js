@@ -1,6 +1,7 @@
 const express = require('express')
 const path = require('path')
 const fs = require('fs')
+const mkdirp = require('mkdirp')
 const cors = require('cors')
 
 const Config = require('./server/config')
@@ -36,11 +37,14 @@ const performCleanup = (folder) => {
 }
 
 const loadFolder = (folder, address) => {
-    console.log('LOADFOLDER', folder, path.resolve(config.base(), folder))
+    const folderTarget = path.resolve(config.base(), folder)
+    console.log('LOADFOLDER', folder, folderTarget)
     console.time(`initialize ${folder}`)
 
+    mkdirp(folderTarget)
+
     console.time(`ls ${folder}`)
-    const files = fs.readdirSync(path.resolve(config.base(), folder))
+    const files = fs.readdirSync(folderTarget)
     console.timeEnd(`ls ${folder}`)
 
     db.insertBulk(folder, files)
@@ -51,7 +55,7 @@ const loadFolder = (folder, address) => {
     console.timeEnd(`cleanup ${folder}`)
 
     console.time(`watch ${folder}`)
-    fs.watch(path.resolve(config.base(), folder), (event, filename) => {
+    fs.watch(folderTarget, (event, filename) => {
         if (filename.indexOf('sg_') != 0) return
         if (fs.existsSync(path.resolve(config.base(), folder, filename))) {
             db.insert(folder, filename)
