@@ -7,7 +7,7 @@
 	padding: 0;
 	background: #673AB7;
 	box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-	z-index: 50;
+	z-index: 999;
 }
 
 .header h1 {
@@ -23,6 +23,16 @@
 .header nav {
 	float: right;
 	font-size: 100%;
+	display: flex;
+	flex-direction: column;
+	position: relative;
+
+	background: #673AB7;
+	border-radius: 0px 0px 0px 10px;
+	overflow: hidden;
+	z-index: 999;
+
+	top: 56px;
 }
 
 .header nav a {
@@ -31,7 +41,7 @@
 	line-height: 56px;
 	padding: 0 15px;
 	min-width: 50px;
-	text-align: center;
+	text-align: right;
 	background: rgba(255,255,255,0);
 	text-decoration: none;
 	color: #FFF;
@@ -45,4 +55,21 @@
 
 .header nav a.active {
 	background: rgba(0,0,0,0.4);
+}
+
+.btn {
+	height: 56px;
+	float: right;
+	color: white;
+	position: absolute;
+	right: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0 15px;
+	font-size: 1.8em;
+}
+
+.hide {
+	display: none !important;
 }

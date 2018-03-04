@@ -5,12 +5,17 @@ import NoSleep from 'nosleep.js';
 
 export default class Header extends Component {
 	state = {
-		streams: []
+		streams: [],
+		showMenu: false,
+	}
+
+	handleOnMenu = () => {
+		this.setState({ showMenu: !this.state.showMenu })
 	}
 
 	componentDidMount() {
 		this.wakelock = new NoSleep()
-		fetch('/streams')
+		fetch('http://localhost/streams')
 			.then(a => a.json())
 			.then(({ data }) => {
 				this.setState({ streams: data })
@@ -33,11 +38,12 @@ export default class Header extends Component {
 		return (
 			<header class={style.header}>
 				<h1>Kamera</h1>
-				<nav>
+				<nav class={this.state.showMenu ? undefined : style.hide}>
 					{ this.state.streams.map(({ name, key }) => (
 						<Link activeClassName={style.active} onClick={this.enableNoSleep} href={`/camera/${key}`} key={key}>{name}</Link>
 					))}
 				</nav>
+				<a class={style.btn} onClick={this.handleOnMenu}>☰</a>
 			</header>
 		);
 	}

@@ -520,7 +520,10 @@ var header_Header = function (_Component) {
 		}
 
 		return _ret = (_temp = (_this = _possibleConstructorReturn(this, _Component.call.apply(_Component, [this].concat(args))), _this), _this.state = {
-			streams: []
+			streams: [],
+			showMenu: false
+		}, _this.handleOnMenu = function () {
+			_this.setState({ showMenu: !_this.state.showMenu });
 		}, _this.enableNoSleep = function () {
 			if (_this.wakelock) {
 				_this.wakelock.enable();
@@ -532,7 +535,7 @@ var header_Header = function (_Component) {
 		var _this2 = this;
 
 		this.wakelock = new src_default.a();
-		fetch('/streams').then(function (a) {
+		fetch('http://localhost/streams').then(function (a) {
 			return a.json();
 		}).then(function (_ref) {
 			var data = _ref.data;
@@ -556,7 +559,7 @@ var header_Header = function (_Component) {
 			header__ref2,
 			Object(preact_min["h"])(
 				'nav',
-				null,
+				{ 'class': this.state.showMenu ? undefined : header_style_default.a.hide },
 				this.state.streams.map(function (_ref3) {
 					var name = _ref3.name,
 					    key = _ref3.key;
@@ -566,6 +569,11 @@ var header_Header = function (_Component) {
 						name
 					);
 				})
+			),
+			Object(preact_min["h"])(
+				'a',
+				{ 'class': header_style_default.a.btn, onClick: this.handleOnMenu },
+				'\u2630'
 			)
 		);
 	};
@@ -3998,7 +4006,7 @@ Match.Link = Link;
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
-module.exports = {"header":"header__2MqSo","active":"active__27Q54"};
+module.exports = {"header":"header__2MqSo","active":"active__27Q54","btn":"btn__3uUqZ","hide":"hide__noRd4"};
 
 /***/ })
 
