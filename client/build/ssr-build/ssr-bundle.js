@@ -535,7 +535,7 @@ var header_Header = function (_Component) {
 		var _this2 = this;
 
 		this.wakelock = new src_default.a();
-		fetch('http://localhost/streams').then(function (a) {
+		fetch('/streams').then(function (a) {
 			return a.json();
 		}).then(function (_ref) {
 			var data = _ref.data;
