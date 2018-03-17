@@ -523,8 +523,16 @@ var header_Header = function (_Component) {
 			streams: [],
 			showMenu: false
 		}, _this.handleOnMenu = function () {
+			try {
+				navigator.vibrate(100);
+			} catch (err) {}
 			_this.setState({ showMenu: !_this.state.showMenu });
 		}, _this.enableNoSleep = function () {
+			try {
+				navigator.vibrate(100);
+			} catch (err) {}
+
+			_this.handleOnMenu();
 			if (_this.wakelock) {
 				_this.wakelock.enable();
 			}
@@ -535,7 +543,7 @@ var header_Header = function (_Component) {
 		var _this2 = this;
 
 		this.wakelock = new src_default.a();
-		fetch('/streams').then(function (a) {
+		fetch('http://192.168.1.135/streams').then(function (a) {
 			return a.json();
 		}).then(function (_ref) {
 			var data = _ref.data;
@@ -886,7 +894,7 @@ var camera_Camera = function (_Component) {
                 to = _ref.to,
                 shift = _ref.shift;
 
-            var baseUrl = '/data/' + name + '/';
+            var baseUrl = 'http://192.168.1.135/data/' + name + '/';
             var type = 'stream.m3u8';
 
             var params = [];
@@ -970,9 +978,9 @@ var camera_Camera = function (_Component) {
     };
 
     Camera.prototype.componentDidUpdate = function componentDidUpdate(oldProps, oldState) {
-        if (this.getUrl(oldProps, oldState) !== this.getUrl(this.props, this.state)) {
-            this.handlePlayback();
-        }
+        // if (this.getUrl(oldProps, oldState) !== this.getUrl(this.props, this.state)) {
+        // }
+        this.handlePlayback();
     };
 
     Camera.prototype.componentWillUnmount = function componentWillUnmount() {
@@ -991,7 +999,7 @@ var camera_Camera = function (_Component) {
         return Object(preact_min["h"])(
             'div',
             { 'class': camera_style_default.a.camera },
-            Object(preact_min["h"])('video', { 'class': camera_style_default.a.video, autoplay: true, playsinline: true, ref: this.videoRef }),
+            Object(preact_min["h"])('video', { 'class': camera_style_default.a.video, autoplay: true, muted: true, playsinline: true, ref: this.videoRef }),
             Object(preact_min["h"])(scrobber_Scrobber, { onShift: this.handleShiftChange, onStop: this.handlePause })
         );
     };
