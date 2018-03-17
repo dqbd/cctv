@@ -10,12 +10,15 @@ export default class Header extends Component {
 	}
 
 	handleOnMenu = () => {
+		try {
+			navigator.vibrate(100)
+		} catch (err) {}
 		this.setState({ showMenu: !this.state.showMenu })
 	}
 
 	componentDidMount() {
 		this.wakelock = new NoSleep()
-		fetch('/streams')
+		fetch('http://192.168.1.135/streams')
 			.then(a => a.json())
 			.then(({ data }) => {
 				this.setState({ streams: data })
@@ -29,6 +32,11 @@ export default class Header extends Component {
 	}
 
 	enableNoSleep = () => {
+		try {
+			navigator.vibrate(100)
+		} catch (err) {}
+
+		this.handleOnMenu()
 		if (this.wakelock) {
 			this.wakelock.enable()
 		}

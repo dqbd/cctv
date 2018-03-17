@@ -17,7 +17,7 @@ export default class Camera extends Component {
     ref = undefined
 
     generateUrl = ({ name, from, to, shift }) => {
-        let baseUrl = `/data/${name}/`
+        let baseUrl = `http://192.168.1.135/data/${name}/`
         let type = 'stream.m3u8'
 
         let params = []
@@ -60,9 +60,9 @@ export default class Camera extends Component {
     }
 
     componentDidUpdate(oldProps, oldState) {
-        if (this.getUrl(oldProps, oldState) !== this.getUrl(this.props, this.state)) {
-            this.handlePlayback()
-        }
+        // if (this.getUrl(oldProps, oldState) !== this.getUrl(this.props, this.state)) {
+        // }
+        this.handlePlayback()
     }
 
     videoRef = (ref) => {
@@ -120,7 +120,7 @@ export default class Camera extends Component {
 	render({ name }, { url, shift, from, to, showTools }) {
 		return (
 			<div class={style.camera}>
-				<video class={style.video} autoplay playsinline ref={this.videoRef} />
+				<video class={style.video} autoplay muted playsinline ref={this.videoRef} />
                 <Scrobber onShift={this.handleShiftChange} onStop={this.handlePause} />
 			</div>
 		);
