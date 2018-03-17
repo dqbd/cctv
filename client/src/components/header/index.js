@@ -18,7 +18,7 @@ export default class Header extends Component {
 
 	componentDidMount() {
 		this.wakelock = new NoSleep()
-		fetch('http://192.168.1.135/streams')
+		fetch('/streams')
 			.then(a => a.json())
 			.then(({ data }) => {
 				this.setState({ streams: data })

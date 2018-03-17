@@ -543,7 +543,7 @@ var header_Header = function (_Component) {
 		var _this2 = this;
 
 		this.wakelock = new src_default.a();
-		fetch('http://192.168.1.135/streams').then(function (a) {
+		fetch('/streams').then(function (a) {
 			return a.json();
 		}).then(function (_ref) {
 			var data = _ref.data;
@@ -894,7 +894,7 @@ var camera_Camera = function (_Component) {
                 to = _ref.to,
                 shift = _ref.shift;
 
-            var baseUrl = 'http://192.168.1.135/data/' + name + '/';
+            var baseUrl = '/data/' + name + '/';
             var type = 'stream.m3u8';
 
             var params = [];
