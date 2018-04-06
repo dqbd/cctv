@@ -9,6 +9,7 @@ const Ffmpeg = require('./server/ffmpeg')
 const Database = require('./server/database')
 const Manifest = require('./server/manifest')
 const Smooth = require('./server/smooth')
+const ClockSync = require('./server/clocksync')
 
 const config = new Config(require('./config.js'))
 const db = new Database(path.resolve(__dirname, 'app.db'), { memory: true })
