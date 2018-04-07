@@ -3,6 +3,7 @@ const path = require('path')
 const fs = require('fs')
 const mkdirp = require('mkdirp')
 const cors = require('cors')
+const url = require('url')
 
 const Config = require('./server/config')
 const Ffmpeg = require('./server/ffmpeg')
@@ -37,6 +38,16 @@ const performCleanup = (folder) => {
     setTimeout(() => performCleanup(folder), config.cleanupPolling() * 1000)
 }
 
+const timeSync = async (folder, address) => {
+    console.time(`timeSync ${folder}`)
+    try{
+        await ClockSync.setSystemTime(url.parse(address).hostname)
+    }catch(err){
+        console.error(`failed to set ${folder} time:`, err)
+    }
+    console.timeEnd(`timeSync ${folder}`)
+}
+
 const loadFolder = (folder, address) => {
     const folderTarget = path.resolve(config.base(), folder)
     console.log('LOADFOLDER', folder, folderTarget)
@@ -65,6 +76,9 @@ const loadFolder = (folder, address) => {
     console.timeEnd(`watch ${folder}`)
 
     instances.push(new Ffmpeg(config, folder, address))
+    
+    timeSync(folder, address)
+    setInterval(() => timeSync(folder, address), config.syncInterval() * 1000)
 }
 
 app.use(cors())

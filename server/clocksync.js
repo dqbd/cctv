@@ -1,23 +1,23 @@
-const net = require('net'), crypto = require('crypto')
+const net = require('net'), crypto = require('crypto'), config = require('../config')
 const types = {
 	AUTH: [0x00, 0x00, 0xE8, 0x03],
 	SET_TIME: [0x00, 0x00, 0xAA, 0x05],
 	SESSION_HEARTBEAT: [0x00, 0x00, 0xEE, 0x03]
 }
 
-function updateTime(ip, port = 34567){
+function setSystemTime(ip, port = 34567, time){
 	return new Promise((resolve, reject) => {
 		const socket = new net.Socket()
 		let authenticated = false
 		socket.connect(port, ip, () => {
-			let authPacket = packetBuilder(getLoginPacket('admin', ''), types.AUTH)
+			let authPacket = packetBuilder(getLoginPacket(config.credential.username, config.credential.password), types.AUTH)
 			socket.write(authPacket)
 		})
 		socket.on('data', async data => {
 			if(authenticated) return socket.destroy()
 			authenticated = true
 			let json = JSON.parse(data.slice(20, data.length-1))
-			let timePacket = packetBuilder(getTimePacket(json.SessionID), types.SET_TIME, json.SessionID)
+			let timePacket = packetBuilder(getTimePacket(json.SessionID, time), types.SET_TIME, json.SessionID)
 			socket.write(timePacket)
 		}).once('error', reject).once('end', resolve)
 	})
@@ -39,8 +39,8 @@ function packetBuilder(obj, messageType, sessionID = 0){
 	let footer = Buffer.from([0x0A])
 	return Buffer.concat([header, session, unknown, messageCode, length, data, footer])
 }
-function getTimePacket(sessionID){
-	let today = new Date()
+function getTimePacket(sessionID, customTime){
+	let today = customTime || new Date()
 	return {
 		Name: 'OPTimeSetting',
 		OPTimeSetting: today.toISOString().split('T')[0] + ' ' + today.toTimeString().split(' ')[0],
@@ -68,4 +68,4 @@ function generatePasswordHash(password){
 	return result
 }
 
-module.exports = updateTime
+module.exports = {setSystemTime: setSystemTime}
