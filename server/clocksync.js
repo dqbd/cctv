@@ -1,16 +1,16 @@
-const net = require('net'), crypto = require('crypto'), config = require('../config')
+const net = require('net'), crypto = require('crypto')
 const types = {
 	AUTH: [0x00, 0x00, 0xE8, 0x03],
 	SET_TIME: [0x00, 0x00, 0xAA, 0x05],
 	SESSION_HEARTBEAT: [0x00, 0x00, 0xEE, 0x03]
 }
 
-function setSystemTime(ip, port = 34567, time){
+function setSystemTime(credential, ip, port = 34567, time){
 	return new Promise((resolve, reject) => {
 		const socket = new net.Socket()
 		let authenticated = false
 		socket.connect(port, ip, () => {
-			let authPacket = packetBuilder(getLoginPacket(config.credential.username, config.credential.password), types.AUTH)
+			let authPacket = packetBuilder(getLoginPacket(credential.username, credential.password), types.AUTH)
 			socket.write(authPacket)
 		})
 		socket.on('data', async data => {

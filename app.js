@@ -41,7 +41,7 @@ const performCleanup = (folder) => {
 const timeSync = async (folder, address) => {
     console.time(`timeSync ${folder}`)
     try{
-        await ClockSync.setSystemTime(url.parse(address).hostname)
+        await ClockSync.setSystemTime(config.credential(), url.parse(address).hostname)
     }catch(err){
         console.error(`failed to set ${folder} time:`, err)
     }
