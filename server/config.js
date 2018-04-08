@@ -39,6 +39,12 @@ class Config {
     cleanupPolling() {
         return this.params.cleanupPolling
     }
+    credential(){
+        return this.params.credential
+    }
+    syncInterval(){
+        return this.params.syncInterval
+    }
 }
 
 module.exports = Config

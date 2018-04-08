@@ -3,12 +3,14 @@ const path = require('path')
 const fs = require('fs')
 const mkdirp = require('mkdirp')
 const cors = require('cors')
+const url = require('url')
 
 const Config = require('./server/config')
 const Ffmpeg = require('./server/ffmpeg')
 const Database = require('./server/database')
 const Manifest = require('./server/manifest')
 const Smooth = require('./server/smooth')
+const ClockSync = require('./server/clocksync')
 
 const config = new Config(require('./config.js'))
 const db = new Database(path.resolve(__dirname, 'app.db'), { memory: true })
@@ -34,6 +36,16 @@ const performCleanup = (folder) => {
     console.timeEnd('- delete from FS')
 
     setTimeout(() => performCleanup(folder), config.cleanupPolling() * 1000)
+}
+
+const timeSync = async (folder, address) => {
+    console.time(`timeSync ${folder}`)
+    try{
+        await ClockSync.setSystemTime(config.credential(), url.parse(address).hostname)
+    }catch(err){
+        console.error(`failed to set ${folder} time:`, err)
+    }
+    console.timeEnd(`timeSync ${folder}`)
 }
 
 const loadFolder = (folder, address) => {
@@ -64,6 +76,9 @@ const loadFolder = (folder, address) => {
     console.timeEnd(`watch ${folder}`)
 
     instances.push(new Ffmpeg(config, folder, address))
+    
+    timeSync(folder, address)
+    setInterval(() => timeSync(folder, address), config.syncInterval() * 1000)
 }
 
 app.use(cors())
