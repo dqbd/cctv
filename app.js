@@ -4,6 +4,7 @@ const fs = require('fs')
 const mkdirp = require('mkdirp')
 const cors = require('cors')
 const url = require('url')
+const cp = require('child_process')
 
 const Config = require('./server/config')
 const Ffmpeg = require('./server/ffmpeg')
@@ -93,6 +94,27 @@ app.get('/streams', (req, res) => {
     })
 })
 
+
+app.get('/data/:folder/raw.m4v', (req, res) => {
+    const { folder } = req.params
+    const src = config.source(folder)
+
+    if (!src) {
+        res.statusCode(400)
+        res.end()
+        return
+    }
+    const args = ['-rtsp_transport', 'tcp',
+        '-i', src,
+        '-c', 'copy',
+        '-f', 'm4v',
+        '-']
+    const child = cp.spawn('ffmpeg', args)
+    child.stdout.pipe(res)
+    child.on('exit', (code, signal) => {
+        res.end()
+    })
+})
 app.get('/data/:folder/stream.m3u8', (req, res) => {
     const { folder } = req.params
     const { shift } = req.query
