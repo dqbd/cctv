@@ -112,7 +112,11 @@ app.get('/data/:folder/raw.m4v', (req, res) => {
     const child = cp.spawn('ffmpeg', args)
     child.stdout.pipe(res)
     child.on('exit', (code, signal) => {
+        console.log('raw ffmpeg closed', folder, code, signal)
         res.end()
+    })
+    res.on('close', () => {
+        child.kill('SIGINT')
     })
 })
 app.get('/data/:folder/stream.m3u8', (req, res) => {
