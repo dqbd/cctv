@@ -2,10 +2,11 @@ module.exports = {
     base: "/media/linaro/cctv",
     manifest: "manifest.m3u8",
     segmentName: "sg_%s_%%t.ts",
-    maxAge: 7 * 24 * 60 * 60, /* keep records of one week */
+    maxAge: 7 * 24 * 60 * 60, /* emergency mode, only a day, reduce if still issucifient*/
     cleanupPolling: 60, /* every minute */
     segmentSize: 3,
     port: 80,
+    wanPort: 8080,
     targets: {
         VENKU: {
             name: "Venku",
@@ -32,7 +33,7 @@ module.exports = {
             source: "rtsp://192.168.2.164:554/user=admin&password=&channel=1&stream=0.sdp?real_stream"
         }
     },
-    syncInterval: 60 * 60 * 24, /* sync time every day */
+    syncInterval: 60 * 60, /* sync time every day */
     credential: {
         username: 'admin',
         password: ''

@@ -2,3 +2,4 @@ node_modules/**
 VENKU/**
 OBCHOD/**
 *.db
+auth.json
