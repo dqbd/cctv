@@ -32,6 +32,11 @@ class Config {
         return data ? data.source : undefined
     }
 
+    livePort(folder) {
+        const data = this.params.targets[folder]
+        return data ? data.port : undefined
+    }
+
     maxAge() {
         return this.params.maxAge
     }
@@ -39,6 +44,11 @@ class Config {
     cleanupPolling() {
         return this.params.cleanupPolling
     }
+
+    ipcBase() {
+        return this.params.ipcBase
+    }
+
     credential(){
         return this.params.credential
     }

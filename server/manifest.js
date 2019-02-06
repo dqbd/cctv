@@ -12,9 +12,9 @@ class Manifest {
             `#EXT-X-MEDIA-SEQUENCE:${seq}`,
         ]
 
-        segments.forEach(({ filename, timestamp, duration, extinf }) => {
+        segments.forEach(({ path: target, timestamp, duration, extinf }) => {
             buffer.push(`#EXTINF:${extinf},`)
-            buffer.push(filename)
+            buffer.push(target)
         })
 
         if (end) {

@@ -12,8 +12,10 @@ module.exports = class Ffmpeg {
         this.params = [
             `-i`, address,
             `-rtsp_transport`, `tcp`,
+            `-rtsp_flags`, `prefer_tcp`,
             `-c`, `copy`,
             `-hls_time`, config.segmentSize(),
+            `-use_localtime_mkdir`, `1`,
             `-hls_start_number_source`, `epoch`,
             `-use_localtime`, `1`,
             `-timeout`, `-1`,
@@ -25,10 +27,14 @@ module.exports = class Ffmpeg {
         console.log('ffmpeg', this.params.join(' '))
     }
 
-    loop() {
+    start() {
         this.instance = cp.spawn('ffmpeg', this.params)
         this.instance.stdout.on("data", (data) => console.log(data.toString()))
         this.instance.stderr.on("data", (data) => console.log(data.toString()))
+    }
+
+    loop() {
+        this.start()
         this.instance.on('exit', () => {
             console.log('process stopped', this.folder, this.stopped)
             if (!this.stopped) {

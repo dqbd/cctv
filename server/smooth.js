@@ -10,6 +10,7 @@ class Smooth {
         let segments = this.db.seekFrom(base, current)
 
         if (typeof this.tokens[token] === 'undefined' || Math.abs(current - this.tokens[token].first) > 60) {
+            if (segments.length === 0) return { segments, seq: 0 }
             this.tokens[token] = {
                 first: segments[0].timestamp,
                 next: segments[1] ? segments[1].timestamp : false,
