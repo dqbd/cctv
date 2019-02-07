@@ -4,12 +4,11 @@ const util = require('util')
 const readdir = util.promisify(require('fs').readdir)
 const rimraf = util.promisify(require('rimraf'))
 
-const Config = require('./server/config')
+const Config = require('./server/lib/config')
 const config = new Config(require('./config.js'))
 
 const now = new Date()
 const nowTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0, 0).valueOf()
-
 
 const wait = (delay) => new Promise(resolve => setTimeout(resolve, delay))
 
