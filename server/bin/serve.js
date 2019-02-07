@@ -7,11 +7,6 @@ const util = require('util')
 const ipc = require('node-ipc')
 const mkdirp = require('mkdirp')
 const chokidar = require('chokidar')
-const WebSocket = require('ws')
-const uuid = require('uuid')
-const Split = require('stream-split')
-
-const Readable = require('stream').Readable
 
 const readdir = util.promisify(fs.readdir)
 

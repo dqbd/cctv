@@ -8,7 +8,6 @@ module.exports = {
     segmentSize: 3,
     port: 80,
     wanPort: 8080,
-    livePort: 9000,
     targets: {
         VENKU: {
             name: "Venku",
