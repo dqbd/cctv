@@ -8,10 +8,17 @@
     justify-content: center;
 }
 
-.video {
+.camera > *:first-child {
     background: black;
     width: 100%;
     max-height: calc(100vh - 56px);
+}
+
+.camera > div:first-child > * {
+    object-fit: contain;
+    width: 100% !important;
+    max-height: calc(100vh - 56px);
+    display: block;
 }
 
 .controls {

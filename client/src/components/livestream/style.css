@@ -1,0 +1,14 @@
+.live {
+  position: relative;
+}
+
+.status {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.4);
+  top: 0;
+  left: 0;
+  max-width: 300px;
+  margin: 0;
+  color: #fff;
+  padding: 10px;
+}

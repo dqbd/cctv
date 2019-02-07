@@ -4,10 +4,10 @@
 	bottom: 0;
 	left: 0;
 	right: 0;
-    height: 80px;
-    background: linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,1));
+	height: 80px;
+	background: linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,1));
 
-    transition: opacity 0.3s;
+	transition: opacity 0.3s;
 }
 
 .scrobber {
@@ -15,8 +15,9 @@
 	bottom: 0;
 	left: 0;
 	right: 0;
-	height: 80px;
+	height: 300px;
 	overflow: auto;
+	overflow-y: hidden;
 	align-items: center;
 	display: flex;
 }
@@ -46,6 +47,11 @@
 	position: relative;
 }
 
+.day canvas {
+	position: absolute;
+	bottom: 100%;
+	outline: 1px solid white;
+}
 .day span {
 	position: relative;
 	top: -15px;
@@ -123,7 +129,7 @@
 }
 
 .hidden {
-	opacity: 0;
+	/* opacity: 0; */
 }
 
 @media (hover: hover) {

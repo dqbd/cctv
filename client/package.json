@@ -17,13 +17,16 @@
     "build/*"
   ],
   "devDependencies": {
+    "copy-webpack-plugin": "^4.6.0",
     "eslint": "^4.9.0",
     "eslint-config-synacor": "^2.0.2",
     "if-env": "^1.0.0",
-    "preact-cli": "^2.0.1"
+    "preact-cli": "^2.0.1",
+    "worker-loader": "^2.0.0"
   },
   "dependencies": {
     "hls.js": "^0.8.9",
+    "moment": "^2.24.0",
     "nosleep.js": "^0.7.0",
     "preact": "^8.2.6",
     "preact-compat": "^3.17.0",

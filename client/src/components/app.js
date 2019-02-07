@@ -6,6 +6,19 @@ import Home from '../routes/home';
 import Camera from '../routes/camera';
 
 export default class App extends Component {
+
+	state = {
+		streams: [],
+	}
+
+	componentDidMount() {
+		fetch('http://192.168.1.217:8081/streams')
+			.then(a => a.json())
+			.then(({ data }) => {
+				this.setState({ streams: data })
+			})
+	}
+
 	handleRoute = e => {
 		this.currentUrl = e.url
 	}
@@ -13,10 +26,10 @@ export default class App extends Component {
 	render() {
 		return (
 			<div id="app">
-				<Header />
+				<Header streams={this.state.streams} />
 				<Router onChange={this.handleRoute}>
 					<Home path="/" />
-					<Camera path="/camera/:name" />
+					<Camera path="/camera/:name" streams={this.state.streams} />
 				</Router>
 			</div>
 		);
