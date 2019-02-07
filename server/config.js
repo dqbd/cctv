@@ -11,6 +11,10 @@ class Config {
         return this.params.segmentName
     }
 
+    previewName() {
+        return this.params.previewName
+    }
+
     base() {
         return this.params.base
     }
@@ -35,6 +39,11 @@ class Config {
     livePort(folder) {
         const data = this.params.targets[folder]
         return data ? data.port : undefined
+    }
+
+    preview(folder) {
+        const data = this.params.targets[folder]
+        return data ? data.preview : undefined
     }
 
     maxAge() {

@@ -5,6 +5,7 @@ const mkdirp = require('mkdirp')
 const ffmpeg = require('fluent-ffmpeg')
 const Split = require('stream-split')
 const WebSocket = require('ws')
+const ipc = require('node-ipc')
 
 const Config = require('./server/config')
 const ClockSync = require('./server/clocksync')
@@ -12,57 +13,23 @@ const config = new Config(require('./config.js'))
 
 const cameraKey = process.argv.slice().pop()
 const address = config.source(cameraKey)
+const previewAddress = config.preview(cameraKey)
+
 const baseFolder = path.resolve(config.base(), cameraKey)
 const socketPort = `ws://127.0.0.1:${config.livePort(cameraKey)}/`
 
-
 if (!config.targets()[cameraKey]) throw Error('Invalid argument')
+
 mkdirp.sync(baseFolder)
 
-// class Bridge {
-//   constructor() {
-//     this.socket = null
-//     this.socketTimer = null
-    
-//     this.sending = false
-//   }
+ipc.config.id = `perform:${cameraKey}`
+ipc.config.retry = 10 * 1000
+ipc.config.silent = true
 
-//   connect() {
-//     this.sending = false
-//     console.log('Connecting to bridge')
-
-//     this.socket = new WebSocket(socketUrl)
-//     this.socket.on('open', () => {
-//       console.log('Bridge connected')
-//       this.socket.send(JSON.stringify({
-//         type: 'source',
-//         payload: cameraKey,
-//       }))
-  
-//       this.sending = true
-//     })
-  
-//     this.socket.on('close', () => {
-//       console.log('Bridge closed, reconnecting')
-//       clearTimeout(this.socketTimer)
-//       this.socketTimer = setTimeout(this.connect.bind(this), 3 * 1000)
-//     })
-  
-//     this.socket.on('error', (err) => {
-//       console.log('Bridge error', err.message)
-//       this.socket.close()
-//     })
-//   }
-
-//   send(data, args) {
-//     if (this.socket && this.sending && this.socket.readyState === WebSocket.OPEN) {
-//       this.socket.send(data, args)
-//     }
-//   }
-// }
+ipc.connectTo('serve', `${config.ipcBase()}/serve`)
 
 const start = async () => {
-  const NALseparator = new Buffer([0,0,0,1])
+  const NALseparator = Buffer.from([0,0,0,1])
   const splitter = new Split(NALseparator)
 
   const wss = new WebSocket.Server({
@@ -76,8 +43,13 @@ const start = async () => {
       }
     })
   })
+
+  let encoders = {
+    main: null,
+    preview: null,
+  }
   
-  const instance = ffmpeg(address)
+  encoders.main = ffmpeg(address)
     .inputOptions([
       '-rtsp_transport tcp',
       '-rtsp_flags prefer_tcp',
@@ -90,7 +62,6 @@ const start = async () => {
       `-use_localtime_mkdir 1`,
       `-hls_start_number_source epoch`,
       `-use_localtime 1`,
-      `-timeout -1`,
       `-hls_flags second_level_segment_duration`,
       `-hls_segment_filename ${path.resolve(baseFolder, config.segmentName())}`,
     ])
@@ -102,15 +73,53 @@ const start = async () => {
     .videoCodec('copy')
     .audioCodec('copy')
     .on('start', (cmd) => console.log('Command', cmd))
-    .on('codecData', (data, stdout, stderr) => console.log('Codec data', data))
+    .on('codecData', (data) => console.log('Codec data', data))
     .on('progress', (progress) => console.log('Processing', progress.frames, progress.timemark))
+    .on('end', () => process.exit())
     .on('error', (err, stdout, stderr) => {
       console.log('An error occurred', err.message, stdout, stderr)
-      wss.close()
+      process.exit()
     })
-    .on('end', () => wss.close())
-    .run()
-  
+
+  encoders.preview = ffmpeg(previewAddress)
+    .inputOptions([
+      '-rtsp_transport tcp',
+      '-rtsp_flags prefer_tcp',
+    ])
+    .videoFilters([
+      `crop=iw:ih-30:0:30`,
+      `select='gte(scene\\,0)'`,
+      `metadata=print`
+    ])
+    .noAudio()
+    .on('stderr', (stderrLine) => {
+      if (stderrLine.indexOf('lavfi.scene_score') >= 0) {
+        let [key, value] = stderrLine.split(" ").pop().split("=")
+        value = Number.parseFloat(value, 10)
+        
+        console.log('Sending value', value)
+        wss.clients.forEach((ws) => {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ value }))
+          }
+        })
+
+        ipc.of.serve.emit('perform.scene', { id: cameraKey, value })
+      }
+    })
+    .on('codecData', (data) => console.log('Codec data preview', data))
+    .on('end', () => process.exit())
+    .on('error', (err) => {
+      console.log('An error occurred in preview', err.message)
+      process.exit()
+    })
+    .addOutput('/dev/null')
+    .outputOptions(['-f null'])
+
+
+  encoders.main.run()
+  encoders.preview.run()
+
   const credential = config.credential()
   const hostname = url.parse(address).hostname
   
@@ -132,6 +141,30 @@ const start = async () => {
   process.on('exit', () => {
     console.log('Closing', cameraKey)
     clearTimeout(timeSyncTimer)
+
+    try {
+      if (encoders.main) encoders.main.kill()
+    } catch (err) {
+      console.log(err)
+    }
+
+    try {
+      if (encoders.preview) encoders.preview.kill()
+    } catch (err) {
+      console.log(err)
+    }
+
+    try {
+      if (wss) wss.close()
+    } catch (err) {
+      console.log(err)
+    }
+
+    try {
+      ipc.disconnect('serve')
+    } catch(err) {
+      console.log(err)
+    }
   })
 }
 

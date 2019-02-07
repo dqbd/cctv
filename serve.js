@@ -4,6 +4,7 @@ const http = require('http')
 const fs = require('fs')
 const cors = require('cors')
 const util = require('util')
+const ipc = require('node-ipc')
 const mkdirp = require('mkdirp')
 const chokidar = require('chokidar')
 const WebSocket = require('ws')
@@ -34,10 +35,13 @@ Promise.all(Object.keys(config.targets()).map(async (cameraKey) => {
         folders => Promise.all(
             folders
                 .filter(folder => folder.indexOf('_') >= 0)
-                .map(async target => [target, await readdir(path.resolve(folderTarget, target))])
+                .map(async target => {
+                    console.log('Loading into database', cameraKey, target)
+                    return [target, await readdir(path.resolve(folderTarget, target))]
+                })
         )
     )
-
+    
     listed.forEach(subfolder => db.insertFolder(cameraKey, subfolder))
 }))
 
@@ -66,6 +70,28 @@ chokidar.watch(config.base(), {
         db.remove(cameraKey, finalPath)
     })
 
+
+ipc.config.id = 'serve'
+ipc.config.retry = 10 * 1000
+ipc.config.silent = true
+
+ipc.serve(
+    `${config.ipcBase()}/serve`,
+    () => {
+        ipc.server.on('perform.scene', ({ id, value }) => {
+            db.addScene(id, value)
+        })
+    }
+)
+
+const cleanupInterval = setInterval(() => {
+    Object.keys(config.targets()).forEach(cameraKey => {
+        db.removeOldScenes(cameraKey, config.maxAge())
+    })
+}, config.cleanupPolling() * 1000)
+
+ipc.server.start()
+
 app.use(cors())
 
 app.get('/streams', (req, res) => {
@@ -73,7 +99,15 @@ app.get('/streams', (req, res) => {
     res.send({
         data: Object.keys(config.targets()).map((key) => (
             { key, name: config.targets()[key].name, port: config.targets()[key].port }
-        )),
+            )),
+        })
+})
+
+app.get('/scene/:folder', (req, res) => {
+    const { folder } = req.params
+    res.set('Content-Type', 'application/json')
+    res.send({
+        data: db.getScenes(folder),
     })
 })
 
@@ -100,7 +134,8 @@ app.get('/data/:folder/slice.m3u8', (req, res) => {
 
 app.get('/data/:folder/:date/:file', (req, res, next) => {
     const { folder, date, file } = req.params
-    if (file.indexOf('.ts') < 0) return next()
+    console.log(folder, date, file)
+    if (file.indexOf('.ts') < 0 && file.indexOf('.bmp') < 0) return next()
     res.sendFile(path.join(folder, date, file), { root: config.base() })
 })
 
@@ -110,74 +145,11 @@ app.get('*', (req, res) => res.sendFile(path.resolve(__dirname, 'client', 'build
 
 process.on("SIGTERM", () => db.close())
 
-const server = http.createServer(app)
-// const wss = new WebSocket.Server({ server })
 
-// const mapper = {
-//     source: {},
-//     sink: {},
-// }
-
-// wss.on('connection', (client) => {
-//     let id = uuid()
-//     let ident = null
-
-//     client.on('message', (data) => {
-//         if (typeof data === 'string') {
-//             const { type, payload } = JSON.parse(data)
-
-//             if (type === 'source' && config.source(payload) !== null) {
-//                 ident = { type, payload }
-//                 if (mapper.source[payload]) {
-//                     try {
-//                         mapper.source[payload].client.close()
-//                     } catch (err) {
-//                         console.log('Failed to close duplicate source', id, err.message)
-//                     }
-//                 }
-
-//                 mapper.source[payload] = { id, client }
-//                 console.log('source connected', id, payload)
-//             } else if (type === 'sink' && config.source(payload) !== null) {
-//                 // TODO: support for multiple clients
-//                 ident = { type, payload }
-
-//                 if (mapper.sink[payload]) {
-//                     try {
-//                         mapper.sink[payload].client.close()
-//                     } catch (err) {
-//                         console.log('Failed to close duplicate sink', id, err.message)
-//                     }
-//                 }
-
-//                 mapper.sink[payload] = { id, client }
-//                 console.log('sink connected', id, payload)
-//             }
-
-//         } else if (ident !== null) {
-//             const { type, payload } = ident
-
-//             // we're assuming sending to clients
-//             if (type !== 'source') throw Error('Sink is sending data')
-
-//             if (mapper.sink[payload]) {
-//                 if (mapper.sink[payload].client.readyState === WebSocket.OPEN) {
-//                     mapper.sink[payload].client.send(data, { binary: true })
-//                 } else if (mapper.sink[payload].client.readyState === WebSocket.CLOSED) {
-//                     mapper.sink[payload] = null
-//                 }
-//             }
-//         }
-//     })
-
-//     client.on('close', () => {
-//         if (ident && mapper[ident.type][ident.payload].id === id) {
-//             mapper[ident.type][ident.payload] = null
-//             console.log(ident.type, 'disconnected', id, ident.payload)
-//         }
-//     })
-// })
-
-server.listen(config.port(), () => {
+http.createServer(app).listen(config.port(), () => {
     console.log(`Listening at ${config.port()}`)
+})
+
+process.on('exit', () => {
+    clearInterval(cleanupInterval)
 })

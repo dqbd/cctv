@@ -20,6 +20,14 @@ module.exports = class Cache {
                 PRIMARY KEY (timestamp)
             )`
         ).run()
+
+        this.db.prepare(`
+            CREATE TABLE IF NOT EXISTS ${base}_SCENE (
+                timestamp int(12) NOT NULL,
+                scene REAL NOT NULL,
+                PRIMARY KEY (timestamp)
+            )
+        `).run()
         this.hasCreated[base] = true
     }
 
@@ -114,5 +122,29 @@ module.exports = class Cache {
         return this.db
             .prepare(`SELECT * FROM ${base} WHERE timestamp >= ? ORDER BY timestamp ASC LIMIT ${limit}`)
             .all([(Date.now() / 1000) - shift])
+    }
+
+    getScenes(base) {
+        this.createTable(base)
+        return this.db
+            .prepare(`SELECT * FROM ${base}_SCENE ORDER BY timestamp DESC`)
+            .all()
+    }
+
+    removeOldScenes(base, maxAge) {
+        this.createTable(base)
+        return this.db
+            .prepare(`DELETE FROM ${base}_SCENE WHERE timestamp <= ?`)
+            .run([Math.floor(Date.now() / 1000) - maxAge])
+    }
+
+    addScene(base, value) {
+        this.createTable(base)
+        return this.db
+            .prepare(`
+                INSERT OR REPLACE INTO ${base}_SCENE (timestamp, scene)
+                VALUES (@timestamp, @scene)
+            `)
+            .run({ timestamp: Math.floor(Date.now() / 1000), scene: value })
     }
 }
