@@ -11,6 +11,10 @@ class Config {
         return this.params.segmentName
     }
 
+    previewName() {
+        return this.params.previewName
+    }
+
     base() {
         return this.params.base
     }
@@ -32,6 +36,16 @@ class Config {
         return data ? data.source : undefined
     }
 
+    livePort(folder) {
+        const data = this.params.targets[folder]
+        return data ? data.port : undefined
+    }
+
+    preview(folder) {
+        const data = this.params.targets[folder]
+        return data ? data.preview : undefined
+    }
+
     maxAge() {
         return this.params.maxAge
     }
@@ -39,6 +53,11 @@ class Config {
     cleanupPolling() {
         return this.params.cleanupPolling
     }
+
+    ipcBase() {
+        return this.params.ipcBase
+    }
+
     credential(){
         return this.params.credential
     }
