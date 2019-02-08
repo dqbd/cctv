@@ -1,24 +1,24 @@
-const path = require('path')
+const ipc = require('node-ipc')
 const url = require('url')
-const fs = require('fs')
+const path = require('path')
 const mkdirp = require('mkdirp')
 const ffmpeg = require('fluent-ffmpeg')
 const Split = require('stream-split')
 const WebSocket = require('ws')
-const ipc = require('node-ipc')
+const ClockSync = require('../lib/clocksync')
 
-const Config = require('./server/config')
-const ClockSync = require('./server/clocksync')
-const config = new Config(require('./config.js'))
+const config = require('../config.js')
 
 const cameraKey = process.argv.slice().pop()
-const address = config.source(cameraKey)
-const previewAddress = config.preview(cameraKey)
+const target = config.targets[cameraKey]
 
-const baseFolder = path.resolve(config.base(), cameraKey)
-const socketPort = `ws://127.0.0.1:${config.livePort(cameraKey)}/`
+if (!target) throw Error('Invalid argument')
 
-if (!config.targets()[cameraKey]) throw Error('Invalid argument')
+const credential = config.credential
+const address = target.source(cameraKey)
+const previewAddress = target.preview(cameraKey)
+
+const baseFolder = path.resolve(config.base, cameraKey)
 
 mkdirp.sync(baseFolder)
 
@@ -26,14 +26,14 @@ ipc.config.id = `perform:${cameraKey}`
 ipc.config.retry = 10 * 1000
 ipc.config.silent = true
 
-ipc.connectTo('serve', `${config.ipcBase()}/serve`)
+ipc.connectTo('serve', `${config.ipcBase}/serve`)
 
 const start = async () => {
   const NALseparator = Buffer.from([0,0,0,1])
   const splitter = new Split(NALseparator)
 
   const wss = new WebSocket.Server({
-    port: config.livePort(cameraKey)
+    port: target.livePort
   })
 
   splitter.on('data', (data) => {
@@ -54,16 +54,16 @@ const start = async () => {
       '-rtsp_transport tcp',
       '-rtsp_flags prefer_tcp',
     ])
-    .addOutput(path.resolve(baseFolder, config.name()))
+    .addOutput(path.resolve(baseFolder, config.manifest))
     .audioCodec('copy')
     .videoCodec('copy')
     .outputOptions([
-      `-hls_time ${config.segmentSize()}`,
+      `-hls_time ${config.segmentSize}`,
       `-use_localtime_mkdir 1`,
       `-hls_start_number_source epoch`,
       `-use_localtime 1`,
       `-hls_flags second_level_segment_duration`,
-      `-hls_segment_filename ${path.resolve(baseFolder, config.segmentName())}`,
+      `-hls_segment_filename ${path.resolve(baseFolder, config.segmentName)}`,
     ])
     .addOutput(splitter)
     .format('rawvideo')
@@ -120,7 +120,6 @@ const start = async () => {
   encoders.main.run()
   encoders.preview.run()
 
-  const credential = config.credential()
   const hostname = url.parse(address).hostname
   
   let timeSyncTimer = null

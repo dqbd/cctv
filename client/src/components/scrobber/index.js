@@ -57,7 +57,7 @@ class Timeline extends Component {
 		scenes.forEach(({ timestamp, scene }) => {
 			const availableHeight = (height - 3) / 2
 			const x = this.timestampToPx(timestamp * 1000)
-			const y = availableHeight - availableHeight * Math.pow(scene, 2)
+			const y = availableHeight - availableHeight * scene
 			ctx.lineTo(x, y)
 		})
 

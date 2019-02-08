@@ -1,7 +1,7 @@
 const auth = require('basic-auth')
 const httpProxy = require('http-proxy')
 const http = require('http')
-const config = require('./config.js')
+const config = require('../config.js')
 const compare = require('tsscmp')
 
 const { username, password } = require('./auth.json')
