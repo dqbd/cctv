@@ -19,7 +19,8 @@ module.exports = {
     },
     ...Object.keys(config.targets).map((name) => ({
       name: `perform:${name}`,
-      script: `./bin/perform.js ${name}`,
+      script: `./bin/perform.js`,
+      args: `${name}`,
       log_date_format: "YYYY-MM-DD HH:mm:ss",
     })),
   ],
