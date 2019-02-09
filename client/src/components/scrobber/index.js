@@ -43,7 +43,7 @@ class Timeline extends Component {
 		const ctx = this.canvas.getContext('2d')
 
 		const width = this.timeToPx(MAX_LENGTH)
-		const height = 300
+		const height = 70
 		const circleRadius = 10
 
 		this.canvas.width = width
@@ -129,7 +129,6 @@ export default class Scrobber extends Component {
 		}
 		
 		const current = Date.now()
-		// const current = (this.state.current) ? (this.state.current + 60 * 1000) : Date.now()
 		this.setState({ current })
 
 		clearTimeout(this.timer)
@@ -139,17 +138,7 @@ export default class Scrobber extends Component {
 	extendOpacity = () => {
 		this.setState({ visible: true })
 		clearTimeout(this.timeout)
-		// this.timeout = setTimeout(() => this.setState({ visible: false }), 8000)
-	}
-
-	fetchScenes = async () => {
-		const { name } = this.props
-		const { data } = await fetch(`http://192.168.1.217:8081/scene/${name}`).then(a => a.json())
-
-		this.setState({ scenes: data })
-
-		clearTimeout(this.sceneTimer)
-		this.sceneTimer = setTimeout(this.fetchScenes, 10 * 1000)
+		this.timeout = setTimeout(() => this.setState({ visible: false }), 8000)
 	}
 
 	componentDidMount() {
@@ -159,7 +148,6 @@ export default class Scrobber extends Component {
 		document.addEventListener('mousemove', this.extendOpacity)
 		
 		this.performTick()
-		this.fetchScenes()
 	}
 
 	handleScroll = () => {
@@ -168,11 +156,8 @@ export default class Scrobber extends Component {
 		if (this.ref) {
 			if (!this.state.paused) {
 				const shift = this.ref.scrollLeft * TIME_PER_PIXEL
-				
 				this.setState({ shift })
 				this.onShift(shift)
-			} else {
-				// this.ref.scrollLeft = this.state.shift / DAY_LENGTH * this.ref.offsetWidth * SIZE_MULTIPLIER
 			}
 		}
 	}
@@ -234,100 +219,30 @@ export default class Scrobber extends Component {
 		}
 	}
 
-	getSegments = () => {
-		const { current, scenes } = this.state
-		const lastPossible = current - MAX_LENGTH
-		let segments = []
-		let pos = current
-
-		let iteration = 0
-
-		
-		while (pos > lastPossible) {
-			let date = new Date(pos)
-			const key = [date.getFullYear(), date.getMonth(), date.getDate()].join('_')
-
-			let previousDay = new Date(pos)
-			previousDay.setMilliseconds(999)
-			previousDay.setSeconds(59)
-			previousDay.setMinutes(59)
-			previousDay.setHours(23)
-			previousDay.setDate(date.getDate() - 1)
-
-			let prev = Math.max(lastPossible, previousDay.getTime())
-			let diff = pos - prev
-
-			const width = diff * SIZE_MULTIPLIER / DAY_LENGTH
-			const realWidth = width * window.innerWidth
-
-
-			// draw stuff for me
-			const sceneMap = scenes[key]
-			let canvas = null
-
-			// if (sceneMap) {
-			// 	canvas = <Canvas width={width} height={300} onDraw={(ctx, width, height) => {
-
-			// 		ctx.strokeStyle = '#aaa'
-			// 		ctx.strokeWidth = 10
-
-					// for (let i = 0; i <= diff; i += 1000) {
-					// 	ctx.beginPath()
-					// 	const x = (i * 9 / DAY_LENGTH) * realWidth
-					// 	ctx.moveTo(x, height)
-					// 	ctx.lineTo(x, 0)
-						
-					// 	ctx.stroke()
-					// }
-
-					// console.log(ctx)
-					// ctx.beginPath()
-					// ctx.strokeStyle = '#ff00FF'
-					// ctx.strokeWidth = 10
-					// ctx.moveTo(0, height)
-					// sceneMap.forEach(({ timestamp, scene }) => {
-					// 	const diff = current - (timestamp * 1000)
-					// 	const x = (diff * SIZE_MULTIPLIER / DAY_LENGTH) * width
-					// 	const y = height - height * scene
-
-					// 	ctx.lineTo(x, y)
-					// })
-
-					// ctx.stroke()
-			// 	}} />
-			// }
-
-
-			segments.push({ name: date.toLocaleDateString(), minWidth: `${width * 100}vw`, canvas })
-			pos -= diff
-		}	
-
-		return segments
+	handleShift = (seconds) => {
+		const px = (seconds * 1000) / TIME_PER_PIXEL
+		if (this.ref) {
+			this.ref.scrollLeft = Math.max(0, Math.min(MAX_LENGTH / TIME_PER_PIXEL, this.ref.scrollLeft + px))
+		}
 	}
+	handleShiftRight = () => this.handleShift(30)
+
+	handleShiftLeft = () => this.handleShift(-30)
 
 	render() {
 		const { current, shift, paused, visible, scenes } = this.state
-		const segments = this.getSegments()
 
 		return (
 			<div class={style.timeline} style={{ opacity: visible ? 1 : 0 }}>
 				<div class={style.position}>
-					<div class={style.button} onClick={this.handleLive}>🔴</div>
+					<div class={style.button} onClick={this.handleShiftLeft}>⏪</div>
 					<div class={style.bubble}>
 						{new Date(current - shift).toLocaleString()}
 					</div>
-					<div class={style.button} onClick={this.handlePlayPause}>{paused ? `🔥` : `❄️`}</div>
+					<div class={style.button} onClick={this.handleShiftRight}>⏩</div>
 				</div>
 				<div class={style.scrobber} ref={this.addRef}>
 					<Timeline current={current} scenes={scenes} />
-					{/* <div class={style.slider}>
-						{segments.map(({ minWidth, name, canvas }) => (
-							<div class={style.day} style={{ minWidth }}>
-								{canvas}
-								<span>{name}</span>
-							</div>
-						))}
-					</div> */}
 				</div>
 			</div>
 		)

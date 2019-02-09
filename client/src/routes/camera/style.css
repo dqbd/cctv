@@ -8,13 +8,13 @@
     justify-content: center;
 }
 
-.camera > *:first-child {
+.camera > *:first-child:not(:last-child) {
     background: black;
     width: 100%;
     max-height: calc(100vh - 56px);
 }
 
-.camera > div:first-child > * {
+.camera > div:first-child:not(:last-child) > * {
     object-fit: contain;
     width: 100% !important;
     max-height: calc(100vh - 56px);
