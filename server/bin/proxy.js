@@ -1,18 +1,17 @@
 const auth = require('basic-auth')
 const httpProxy = require('http-proxy')
 const http = require('http')
-const config = require('../config.js')
 const compare = require('tsscmp')
 
-const { username, password } = require('./auth.json')
+const config = require('../config.js')
 const targetUrl = `http://localhost:${config.port}`
 
 const check = (name, pass) => {
   var valid = true
  
   // Simple method to prevent short-circut and use timing-safe compare
-  valid = compare(name, username) && valid
-  valid = compare(pass, password) && valid
+  valid = compare(name, config.auth.proxy.username) && valid
+  valid = compare(pass, config.auth.proxy.password) && valid
  
   return valid
 }
@@ -33,5 +32,5 @@ const server = http.createServer((req, res) => {
 })
 
 server.listen(config.wanPort, () => {
-  console.log('Listening WAN from', config.wanPort)
+  console.log('Listening WAN from', config.wanPort, "<-->", config.port)
 })

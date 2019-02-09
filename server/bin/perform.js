@@ -1,4 +1,3 @@
-const ipc = require('node-ipc')
 const url = require('url')
 const path = require('path')
 const mkdirp = require('mkdirp')
@@ -15,26 +14,17 @@ const target = config.targets[cameraKey]
 if (!target) throw Error('Invalid argument')
 
 const credential = config.credential
-const address = target.source(cameraKey)
-const previewAddress = target.preview(cameraKey)
+const address = target.source
+const hostname = url.parse(address).hostname
 
 const baseFolder = path.resolve(config.base, cameraKey)
-
 mkdirp.sync(baseFolder)
-
-ipc.config.id = `perform:${cameraKey}`
-ipc.config.retry = 10 * 1000
-ipc.config.silent = true
-
-ipc.connectTo('serve', `${config.ipcBase}/serve`)
 
 const start = async () => {
   const NALseparator = Buffer.from([0,0,0,1])
   const splitter = new Split(NALseparator)
 
-  const wss = new WebSocket.Server({
-    port: target.livePort
-  })
+  const wss = new WebSocket.Server({ port: target.port })
 
   splitter.on('data', (data) => {
     wss.clients.forEach((ws) => {
@@ -44,15 +34,11 @@ const start = async () => {
     })
   })
 
-  let encoders = {
-    main: null,
-    preview: null,
-  }
-  
-  encoders.main = ffmpeg(address)
+  const main = ffmpeg(address)
     .inputOptions([
       '-rtsp_transport tcp',
       '-rtsp_flags prefer_tcp',
+      '-stimeout 30000000',
     ])
     .addOutput(path.resolve(baseFolder, config.manifest))
     .audioCodec('copy')
@@ -75,57 +61,20 @@ const start = async () => {
     .on('start', (cmd) => console.log('Command', cmd))
     .on('codecData', (data) => console.log('Codec data', data))
     .on('progress', (progress) => console.log('Processing', progress.frames, progress.timemark))
-    .on('end', () => process.exit())
+    .on('end', () => {
+      console.log('main stream end')
+      process.exit()
+    })
     .on('error', (err, stdout, stderr) => {
       console.log('An error occurred', err.message, stdout, stderr)
       process.exit()
     })
 
-  encoders.preview = ffmpeg(previewAddress)
-    .inputOptions([
-      '-rtsp_transport tcp',
-      '-rtsp_flags prefer_tcp',
-    ])
-    .videoFilters([
-      `crop=iw:ih-30:0:30`,
-      `select='gte(scene\\,0)'`,
-      `metadata=print`
-    ])
-    .noAudio()
-    .on('stderr', (stderrLine) => {
-      if (stderrLine.indexOf('lavfi.scene_score') >= 0) {
-        let [key, value] = stderrLine.split(" ").pop().split("=")
-        value = Number.parseFloat(value, 10)
-        
-        console.log('Sending value', value)
-        wss.clients.forEach((ws) => {
-          if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ value }))
-          }
-        })
+  main.run()
 
-        ipc.of.serve.emit('perform.scene', { id: cameraKey, value })
-      }
-    })
-    .on('codecData', (data) => console.log('Codec data preview', data))
-    .on('end', () => process.exit())
-    .on('error', (err) => {
-      console.log('An error occurred in preview', err.message)
-      process.exit()
-    })
-    .addOutput('/dev/null')
-    .outputOptions(['-f null'])
-
-
-  encoders.main.run()
-  encoders.preview.run()
-
-  const hostname = url.parse(address).hostname
-  
   let timeSyncTimer = null
   const timeSync = async () => {
     clearTimeout(timeSyncTimer)
-  
     console.time(`timeSync ${cameraKey}`)
     try {
       await ClockSync.setSystemTime(credential, hostname)
@@ -142,13 +91,7 @@ const start = async () => {
     clearTimeout(timeSyncTimer)
 
     try {
-      if (encoders.main) encoders.main.kill()
-    } catch (err) {
-      console.log(err)
-    }
-
-    try {
-      if (encoders.preview) encoders.preview.kill()
+      if (main) main.kill()
     } catch (err) {
       console.log(err)
     }
@@ -156,12 +99,6 @@ const start = async () => {
     try {
       if (wss) wss.close()
     } catch (err) {
-      console.log(err)
-    }
-
-    try {
-      ipc.disconnect('serve')
-    } catch(err) {
       console.log(err)
     }
   })

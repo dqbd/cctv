@@ -1,150 +1,178 @@
-const Database = require('better-sqlite3')
 const path = require('path')
+const mysql = require('promise-mysql')
 
 const { createSegment } = require('./segment')
 
-module.exports = class Cache {
-    constructor(path, options) {
-        this.db = new Database(path, options)
-        this.hasCreated = {}
+module.exports = class Database {
+  constructor(config) {
+    this.conn = null
+    this.config = config
+    this.hasCreated = {}
+  }
+
+  getScenesTable(cameraKey) {
+    return `${cameraKey}_SCENES`
+  }
+
+  getMotionTable(cameraKey) {
+    return `${cameraKey}_MOTION` 
+  }
+
+  async init() {
+    if (!this.conn) {
+      this.conn = await mysql.createConnection(this.config)
+    }
+  }
+
+  async close() {
+    if (this.conn) {
+      this.conn.end()
+    }
+  }
+
+  async createTable(base) {
+    await this.init()
+    if (this.hasCreated[base]) return
+
+    await this.conn.query(`
+      CREATE TABLE IF NOT EXISTS ?? (
+        timestamp BIGINT NOT NULL,
+        path varchar(180) NOT NULL,
+        PRIMARY KEY (timestamp)
+      )
+      ENGINE = MyISAM
+    `, [this.getScenesTable(base)])
+    await this.conn.query(`
+      CREATE TABLE IF NOT EXISTS ?? (
+        timestamp BIGINT NOT NULL,
+        scene NUMERIC(12, 10) NOT NULL,
+        PRIMARY KEY (timestamp)
+      )
+      ENGINE = MyISAM
+    `, [this.getMotionTable(base)])
+
+    this.hasCreated[base] = true
+  }
+
+  async resetFolder(cameraKey) {
+    await this.createTable(cameraKey)
+    return Promise.all([
+      this.conn.query('TRUNCATE TABLE ??', [this.getScenesTable(cameraKey)]),
+      this.conn.query('TRUNCATE TABLE ??', [this.getMotionTable(cameraKey)]),
+    ])
+  }
+
+  async insertFolder(cameraKey, keyBase, filenames, len = 3 * 24 * 3600) {
+    await this.createTable(cameraKey)
+
+    console.log('Insert', cameraKey, keyBase, filenames.length)
+
+    let i = 0, n = filenames.length
+    while (i < n) {
+      const slices = filenames.slice(i, i += len)
+      const queries = slices.reduce((memo, filename) => {
+        const segment = createSegment(filename)
+        const target = path.join(keyBase, path.basename(filename))
+        if (!segment) return memo
+
+        memo.push([segment.timestamp, target])
+        return memo
+      }, [])
+
+      await this.conn.query(`INSERT INTO ?? (timestamp, path) VALUES ? ON DUPLICATE KEY UPDATE path = path`, [this.getScenesTable(cameraKey), queries])
+    }
+  }
+
+  async insert(cameraKey, relative) {
+    console.log('Insert', cameraKey, relative)
+    await this.createTable(cameraKey)
+
+    const segment = createSegment(path.basename(relative))
+    if (!segment || segment.duration <= 0) return null
+
+    return this.conn.query(`
+      INSERT INTO ?? (path, timestamp)
+      VALUES (?, ?)
+      ON DUPLICATE KEY UPDATE path = ?
+    `, [this.getScenesTable(cameraKey), relative, segment.timestamp, relative])
+  }
+
+  async seek(cameraKey, from, to, limit = 5) {
+    await this.createTable(cameraKey)
+
+    if (!to) {
+      return this.conn
+        .query(`
+          SELECT * FROM ??
+          WHERE timestamp >= ?
+          ORDER BY timestamp ASC
+        `, [this.getScenesTable(cameraKey), from])
     }
 
-    createTable(base) {
-        if (this.hasCreated[base]) return
-        this.db.prepare(`
-            CREATE TABLE IF NOT EXISTS ${base} (
-                timestamp int(12) NOT NULL,
-                extinf varchar(100) NOT NULL,
-                duration int(10) NOT NULL,
-                path varchar(180) NOT NULL,
-                PRIMARY KEY (timestamp)
-            )`
-        ).run()
+    return this.conn
+      .query(`
+        SELECT * FROM ??
+        WHERE timestamp >= ? AND timestamp <= ?
+        ORDER BY timestamp ASC
+      `, [this.getScenesTable(cameraKey), from, to])
+  }
 
-        this.db.prepare(`
-            CREATE TABLE IF NOT EXISTS ${base}_SCENE (
-                timestamp int(12) NOT NULL,
-                scene REAL NOT NULL,
-                PRIMARY KEY (timestamp)
-            )
-        `).run()
-        this.hasCreated[base] = true
-    }
+  async seekFrom(cameraKey, from, limit = 5) {
+    await this.createTable(cameraKey)
 
-    insertFolder(cameraKey, [keyBase, filenames], len = 3 * 24 * 3600) {
-        this.createTable(cameraKey)
-        let i = 0, n = filenames.length
-        while (i < n) {
-            const slices = filenames.slice(i, i += len)
-            const queries = slices.reduce((memo, filename) => {
-                const segment = createSegment(filename)
-                const target = path.join(keyBase, filename)
-                if (!segment) return memo
+    return this.conn
+      .query(`
+        SELECT * FROM ??
+        WHERE timestamp >= ?
+        ORDER BY timestamp ASC
+        LIMIT ?
+      `, [this.getScenesTable(cameraKey), from, limit])
+  }
 
-                memo.push(`
-                    INSERT OR REPLACE INTO ${cameraKey} (path, timestamp, duration, extinf)
-                    VALUES ('${target}', '${segment.timestamp}', '${segment.duration}', '${segment.extinf}')
-                `)
-                return memo
-            }, [])
+  async shift(cameraKey, shift = 0, limit = 5) {
+    await this.createTable(cameraKey)
+    return this.conn
+      .query(`
+        SELECT * FROM ??
+        WHERE timestamp >= ?
+        ORDER BY timestamp ASC
+        LIMIT ?
+      `, [this.getScenesTable(cameraKey), Math.floor(Date.now() / 1000) - shift, limit])
+  }
 
-            this.db.transaction(queries).run()
-        }
-    }
+  async removeOldScenesAndMotion(cameraKey, maxAge) {
+    await this.createTable(cameraKey)
+    const timestamp = Math.floor(Date.now() / 1000) - maxAge
 
-    insertBulk(base, filenames, len = 3 * 24 * 3600) {
-        this.createTable(base)
-        let i = 0, n = filenames.length
-        while (i < n) {
-            const transactions = filenames.slice(i, i += len).reduce((memo, filename) => {
-                const segment = createSegment(filename)
-                if (!segment) return memo
-                memo.push(`INSERT OR REPLACE INTO ${base} (filename, timestamp, duration, extinf) VALUES ('${segment.filename}', '${segment.timestamp}', '${segment.duration}', '${segment.extinf}')`)
-                return memo
-            }, [])
-            this.db.transaction(transactions).run()
-        }
-    }
+    return Promise.all([
+      this.conn
+        .query(`
+          DELETE FROM ??
+          WHERE timestamp <= ?
+        `, [this.getScenesTable(cameraKey), timestamp]),
+      this.conn
+        .query(`
+          DELETE FROM ??
+          WHERE timestamp <= ?
+        `, [this.getMotionTable(cameraKey), timestamp])
+    ])
+  }
 
-    insert(base, relative) {
-        
-        const segment = createSegment(path.basename(relative))
-        if (!segment || segment.duration <= 0) return null
-        this.createTable(base)
-        this.db
-            .prepare(`
-                INSERT OR REPLACE INTO ${base} (path, timestamp, duration, extinf)
-                VALUES (@path, @timestamp, @duration, @extinf)
-            `)
-            .run(Object.assign({}, segment, { path: relative }))
-    }
+  async getScenes(cameraKey) {
+    await this.createTable(cameraKey)
+    return this.conn
+      .query(`
+        SELECT * FROM ??
+        ORDER BY timestamp DESC
+      `, [this.getMotionTable(cameraKey)])
+  }
 
-    remove(base, filename) {
-        this.db
-            .prepare(`DELETE FROM ${base} WHERE path = ?`)
-            .run([filename])
-    }
-
-    removeBulk(base, filenames, len = 3 * 24 * 3600) {
-        this.createTable(base)
-        let i = 0, n = filenames.length
-        while (i < n) {
-            const list = filenames.slice(i, i += len).map(({ filename }) => `'${filename}'`)
-            this.db.prepare(`DELETE FROM ${base} WHERE filename IN (${list.join(', ')})`).run()
-        }
-    }
-
-    tooOld(base, maxAge) {
-        return this.db
-            .prepare(`SELECT filename FROM ${base} WHERE timestamp < ?`)
-            .all([(Date.now() / 1000) - maxAge])
-    }
-
-    seek(base, from, to, limit = 5) {
-        if (!to) {
-            return this.db
-                .prepare(`SELECT * FROM ${base} WHERE timestamp >= ? ORDER BY timestamp ASC`)
-                .all([from])
-        }
-
-        return this.db
-            .prepare(`SELECT * FROM ${base} WHERE timestamp >= ? AND timestamp <= ? ORDER BY timestamp ASC`)
-            .all([from, to])
-    }
-
-    seekFrom(base, from, limit = 5) {
-        return this.db
-            .prepare(`SELECT * FROM ${base} WHERE timestamp >= ? ORDER BY timestamp ASC LIMIT ${limit}`)
-            .all([from])
-    }
-
-    shift(base, shift = 0, limit = 5) {
-        return this.db
-            .prepare(`SELECT * FROM ${base} WHERE timestamp >= ? ORDER BY timestamp ASC LIMIT ${limit}`)
-            .all([(Date.now() / 1000) - shift])
-    }
-
-    getScenes(base) {
-        this.createTable(base)
-        return this.db
-            .prepare(`SELECT * FROM ${base}_SCENE ORDER BY timestamp DESC`)
-            .all()
-    }
-
-    removeOldScenes(base, maxAge) {
-        this.createTable(base)
-        return this.db
-            .prepare(`DELETE FROM ${base}_SCENE WHERE timestamp <= ?`)
-            .run([Math.floor(Date.now() / 1000) - maxAge])
-    }
-
-    addScene(base, value) {
-        this.createTable(base)
-        return this.db
-            .prepare(`
-                INSERT OR REPLACE INTO ${base}_SCENE (timestamp, scene)
-                VALUES (@timestamp, @scene)
-            `)
-            .run({ timestamp: Math.floor(Date.now() / 1000), scene: value })
-    }
+  async addScene(cameraKey, value) {
+    await this.createTable(cameraKey)
+    return this.conn
+      .query(`
+          INSERT INTO ?? (timestamp, scene)
+          VALUES (?, ?)
+      `, [this.getMotionTable(cameraKey), Date.now(), value])
+  }
 }

@@ -8,13 +8,13 @@ class Manifest {
         const buffer = [
             '#EXTM3U',
             '#EXT-X-VERSION:3',
-            `#EXT-X-TARGETDURATION:${config.segmentSize()}`,
+            `#EXT-X-TARGETDURATION:${config.segmentSize}`,
             `#EXT-X-MEDIA-SEQUENCE:${seq}`,
         ]
 
-        segments.forEach(({ path: target, timestamp, duration, extinf }) => {
+        segments.forEach(({ filename, extinf }) => {
             buffer.push(`#EXTINF:${extinf},`)
-            buffer.push(target)
+            buffer.push(filename)
         })
 
         if (end) {

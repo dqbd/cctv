@@ -1,3 +1,5 @@
+const auth = require('./auth.json')
+
 module.exports = {
     base: "/media/linaro/cctv",
     ipcBase: "/tmp",
@@ -47,6 +49,7 @@ module.exports = {
         }
     },
     syncInterval: 60 * 60, /* sync time every day */
+    auth,
     credential: {
         username: 'admin',
         password: ''

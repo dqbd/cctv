@@ -2,64 +2,67 @@ const path = require('path')
 const util = require('util')
 const mkdirp = require('mkdirp')
 const chokidar = require('chokidar')
-const readdir = util.promisify(require('fs').readdir)
+const fs = require('fs')
+const readdir = util.promisify(fs.readdir)
+const readFile = util.promisify(fs.readFile)
 
-const Database = require('../lib/database')
+const segment = require('../lib/segment.js')
+const Database = require('../lib/database.js')
 const config = require('../config.js')
 
-const db = new Database(path.resolve(__dirname, 'app.db'), { memory: true })
+const db = new Database(config.auth.mysql)
+const wait = (delay) => new Promise(resolve => setTimeout(resolve, delay))
 
-Promise.all(Object.keys(config.targets).map(async (cameraKey) => {
-    const folderTarget = path.resolve(config.base, cameraKey)
-    mkdirp.sync(folderTarget)
+const readNonEmptyFile = async (...args) => {
+  let content = ""
+  let attempts = 0
+  
+  const delay = 100
+  const maxAttempts = (config.segmentSize * 1000) / delay
 
-    const listed = await readdir(folderTarget).then(
-        folders => Promise.all(
-            folders
-                .filter(folder => folder.indexOf('_') >= 0)
-                .map(async target => {
-                    console.log('Loading into database', cameraKey, target)
-                    return [target, await readdir(path.resolve(folderTarget, target))]
-                })
-        )
-    )
-    
-    listed.forEach(subfolder => db.insertFolder(cameraKey, subfolder))
-}))
-
-const parseTargetEvent = (target) => {
-    const relative = path.relative(config.base, target)
-    const cameraKey = relative.split(path.sep).shift()
-    const finalPath = path.relative(path.resolve(config.base, cameraKey), target)
-    return { cameraKey, finalPath }
+  while (!content && attempts < maxAttempts) {
+    content = await readFile(...args)
+    if (!content) await wait(delay)
+  }
+  return content
 }
 
+const main = async () => {
+  const manifests = Object.keys(config.targets).map((cameraKey) => {
+    return path.resolve(config.base, cameraKey, config.manifest)
+  })
 
-chokidar.watch(config.base, {
-    ignoreInitial: true,
-})
-    .on('add', target => {
-        if (target.indexOf('_0.ts') >= 0) return
-        
-        const { cameraKey, finalPath } = parseTargetEvent(target)
-        console.log(`File ${cameraKey} ${finalPath} has been added`)
-        db.insert(cameraKey, finalPath)
-    })
-    .on('unlink', target => {
-        if (target.indexOf('_0.ts') >= 0) return
-        
-        const { cameraKey, finalPath } = parseTargetEvent(target)
-        console.log(`File ${cameraKey} ${finalPath} has been removed`)
-        db.remove(cameraKey, finalPath)
-    })
+  const filesOfManifest = (manifest) => manifest.split("\n").filter(line => line.indexOf(".ts") >= 0)
+  const rdiff = (left, right) => right.filter(val => !left.includes(val))
+  const manifestCache = {}
 
+  const handleChange = async (target) => {
+    const cameraKey = path.relative(config.base, target).split(path.sep).shift()
+    const file = await readNonEmptyFile(target, 'utf-8')
+    const manifest = filesOfManifest(file)
 
-const cleanupInterval = setInterval(() => {
-    Object.keys(config.targets).forEach(cameraKey => {
-        db.removeOldScenes(cameraKey, config.maxAge)
-    })
-}, config.cleanupPolling * 1000)
+    const baseFolder = path.resolve(config.base, cameraKey)
 
-process.on('exit', () => {
-    clearInterval(cleanupInterval)
-})
+    if (manifestCache[cameraKey]) {
+
+      const toInsert = rdiff(manifestCache[cameraKey], manifest)
+
+      for (let item of toInsert) {
+        const relative = path.relative(baseFolder, item)
+        await db.insert(cameraKey, relative)
+      }
+    }
+
+    if (manifest && manifest.length > 0) manifestCache[cameraKey] = manifest
+  }
+
+  chokidar.watch(manifests)
+    .on('add', handleChange)
+    .on('change', handleChange)
+
+  process.on('exit', () => {
+    client.close()
+  })
+}
+
+main()
