@@ -12,7 +12,7 @@ export default class App extends Component {
 	}
 
 	componentDidMount() {
-		fetch('http://192.168.1.217:8081/streams')
+		fetch('/streams')
 			.then(a => a.json())
 			.then(({ data }) => {
 				this.setState({ streams: data })

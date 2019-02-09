@@ -15,7 +15,7 @@ export default class Camera extends Component {
   generateUrl = ({ name, from, to, shift }) => {
     if (!shift && !from && !to) return null
     
-    let baseUrl = `http://192.168.1.217:8081/data/${name}/`
+    let baseUrl = `/data/${name}/`
     let type = 'stream.m3u8'
 
     let params = []
@@ -61,9 +61,8 @@ export default class Camera extends Component {
 
     return (
       <div class={style.camera}>
-        { <Dvr source={url} /> }
-        {/* { url && <Dvr source={url} /> } */}
-        {/* { !url && stream && <Livestream port={stream.port} /> } */}
+        { url && <Dvr source={url} /> }
+        { !url && stream && <Livestream port={stream.port} /> }
         <Scrobber onShift={this.handleShiftChange} onStop={this.handlePause} name={name} />
       </div>
     )
