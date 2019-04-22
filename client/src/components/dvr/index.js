@@ -38,7 +38,6 @@ export default class DVR extends Component {
 
   handlePlayback = () => {
     const { source } = this.props
-    console.log('dvr', source)
 
     if (source && this.ref) {
       clearTimeout(this.timer)

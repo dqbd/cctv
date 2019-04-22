@@ -1,62 +1,91 @@
 import { h, Component } from 'preact'
 import style from './style'
+import { HOST } from '../../constants'
 
 export default class Livestream extends Component {
-
-  canvas = {
-    dom: null,
-    width: 0,
-    height: 0,
-    port: 0,
-  }
-
   ms = null
   video = null
-  packetBuffer = []
-  firstFrame = false
+  objectUrl = null
+
+  frameBuffer = []
   
   componentDidUpdate(oldProps) {
     if (oldProps.port !== this.props.port) {
-      // this.destroyDecoder()
-      // this.createDecoder()
-      
+      this.destroyDecoder()
+      this.createDecoder()
     }
   }
 
-  onRef(dom) {
-    this.video = dom
+  socketConnect = () => {
+    this.socket = new WebSocket(`ws://${HOST}:${this.props.port}`)
+    this.socket.binaryType = 'arraybuffer'
 
-    if (this.props.port) {
-      this.ms = new MediaSource()
-      this.video.src = window.URL.createObjectURL(this.ms)
-      this.ms.addEventListener('sourceopen', () => {
-        this.sourceBuffer = this.ms.addSourceBuffer('video/mp4;codecs=avc1.42001f')
-        
-        const socketConnect = () => {
-          this.socket = new WebSocket(`ws://localhost:${this.props.port}`)
-          this.socket.binaryType = 'arraybuffer'
+    this.socket.onopen = () => console.log('open connection')
+    this.socket.onmessage = ({ data }) => {
+      this.frameBuffer.push(new Uint8Array(data))
+      this.doAppend()
+
+      if (this.video && this.video.paused) {
+        this.video.play()
+      }
+    }
     
-          this.socket.onopen = () => console.log('open connection')
-          this.socket.onmessage = ({ data }) => {
-            this.sourceBuffer.appendBuffer(new Uint8Array(data))
-            console.log(new Uint8Array(data))
+    this.socket.onerror = (err) => {
+      console.log('error in socket', err.message)
+      this.socket.close()
+    }
+    this.socket.onclose = () => {
+      console.log('closing socket')
+      clearTimeout(this.socketTimeout)
+      this.socketTimeout = setTimeout(this.socketConnect, 1000)
+    }
+  }
+  
+  onUpdateEnd = () => {
+    this.doAppend()
+  }
 
-            if (this.video.paused) {
-              this.video.play()
-            }
-          }
-          this.socket.onerror = (err) => {
-            console.log('error in socket', err.message)
-            this.socket.close()
-          }
-          this.socket.onclose = () => {
-            console.log('closing socket')
-            clearTimeout(this.socketTimeout)
-            this.socketTimeout = setTimeout(this.onSocketConnect, 1000)
-          }
+  doAppend = () => {
+    if (this.frameBuffer && this.frameBuffer.length > 0) {
+      const frame = this.frameBuffer.shift()
+      if (this.sourceBuffer) {
+        if (!this.sourceBuffer.updating) {
+          this.sourceBuffer.ended = false
+          this.sourceBuffer.appendBuffer(frame)
         }
-        socketConnect()
-      }, false)
+      }
+    }
+  }
+
+
+
+  onSourceOpen = () => {
+    console.log('source open')
+    this.sourceBuffer = this.ms.addSourceBuffer('video/mp4;codecs=avc1.42001f')
+    this.sourceBuffer.addEventListener('updateend', this.onUpdateEnd)
+    this.socketConnect()
+  }
+
+  onRef = (dom) => {
+    this.video = dom
+    if (!this.video) return
+
+    if (this.objectUrl) {
+      this.video.src = this.objectUrl
+    } else {
+      this.createDecoder()
+    }
+  }
+
+  createDecoder = () => {
+    if (!this.props.port) return
+  
+    this.ms = new MediaSource()
+    this.ms.addEventListener('sourceopen', this.onSourceOpen, false)
+    this.objectUrl = window.URL.createObjectURL(this.ms)
+
+    if (this.video) {
+      this.video.src = this.objectUrl
     }
   }
 
@@ -68,22 +97,36 @@ export default class Livestream extends Component {
       this.socket.close()
     }
 
-    
+    if (this.video) {
+      this.video.removeAttribute('src')
+      this.video.load()
+    }
+
+    if (this.objectUrl) {
+      URL.revokeObjectURL(this.objectUrl)
+    }
+
+    if (this.ms) {
+      try {
+        this.ms.endOfStream();
+      } catch(err) {
+      }
+
+      this.ms.removeEventListener('sourceopen', this.onSourceOpen)
+    }
+
+    this.ms = null
+    this.objectUrl = null
   }
 
 	componentWillUnmount() {
     this.destroyDecoder()
   }
 
-  onStatusRef(dom) {
-    this.statusRef = dom
-  }
-
 	render() {
 		return (
 			<div className={style.live}>
-        <video ref={this.onRef.bind(this)}></video>
-        <pre className={style.status} ref={this.onStatusRef.bind(this)} />
+        <video ref={this.onRef}></video>
       </div>
 		)
 	}
