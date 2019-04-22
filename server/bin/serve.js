@@ -1,11 +1,13 @@
 const express = require('express')
 const path = require('path')
+const url = require('url')
 const http = require('http')
 const cors = require('cors')
 
 const Database = require('../lib/database')
 const Manifest = require('../lib/manifest')
 const Smooth = require('../lib/smooth')
+const Router = require('../lib/router')
 
 const config = require('../config.js')
 const factory = new Manifest(config)
@@ -16,6 +18,30 @@ const main = async () => {
   const app = express()
   
   app.use(cors())
+  app.get('/streams/rtsp', async (req, res) => {
+    const mappings = await Router.getForwards(config.auth.router)
+
+    const data = Object.entries(config.targets).reduce((memo, [key, item]) => {
+      const found = mappings.find(({ addr }) => item.source.indexOf(addr) >= 0)
+      if (found && found.ext) {
+        const [source, preview] = [item.source, item.preview].map(link => url.format({
+          ...url.parse(link),
+          host: `[HOST]:${found.ext}`,
+        }))
+        
+        memo.push({
+          key,
+          name: item.name,
+          source,
+          preview,
+        })
+      }
+      return memo
+    }, [])
+
+    res.send({ data })
+  })
+  
   app.get('/streams', (req, res) => {
     res.set('Content-Type', 'application/json')
     res.send({
@@ -24,7 +50,7 @@ const main = async () => {
         .map(([key, { name, port }]) => ({ key, name, port })),
     })
   })
-  
+
   app.get('/scene/:folder', async (req, res) => {
     const { folder } = req.params
     res.set('Content-Type', 'application/json')
@@ -32,7 +58,7 @@ const main = async () => {
       data: await db.getScenes(folder),
     })
   })
-  
+
   app.get('/data/:folder/slice.m3u8', async (req, res) => {
     if(!req.query.from) return next()
     const { folder } = req.params

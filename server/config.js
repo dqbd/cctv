@@ -5,7 +5,7 @@ module.exports = {
     ipcBase: "/tmp",
     manifest: "manifest.m3u8",
     segmentName: "%Y_%m_%d_%H/sg_%s_%%t.ts",
-    maxAge: 1 * 24 * 60 * 60, /* emergency mode, only a day, reduce if still issucifient*/
+    maxAge: 3 * 24 * 60 * 60, /* emergency mode, only a day, reduce if still issucifient*/
     cleanupPolling: 60, /* every minute */
     segmentSize: 3,
     port: 80,
