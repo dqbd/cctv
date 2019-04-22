@@ -3,6 +3,8 @@ const path = require('path')
 const mkdirp = require('mkdirp')
 const ffmpeg = require('fluent-ffmpeg')
 const Split = require('stream-split')
+const { Writable } = require('stream')
+const Mp4frag = require('mp4frag')
 const WebSocket = require('ws')
 const ClockSync = require('../lib/clocksync')
 
@@ -20,26 +22,35 @@ const hostname = url.parse(address).hostname
 const baseFolder = path.resolve(config.base, cameraKey)
 mkdirp.sync(baseFolder)
 
+
 const start = async () => {
-  const NALseparator = Buffer.from([0,0,0,1])
-  const splitter = new Split(NALseparator)
-
   const wss = new WebSocket.Server({ port: target.port })
+  const fragger = new Mp4frag()
 
-  splitter.on('data', (data) => {
+  fragger.on('segment', (data) => {
     wss.clients.forEach((ws) => {
       if (ws.readyState === WebSocket.OPEN) {
-        ws.send(Buffer.concat([NALseparator, data]), { binary: true })
+        ws.send(data, { binary: true })
       }
     })
   })
 
-  const main = ffmpeg(address)
+  wss.on('connection', (ws) => {
+    ws.send(fragger.initialization, { binary: true })
+    ws.init = true
+  })
+
+  const main = ffmpeg()
+    .addInput(address)
     .inputOptions([
       '-rtsp_transport tcp',
       '-rtsp_flags prefer_tcp',
       '-stimeout 30000000',
+      '-re',
     ])
+    // .addInput('anullsrc')
+    // .inputFormat('lavfi')
+
     .addOutput(path.resolve(baseFolder, config.manifest))
     .audioCodec('copy')
     .videoCodec('copy')
@@ -51,10 +62,11 @@ const start = async () => {
       `-hls_flags second_level_segment_duration`,
       `-hls_segment_filename ${path.resolve(baseFolder, config.segmentName)}`,
     ])
-    .addOutput(splitter)
-    .format('rawvideo')
+    .addOutput(fragger)
+    .format('mp4')
     .outputOptions([
-      '-bsf:v h264_mp4toannexb',
+      '-movflags +empty_moov+default_base_moof+frag_keyframe',
+      '-reset_timestamps 1',
     ])
     .videoCodec('copy')
     .audioCodec('copy')

@@ -11,10 +11,11 @@ class Manifest {
             `#EXT-X-TARGETDURATION:${config.segmentSize}`,
             `#EXT-X-MEDIA-SEQUENCE:${seq}`,
         ]
-
-        segments.forEach(({ filename, extinf }) => {
-            buffer.push(`#EXTINF:${extinf},`)
-            buffer.push(filename)
+	require('fs').writeFileSync('/root/camera_dump_'+Date.now()+'.json', JSON.stringify(segments))
+        segments.forEach(({ filename, extinf, path }) => {
+            buffer.push(`#EXTINF:${extinf || '4.000'},`)
+	    if(filename) buffer.push(filename)
+	    else buffer.push(path) //fucking hell
         })
 
         if (end) {
