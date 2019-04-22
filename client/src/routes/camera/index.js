@@ -4,6 +4,8 @@ import Livestream from '../../components/Livestream';
 import Dvr from '../../components/Dvr';
 import Scrobber from '../../components/scrobber';
 
+import { BASE_URL } from '../../constants'
+
 export default class Camera extends Component {
   state = {
     from: undefined,
@@ -15,7 +17,7 @@ export default class Camera extends Component {
   generateUrl = ({ name, from, to, shift }) => {
     if (!shift && !from && !to) return null
     
-    let baseUrl = `/data/${name}/`
+    let baseUrl = `${BASE_URL}/data/${name}/`
     let type = 'stream.m3u8'
 
     let params = []

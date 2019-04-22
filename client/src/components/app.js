@@ -5,6 +5,8 @@ import Header from './header';
 import Home from '../routes/home';
 import Camera from '../routes/camera';
 
+import { BASE_URL } from '../constants'
+
 export default class App extends Component {
 
 	state = {
@@ -12,7 +14,7 @@ export default class App extends Component {
 	}
 
 	componentDidMount() {
-		fetch('/streams')
+		fetch(`${BASE_URL}/streams`)
 			.then(a => a.json())
 			.then(({ data }) => {
 				this.setState({ streams: data })

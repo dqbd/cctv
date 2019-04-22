@@ -8,7 +8,6 @@ export default class DVR extends Component {
   ref = undefined
 
   componentDidMount() {
-    console.log(this)
     this.handlePlayback()
   }
 
@@ -29,7 +28,6 @@ export default class DVR extends Component {
   }
 
   videoRef = (ref) => {
-    console.log(this)
     this.ref = ref
     this.handlePlayback()
   }

@@ -2,8 +2,6 @@ const url = require('url')
 const path = require('path')
 const mkdirp = require('mkdirp')
 const ffmpeg = require('fluent-ffmpeg')
-const Split = require('stream-split')
-const { Writable } = require('stream')
 const Mp4frag = require('mp4frag')
 const WebSocket = require('ws')
 const ClockSync = require('../lib/clocksync')
@@ -22,22 +20,51 @@ const hostname = url.parse(address).hostname
 const baseFolder = path.resolve(config.base, cameraKey)
 mkdirp.sync(baseFolder)
 
+const MFHD = Buffer.from([0x6d, 0x66, 0x68, 0x64])
+const TFDT = Buffer.from([0x74, 0x66, 0x64, 0x74])
 
 const start = async () => {
   const wss = new WebSocket.Server({ port: target.port })
   const fragger = new Mp4frag()
 
   fragger.on('segment', (data) => {
+    const seqIndex = data.indexOf(MFHD) + 8
+    const tfhdIndex = data.indexOf(TFDT) + 4
+    const timeVersion = data[tfhdIndex]
+    const timeIndex = tfhdIndex + 4
+
+    const seq = data.slice(seqIndex, seqIndex + 4).readUInt32BE(0)
+    const time = data.slice(timeIndex, timeIndex + (timeVersion === 0 ? 4 : 8))
+
     wss.clients.forEach((ws) => {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(data, { binary: true })
+      if (ws.readyState === WebSocket.OPEN && ws._init) {
+        if (ws._initSeq === null || ws._initTime === null) {
+          ws._initSeq = seq
+          ws._initTime = time
+        }
+
+        const cloned = Buffer.from(data)
+        cloned.writeUInt32BE(seq - ws._initSeq + 1, seqIndex)
+
+        let carry = 0
+        for (let i = timeVersion === 0 ? 3 : 7; i >= 0; i -= 1) {
+          const a = time[i]
+          const b = ws._initTime[i] + carry
+
+          carry = (b > a) ? 1 : 0
+          cloned[timeIndex + i] = (a - b) % 256
+        }
+
+        ws.send(cloned, { binary: true })
       }
     })
   })
 
   wss.on('connection', (ws) => {
     ws.send(fragger.initialization, { binary: true })
-    ws.init = true
+    ws._init = true
+    ws._initTime = null
+    ws._initSeq = null
   })
 
   const main = ffmpeg()
@@ -48,9 +75,6 @@ const start = async () => {
       '-stimeout 30000000',
       '-re',
     ])
-    // .addInput('anullsrc')
-    // .inputFormat('lavfi')
-
     .addOutput(path.resolve(baseFolder, config.manifest))
     .audioCodec('copy')
     .videoCodec('copy')
@@ -65,6 +89,7 @@ const start = async () => {
     .addOutput(fragger)
     .format('mp4')
     .outputOptions([
+      // '-frag_duration 30000', -- enable realtime
       '-movflags +empty_moov+default_base_moof+frag_keyframe',
       '-reset_timestamps 1',
     ])
