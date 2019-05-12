@@ -61,12 +61,11 @@ export default class DVR extends Component<Props> {
         this.hls.loadSource(source)
         this.hls.attachMedia(this.ref)
         this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            this.timer = setTimeout(this.autoplay, 300)
-
+          this.timer = setTimeout(this.autoplay, 300)
         })
       } else {
         this.ref.src = source
-        setTimeout(this.autoplay, 300)
+        this.timer = setTimeout(this.autoplay, 300)
       }
     }
   }

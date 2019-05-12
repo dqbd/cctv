@@ -5,7 +5,7 @@ import Live from '../../components/Live/Live'
 import Dvr from '../../components/Dvr/Dvr'
 import Scrobber from '../../components/Scrobber/Scrobber'
 
-import { API_URL } from '../../constants'
+import { API_URL } from '../../utils/constants'
 
 type Props = {
   name: string,

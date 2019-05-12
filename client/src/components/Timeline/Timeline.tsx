@@ -97,7 +97,7 @@ class Timeline extends Component<Props> {
 			ctx.stroke()
 
 			ctx.font = '1em sans-serif'
-			ctx.fillText(moment(now).format('YYYY-MM-DD'), startX + (shift && circleRadius) + 5, height / 2 - 6.5)
+			ctx.fillText(moment(now - ofDay).format('YYYY-MM-DD'), startX + (shift && circleRadius) + 5, height / 2 - 6.5)
 
 			ctx.beginPath()
 			ctx.moveTo(startX + (shift && circleRadius), height / 2)
