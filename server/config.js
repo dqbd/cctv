@@ -53,5 +53,90 @@ module.exports = {
     credential: {
         username: 'admin',
         password: ''
+    },
+    mediasoup: {
+        // Listening hostname (just for for `gulp live|open` tasks).
+        domain: 'localhost',
+        // Signaling settings.
+        https: {
+            listenIp: '0.0.0.0',
+            listenPort: 4443, // NOTE: Don't change it (client app assumes 4443).
+            tls: {
+                cert: `${__dirname}/certs/mediasoup-demo.localhost.cert.pem`,
+                key: `${__dirname}/certs/mediasoup-demo.localhost.key.pem`
+            }
+        },
+        // Media settings.
+        mediasoup: {
+            // mediasoup Worker settings.
+            worker: {
+                logLevel: 'warn',
+                logTags: [
+                    'info',
+                    'ice',
+                    'dtls',
+                    'rtp',
+                    'srtp',
+                    'rtcp',
+                    // 'rtx',
+                    // 'bwe',
+                    // 'score',
+                    // 'simulcast',
+                    // 'svc'
+                ],
+                rtcMinPort: 40000,
+                rtcMaxPort: 49999
+            },
+            // mediasoup Router settings.
+            router: {
+                // Router media codecs.
+                mediaCodecs: [{
+                        kind: 'audio',
+                        mimeType: 'audio/opus',
+                        clockRate: 48000,
+                        channels: 2
+                    },
+                    {
+                        kind: 'video',
+                        mimeType: 'video/VP8',
+                        clockRate: 90000,
+                        parameters: {
+                            'x-google-start-bitrate': 1000
+                        }
+                    },
+                    {
+                        kind: 'video',
+                        mimeType: 'video/h264',
+                        clockRate: 90000,
+                        parameters: {
+                            'packetization-mode': 0,
+                            'profile-level-id': '4d0032',
+                            'level-asymmetry-allowed': 1,
+                            'x-google-start-bitrate': 1000
+                        }
+                    },
+                    {
+                        kind: 'video',
+                        mimeType: 'video/h264',
+                        clockRate: 90000,
+                        parameters: {
+                            'packetization-mode': 0,
+                            'profile-level-id': '42e01f',
+                            'level-asymmetry-allowed': 1,
+                            'x-google-start-bitrate': 1000
+                        }
+                    }
+                ]
+            },
+            // mediasoup WebRtcTransport settings.
+            webRtcTransport: {
+                listenIps: [{
+                    ip: '0.0.0.0',
+                    announcedIp: '192.168.1.123'
+                }],
+                maxIncomingBitrate: 1500000,
+                initialAvailableOutgoingBitrate: 1000000
+            }
+        }
     }
 }

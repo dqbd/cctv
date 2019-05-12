@@ -120,7 +120,6 @@ export default class RoomClient {
     this._protoo.on('request', async (request: { method: string, data: any }, accept: () => any) => {
       switch (request.method) {
         case 'newConsumer': {
-
           const {
             peerId,
             producerId,
@@ -178,6 +177,9 @@ export default class RoomClient {
           // resume this Consumer (which was paused for now).
           accept();
 
+          break;
+        }
+        default: {
           break;
         }
       }

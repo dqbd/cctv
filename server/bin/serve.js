@@ -1,3 +1,4 @@
+const protoo = require('protoo-server')
 const express = require('express')
 const path = require('path')
 const url = require('url')
@@ -8,16 +9,59 @@ const Database = require('../lib/database')
 const Manifest = require('../lib/manifest')
 const Smooth = require('../lib/smooth')
 const Router = require('../lib/router')
+const Room = require('../lib/room')
 
 const config = require('../config.js')
-const factory = new Manifest(config)
-const db = new Database(config.auth.mysql)
 
 const main = async () => {
+  const factory = new Manifest(config)
+  const db = new Database(config.auth.mysql)
+  const soup = await Room.create(config.mediasoup)
+  
   const valve = new Smooth(db)
   const app = express()
   
   app.use(cors())
+  app.post('/room/broadcasters', async (req, res, next) => {
+    const { id, displayName, device, rtpCapabilities } = req.body
+    try {
+      const data = await soup.createBroadcaster({ id, displayName, device, rtpCapabilities })
+      res.status(200).json(data);
+    } catch (error) {
+      next(error)
+    }
+  })
+
+	app.delete('/room/broadcasters/:broadcasterId', (req, res) => {
+    const { broadcasterId } = req.params
+    soup.deleteBroadcaster({ broadcasterId })
+    res.status(200).send('broadcaster deleted')
+  })
+
+	app.post('/room/broadcasters/:broadcasterId/transports', async (req, res, next) => {
+    const { broadcasterId } = req.params
+    const { type, rtcpMux, comedia, multiSource } = req.body
+
+    try {
+      const data = await soup.createBroadcasterTransport({ broadcasterId, type, rtcpMux, comedia, multiSource })
+      res.status(200).json(data)
+    } catch (error) {
+      next(error)
+    }
+  })
+
+	app.post('/room/broadcasters/:broadcasterId/transports/:transportId/producers', async (req, res, next) => {
+    const { broadcasterId, transportId } = req.params;
+    const { kind, rtpParameters } = req.body;
+
+    try {
+      const data = await globalRoom.createBroadcasterProducer({ broadcasterId, transportId, kind, rtpParameters })
+      res.status(200).json(data)
+    } catch (error) {
+      next(error)
+    }
+  })
+
   app.get('/streams/rtsp', async (req, res) => {
     const mappings = await Router.getForwards(config.auth.router)
 
@@ -90,9 +134,33 @@ const main = async () => {
   
   app.get('*', (_, res) => res.sendFile(path.resolve(__dirname, '../../', 'client', 'build', 'index.html')))
   
-  app.listen(config.port, () => console.log(`Listening at ${config.port}`))
+  const httpServer = http.createServer(app)
+
+  const protooServer = new protoo.WebSocketServer(httpServer, {
+    maxReceivedFrameSize: 960000,
+		maxReceivedMessageSize: 960000,
+		fragmentOutgoingMessages: true,
+		fragmentationThreshold: 960000
+  }) 
+
+  protooServer.on('connectionrequest', (info, accept, reject) => {
+		const u = url.parse(info.request.url, true)
+		const peerId = u.query['peerId']
+
+		if (!peerId) {
+			reject(400, 'Connection request without peerId')
+			return
+    }
+    
+    try {
+      const protooWebSocketTransport = accept() 
+      soup.handleProtooConnection({ peerId, protooWebSocketTransport })
+    } catch (err) {
+      reject(err)
+    }
+  })
   
-  process.on("exit", () => client.close())
+  httpServer.listen(config.port, () => console.log(`Listening at ${config.port}`))
 }
 
 main()
