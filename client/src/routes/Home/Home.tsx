@@ -1,7 +1,11 @@
 import React, { useEffect, useRef, useReducer } from 'react'
 import RoomClient, { RoomPeer, RoomConsumer } from '../../utils/roomClient'
+import DataProvider from '../../utils/dataProvider'
+
 import randomString from 'random-string'
-import PeerList from '../../components/PeerList/PeerList'
+import PeerView from '../../components/PeerView/PeerView'
+import styles from './Home.module.css'
+import { COLORS } from 'utils/constants';
 
 type State = {
   consumers: { [key: string]: RoomConsumer },
@@ -118,7 +122,6 @@ const reducer = (state: State, action: Action): State => {
   }
 }
 
-
 export default () => {
   const clientRef = useRef<RoomClient>()
   const [state, dispatch] = useReducer(reducer, { consumers: {}, peers: {}, roomState: "" })
@@ -156,10 +159,42 @@ export default () => {
 
   return (
     <div>
-      <PeerList
-        peers={state.peers}
-        consumers={state.consumers}
-      />
+      <div className={styles.list}>
+        <DataProvider.Consumer>
+          {({ streams }) => streams.map(({ key, name }, index) => {
+
+            const peer = state.peers[key]
+            let videoContent = null
+            
+            if (peer) {
+              const consumerList = peer.consumers.map(consumerId => state.consumers[consumerId])
+              const videoConsumer = consumerList.find((consumer) => consumer.track.kind === 'video')
+
+              const videoVisible = (
+                videoConsumer &&
+                !videoConsumer.locallyPaused &&
+                !videoConsumer.remotelyPaused &&
+                videoConsumer.score < 5
+              )
+
+              videoContent = <PeerView
+                videoTrack={videoConsumer ? videoConsumer.track : null}
+                videoVisible={!!videoVisible}
+              />
+            }
+
+            return (
+              <article className={styles.item} key={key}>
+                <section className={styles.header}>
+                  <h2 className={styles.name}>{name}</h2>
+                  <span className={styles.color} style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
+                </section>
+                <div className={styles.video}>{videoContent}</div>
+              </article>
+            )
+          })}
+        </DataProvider.Consumer>
+      </div>
     </div>
   )
 }

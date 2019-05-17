@@ -59,7 +59,7 @@ export default class RoomClient {
   }) {
     this._forceTcp = forceTcp
     this._stateActions = stateActions
-    this._protooUrl = `wss://${window.location.hostname}:4443/?peerId=${peerId}`
+    this._protooUrl = `ws://${window.location.hostname}/?peerId=${peerId}`
   }
 
   close() {
