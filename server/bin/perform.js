@@ -2,9 +2,8 @@ const url = require('url')
 const path = require('path')
 const mkdirp = require('mkdirp')
 const ffmpeg = require('fluent-ffmpeg')
-const Mp4frag = require('mp4frag')
-const WebSocket = require('ws')
 const ClockSync = require('../lib/clocksync')
+const net = require('net')
 
 const config = require('../config.js')
 
@@ -20,52 +19,42 @@ const hostname = url.parse(address).hostname
 const baseFolder = path.resolve(config.base, cameraKey)
 mkdirp.sync(baseFolder)
 
-const MFHD = Buffer.from([0x6d, 0x66, 0x68, 0x64])
-const TFDT = Buffer.from([0x74, 0x66, 0x64, 0x74])
+const exitAfterSocketConnect = () => {
+  const conn = net.connect(config.ipcBase, () => {
+    process.exit()
+  })
+  conn.on('error', () => {
+    setTimeout(exitAfterSocketConnect)
+  })
+}
 
 const start = async () => {
-  const wss = new WebSocket.Server({ port: target.port })
-  const fragger = new Mp4frag()
 
-  fragger.on('segment', (data) => {
-    const seqIndex = data.indexOf(MFHD) + 8
-    const tfhdIndex = data.indexOf(TFDT) + 4
-    const timeVersion = data[tfhdIndex]
-    const timeIndex = tfhdIndex + 4
+  const soupConn = net.createConnection(config.ipcBase)
 
-    const seq = data.slice(seqIndex, seqIndex + 4).readUInt32BE(0)
-    const time = data.slice(timeIndex, timeIndex + (timeVersion === 0 ? 4 : 8))
+  soupConn.once('connect', () => {
+    soupConn.write(JSON.stringify({
+      id: cameraKey,
+      kind: 'video',
+      rtpParameters: {
+        codecs: [{
+          mimeType: 'video/h264',
+          payloadType: 101,
+          clockRate: 90000
+        }],
+        encodings: [{ ssrc: 2222 }] 
+      },
+    }))
+  })
 
-    wss.clients.forEach((ws) => {
-      if (ws.readyState === WebSocket.OPEN && ws._init) {
-        if (ws._initSeq === null || ws._initTime === null) {
-          ws._initSeq = seq
-          ws._initTime = time
-        }
-
-        const cloned = Buffer.from(data)
-        cloned.writeUInt32BE(seq - ws._initSeq + 1, seqIndex)
-
-        let carry = 0
-        for (let i = timeVersion === 0 ? 3 : 7; i >= 0; i -= 1) {
-          const a = time[i]
-          const b = ws._initTime[i] + carry
-
-          carry = (b > a) ? 1 : 0
-          cloned[timeIndex + i] = (a - b) % 256
-        }
-
-        ws.send(cloned, { binary: true })
-      }
+  const soupData = await new Promise((resolve, reject) => {
+    soupConn.once('data', (data) => {
+      const payload = JSON.parse(data.toString())
+      resolve(payload)
     })
   })
 
-  wss.on('connection', (ws) => {
-    ws.send(fragger.initialization, { binary: true })
-    ws._init = true
-    ws._initTime = null
-    ws._initSeq = null
-  })
+  soupConn.on('close', exitAfterSocketConnect)
 
   const main = ffmpeg()
     .addInput(address)
@@ -86,12 +75,11 @@ const start = async () => {
       `-hls_flags second_level_segment_duration`,
       `-hls_segment_filename ${path.resolve(baseFolder, config.segmentName)}`,
     ])
-    .addOutput(fragger)
-    .format('mp4')
+    .addOutput(`rtp://${soupData.ip}:${soupData.port}`)
+    .format('rtp')
     .outputOptions([
-      // '-frag_duration 30000', -- enable realtime
-      '-movflags +empty_moov+default_base_moof+frag_keyframe',
-      '-reset_timestamps 1',
+      '-ssrc 2222',
+      '-payload_type 101',
     ])
     .videoCodec('copy')
     .audioCodec('copy')
@@ -129,12 +117,6 @@ const start = async () => {
 
     try {
       if (main) main.kill()
-    } catch (err) {
-      console.log(err)
-    }
-
-    try {
-      if (wss) wss.close()
     } catch (err) {
       console.log(err)
     }

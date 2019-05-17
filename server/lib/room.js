@@ -14,16 +14,13 @@ class Room extends EventEmitter {
 	 * Factory function that creates and returns Room instance.
 	 *
 	 * @async
-	 *
-	 * @param {mediasoup.Worker} mediasoupWorker - The mediasoup Worker in which a new
-	 *   mediasoup Router must be created.
 	 */
 	static async create(config) {
 		const mediasoupWorker = await mediasoup.createWorker({
-			logLevel: config.mediasoup.worker.logLevel,
-			logTags: config.mediasoup.worker.logTags,
-			rtcMinPort: config.mediasoup.worker.rtcMinPort,
-			rtcMaxPort: config.mediasoup.worker.rtcMaxPort
+			logLevel: 'warn',
+			logTags: ['info', 'ice', 'dtls', 'rtp', 'srtp', 'rtcp'],
+			rtcMinPort: config.rtcMinPort,
+			rtcMaxPort: config.rtcMaxPort
 		})
 
 		mediasoupWorker.on('died', () => {
@@ -37,7 +34,7 @@ class Room extends EventEmitter {
 		const protooRoom = new protoo.Room();
 
 		// Router media codecs.
-		let mediaCodecs = config.mediasoup.router.mediaCodecs;
+		let mediaCodecs = config.mediaCodecs;
 
 		// Create a mediasoup Router.
 		const mediasoupRouter = await mediasoupWorker.createRouter({
@@ -74,8 +71,6 @@ class Room extends EventEmitter {
 		// Map of broadcasters indexed by id. Each Object has:
 		// - {String} id
 		// - {Object} data
-		//   - {String} displayName
-		//   - {Object} device
 		//   - {RTCRtpCapabilities} rtpCapabilities
 		//   - {Map<String, mediasoup.Transport>} transports
 		//   - {Map<String, mediasoup.Producer>} producers
@@ -138,8 +133,6 @@ class Room extends EventEmitter {
 		// Not joined after a custom protoo 'join' request is later received.
 		peer.data.consume = consume;
 		peer.data.joined = false;
-		peer.data.displayName = undefined;
-		peer.data.device = undefined;
 		peer.data.rtpCapabilities = undefined;
 
 		// Have mediasoup related maps ready even before the Peer joins since we
@@ -191,24 +184,16 @@ class Room extends EventEmitter {
 	 * @async
 	 *
 	 * @type {String} id - Broadcaster id.
-	 * @type {String} displayName - Descriptive name.
-	 * @type {Object} [device] - Additional info with name, version and flags fields.
-	 * @type {RTCRtpCapabilities} [rtpCapabilities] - Device RTP capabilities.
+	 * @type {String} kind - 'audio' or 'video' kind for the Producer.
+	 * @type {RTCRtpParameters} rtpParameters - RTP parameters for the Producer.
 	 */
 	async createBroadcaster({
 		id,
-		displayName,
-		device = {},
-		rtpCapabilities
+		kind,
+		rtpParameters
 	}) {
 		if (typeof id !== 'string' || !id)
 			throw new TypeError('missing body.id');
-		else if (typeof displayName !== 'string' || !displayName)
-			throw new TypeError('missing body.displayName');
-		else if (typeof device.name !== 'string' || !device.name)
-			throw new TypeError('missing body.device.name');
-		else if (rtpCapabilities && typeof rtpCapabilities !== 'object')
-			throw new TypeError('wrong body.rtpCapabilities');
 
 		if (this._broadcasters.has(id))
 			throw new Error(`broadcaster with id "${id}" already exists`);
@@ -216,13 +201,7 @@ class Room extends EventEmitter {
 		const broadcaster = {
 			id,
 			data: {
-				displayName,
-				device: {
-					flag: 'broadcaster',
-					name: device.name || 'Unknown device',
-					version: device.version
-				},
-				rtpCapabilities,
+				rtpCapabilities: undefined,
 				transports: new Map(),
 				producers: new Map(),
 				consumers: new Map()
@@ -234,189 +213,21 @@ class Room extends EventEmitter {
 
 		// Notify the new Broadcaster to all Peers.
 		for (const otherPeer of this._getJoinedPeers()) {
-			otherPeer.notify(
-					'newPeer', {
-						id: broadcaster.id,
-						displayName: broadcaster.data.displayName,
-						device: broadcaster.data.device
-					})
-				.catch(() => {});
+			otherPeer.notify('newPeer', { id: broadcaster.id }).catch(() => {});
 		}
 
-		// Reply with the list of Peers and their Producers.
-		const peerInfos = [];
-		const joinedPeers = this._getJoinedPeers();
+		const transport = await this._mediasoupRouter.createPlainRtpTransport({
+			listenIp: this._config.webRtcTransport.listenIps[0],
+			rtcpMux: true,
+			comedia: true,
+			multiSource: true
+		});
 
-		// Just fill the list of Peers if the Broadcaster provided its rtpCapabilities.
-		if (rtpCapabilities) {
-			for (const joinedPeer of joinedPeers) {
-				const peerInfo = {
-					id: joinedPeer.id,
-					displayName: joinedPeer.data.displayName,
-					device: joinedPeer.data.device,
-					producers: []
-				};
+		// Store it.
+		broadcaster.data.transports.set(transport.id, transport);
 
-				for (const producer of joinedPeer.data.producers.values()) {
-					// Ignore Producers that the Broadcaster cannot consume.
-					if (
-						!this._mediasoupRouter.canConsume({
-							producerId: producer.id,
-							rtpCapabilities
-						})
-					) {
-						continue;
-					}
-
-					peerInfo.producers.push({
-						id: producer.id,
-						kind: producer.kind
-					});
-				}
-
-				peerInfos.push(peerInfo);
-			}
-		}
-
-		return {
-			peers: peerInfos
-		};
-	}
-
-	/**
-	 * Delete a Broadcaster.
-	 *
-	 * @type {String} broadcasterId
-	 */
-	deleteBroadcaster({
-		broadcasterId
-	}) {
-		const broadcaster = this._broadcasters.get(broadcasterId);
-
-		if (!broadcaster)
-			throw new Error(`broadcaster with id "${broadcasterId}" does not exist`);
-
-		for (const transport of broadcaster.data.transports.values()) {
-			transport.close();
-		}
-
-		this._broadcasters.delete(broadcasterId);
-
-		for (const peer of this._getJoinedPeers()) {
-			peer.notify('peerClosed', {
-					peerId: broadcasterId
-				})
-				.catch(() => {});
-		}
-	}
-
-	/**
-	 * Create a mediasoup Transport associated to a Broadcaster. It can be a
-	 * PlainRtpTransport or a WebRtcTransport
-	 *
-	 * @async
-	 *
-	 * @type {String} broadcasterId
-	 * @type {String} type - Can be 'plain' (PlainRtpTransport) or 'webrtc'
-	 *   (WebRtcTransport).
-	 * @type {Boolean} [rtcpMux=true] - Just for PlainRtpTransport, use RTCP mux.
-	 * @type {Boolean} [comedia=true] - Just for PlainRtpTransport, enable remote IP:port
-	 *   autodetection.
-	 * @type {Boolean} [multiSource=false] - Just for PlainRtpTransport, allow RTP from any
-	 *   remote IP and port (no RTCP feedback will be sent to the remote).
-	 */
-	async createBroadcasterTransport({
-		broadcasterId,
-		type,
-		rtcpMux = true,
-		comedia = true,
-		multiSource = false
-	}) {
-		const broadcaster = this._broadcasters.get(broadcasterId);
-
-		if (!broadcaster)
-			throw new Error(`broadcaster with id "${broadcasterId}" does not exist`);
-
-		switch (type) {
-			case 'webrtc': {
-				const {
-					initialAvailableOutgoingBitrate
-				} = this._config.mediasoup.webRtcTransport;
-
-				const transport = await this._mediasoupRouter.createWebRtcTransport({
-					listenIps: this._config.mediasoup.webRtcTransport.listenIps,
-					enableUdp: true,
-					enableTcp: false,
-					initialAvailableOutgoingBitrate
-				});
-
-				// Store it.
-				broadcaster.data.transports.set(transport.id, transport);
-
-				return {
-					id: transport.id,
-					iceParameters: transport.iceParameters,
-					iceCandidates: transport.iceCandidates,
-					dtlsParameters: transport.dtlsParameters
-				};
-			}
-
-			case 'plain': {
-				const transport = await this._mediasoupRouter.createPlainRtpTransport({
-					listenIp: this._config.mediasoup.webRtcTransport.listenIps[0],
-					rtcpMux: Boolean(rtcpMux),
-					comedia: Boolean(comedia),
-					multiSource: Boolean(multiSource)
-				});
-
-				// Store it.
-				broadcaster.data.transports.set(transport.id, transport);
-
-				return {
-					id: transport.id,
-					ip: transport.tuple.localIp,
-					port: transport.tuple.localPort,
-					rtcpPort: transport.rtcpTuple ? transport.rtcpTuple.localPort : undefined
-				};
-			}
-
-			default: {
-				throw new TypeError('invalid type');
-			}
-		}
-	}
-
-	/**
-	 * Create a mediasoup Producer associated to a Broadcaster.
-	 *
-	 * @async
-	 *
-	 * @type {String} broadcasterId
-	 * @type {String} transportId
-	 * @type {String} kind - 'audio' or 'video' kind for the Producer.
-	 * @type {RTCRtpParameters} rtpParameters - RTP parameters for the Producer.
-	 */
-	async createBroadcasterProducer({
-		broadcasterId,
-		transportId,
-		kind,
-		rtpParameters
-	}) {
-		const broadcaster = this._broadcasters.get(broadcasterId);
-
-		if (!broadcaster)
-			throw new Error(`broadcaster with id "${broadcasterId}" does not exist`);
-
-		const transport = broadcaster.data.transports.get(transportId);
-
-		if (!transport)
-			throw new Error(`transport with id "${transportId}" does not exist`);
-
-		const producer =
-			await transport.produce({
-				kind,
-				rtpParameters
-			});
+		// Create producer
+		const producer = await transport.produce({ kind, rtpParameters });
 
 		// Store it.
 		broadcaster.data.producers.set(producer.id, producer);
@@ -431,8 +242,33 @@ class Room extends EventEmitter {
 		}
 
 		return {
-			id: producer.id
+			id,
+			ip: transport.tuple.localIp,
+			port: transport.tuple.localPort,
+			rtcpPort: transport.rtcpTuple ? transport.rtcpTuple.localPort : undefined
 		};
+	}
+
+	/**
+	 * Delete a Broadcaster.
+	 *
+	 * @type {String} broadcasterId
+	 */
+	deleteBroadcaster({ id }) {
+		const broadcaster = this._broadcasters.get(id);
+
+		if (!broadcaster)
+			throw new Error(`broadcaster with id "${id}" does not exist`);
+
+		for (const transport of broadcaster.data.transports.values()) {
+			transport.close();
+		}
+
+		this._broadcasters.delete(id);
+
+		for (const peer of this._getJoinedPeers()) {
+			peer.notify('peerClosed', { peerId: id }).catch(() => {});
+		}
 	}
 
 	/**
@@ -453,15 +289,8 @@ class Room extends EventEmitter {
 				if (peer.data.joined)
 					throw new Error('Peer already joined');
 
-				const {
-					displayName,
-					device,
-					rtpCapabilities
-				} = request.data;
+				const { rtpCapabilities } = request.data;
 
-				// Store client data into the protoo Peer data object.
-				peer.data.displayName = displayName;
-				peer.data.device = device;
 				peer.data.rtpCapabilities = rtpCapabilities;
 
 				// Tell the new Peer about already joined Peers.
@@ -471,11 +300,7 @@ class Room extends EventEmitter {
 				const joinedPeers = [...this._getJoinedPeers(), ...Array.from(this._broadcasters.values())];
 
 				for (const joinedPeer of joinedPeers) {
-					peerInfos.push({
-						id: joinedPeer.id,
-						displayName: joinedPeer.data.displayName,
-						device: joinedPeer.data.device
-					});
+					peerInfos.push({ id: joinedPeer.id });
 
 					for (const producer of joinedPeer.data.producers.values()) {
 						this._createConsumer({
@@ -486,24 +311,14 @@ class Room extends EventEmitter {
 					}
 				}
 
-				accept({
-					peers: peerInfos
-				});
+				accept({ peers: peerInfos });
 
 				// Mark the new Peer as joined.
 				peer.data.joined = true;
 
 				// Notify the new Peer to all other Peers.
-				for (const otherPeer of this._getJoinedPeers({
-						excludePeer: peer
-					})) {
-					otherPeer.notify(
-							'newPeer', {
-								id: peer.id,
-								displayName: peer.data.displayName,
-								device: peer.data.device
-							})
-						.catch(() => {});
+				for (const otherPeer of this._getJoinedPeers({ excludePeer: peer })) {
+					otherPeer.notify('newPeer', { id: peer.id }).catch(() => {});
 				}
 
 				break;
@@ -521,10 +336,10 @@ class Room extends EventEmitter {
 				const {
 					maxIncomingBitrate,
 					initialAvailableOutgoingBitrate
-				} = this._config.mediasoup.webRtcTransport;
+				} = this._config.webRtcTransport;
 
 				const transport = await this._mediasoupRouter.createWebRtcTransport({
-					listenIps: this._config.mediasoup.webRtcTransport.listenIps,
+					listenIps: this._config.webRtcTransport.listenIps,
 					enableUdp: !forceTcp,
 					enableTcp: true,
 					preferUdp: true,
@@ -602,9 +417,7 @@ class Room extends EventEmitter {
 				if (!peer.data.joined)
 					throw new Error('Peer not yet joined');
 
-				const {
-					producerId
-				} = request.data;
+				const { producerId } = request.data;
 				const producer = peer.data.producers.get(producerId);
 
 				if (!producer)
@@ -622,9 +435,7 @@ class Room extends EventEmitter {
 				if (!peer.data.joined)
 					throw new Error('Peer not yet joined');
 
-				const {
-					producerId
-				} = request.data;
+				const { producerId } = request.data;
 				const producer = peer.data.producers.get(producerId);
 
 				if (!producer)
@@ -642,9 +453,7 @@ class Room extends EventEmitter {
 				if (!peer.data.joined)
 					throw new Error('Peer not yet joined');
 
-				const {
-					consumerId
-				} = request.data;
+				const { consumerId } = request.data;
 				const consumer = peer.data.consumers.get(consumerId);
 
 				if (!consumer)
@@ -662,9 +471,7 @@ class Room extends EventEmitter {
 				if (!peer.data.joined)
 					throw new Error('Peer not yet joined');
 
-				const {
-					consumerId
-				} = request.data;
+				const { consumerId } = request.data;
 				const consumer = peer.data.consumers.get(consumerId);
 
 				if (!consumer)
@@ -691,8 +498,7 @@ class Room extends EventEmitter {
 	_getJoinedPeers({
 		excludePeer = undefined
 	} = {}) {
-		return this._protooRoom.peers
-			.filter((peer) => peer.data.joined && peer !== excludePeer);
+		return this._protooRoom.peers.filter((peer) => peer.data.joined && peer !== excludePeer);
 	}
 
 	/**
@@ -818,11 +624,11 @@ class Room extends EventEmitter {
 				await consumer.resume();
 
 			consumerPeer.notify(
-					'consumerScore', {
-						consumerId: consumer.id,
-						score: consumer.score
-					})
-				.catch(() => {});
+				'consumerScore', {
+					consumerId: consumer.id,
+					score: consumer.score
+				}
+			).catch(() => {});
 		} catch (error) {
 			console.error('_createConsumer() | failed:', error);
 		}
