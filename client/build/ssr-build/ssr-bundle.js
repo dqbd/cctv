@@ -6139,8 +6139,8 @@ var Livestream_style = __webpack_require__("0mj7");
 var Livestream_style_default = /*#__PURE__*/__webpack_require__.n(Livestream_style);
 
 // CONCATENATED MODULE: ./constants.js
-var HOST = '192.168.1.217';
-var API_URL = 'http://' + HOST + ':8081';
+var HOST = '192.168.2.205';
+var API_URL = 'http://' + HOST;
 // CONCATENATED MODULE: ./components/Livestream/index.js
 
 
@@ -9070,7 +9070,7 @@ this.hls.trigger(events["a"/* default */].ERROR,{type:errors["b"/* ErrorTypes */
 // if sourcebuffers already created, do nothing ...
 if(Object.keys(this.sourceBuffer).length===0){for(var trackName in tracks){this.pendingTracks[trackName]=tracks[trackName];}var mediaSource=this.mediaSource;if(mediaSource&&mediaSource.readyState==='open'){// try to create sourcebuffers if mediasource opened
 this.checkPendingTracks();}}};BufferController.prototype.createSourceBuffers=function createSourceBuffers(tracks){var sourceBuffer=this.sourceBuffer,mediaSource=this.mediaSource;for(var trackName in tracks){if(!sourceBuffer[trackName]){var track=tracks[trackName];// use levelCodec as first priority
-var codec=track.levelCodec||track.codec;var mimeType=track.container+';codecs='+codec;logger["b"/* logger */].log('creating sourceBuffer('+mimeType+')');try{console.log('hello',mimeType);var sb=sourceBuffer[trackName]=mediaSource.addSourceBuffer(mimeType);sb.addEventListener('updateend',this.onsbue);sb.addEventListener('error',this.onsbe);this.tracks[trackName]={codec:codec,container:track.container};track.buffer=sb;}catch(err){logger["b"/* logger */].error('error while trying to add sourceBuffer:'+err.message);this.hls.trigger(events["a"/* default */].ERROR,{type:errors["b"/* ErrorTypes */].MEDIA_ERROR,details:errors["a"/* ErrorDetails */].BUFFER_ADD_CODEC_ERROR,fatal:false,err:err,mimeType:mimeType});}}}this.hls.trigger(events["a"/* default */].BUFFER_CREATED,{tracks:tracks});};BufferController.prototype.onBufferAppending=function onBufferAppending(data){if(!this._needsFlush){if(!this.segments){this.segments=[data];}else{this.segments.push(data);}this.doAppending();}};BufferController.prototype.onBufferAppendFail=function onBufferAppendFail(data){logger["b"/* logger */].error('sourceBuffer error:',data.event);// according to http://www.w3.org/TR/media-source/#sourcebuffer-append-error
+var codec=track.levelCodec||track.codec;var mimeType=track.container+';codecs='+codec;logger["b"/* logger */].log('creating sourceBuffer('+mimeType+')');try{var sb=sourceBuffer[trackName]=mediaSource.addSourceBuffer(mimeType);sb.addEventListener('updateend',this.onsbue);sb.addEventListener('error',this.onsbe);this.tracks[trackName]={codec:codec,container:track.container};track.buffer=sb;}catch(err){logger["b"/* logger */].error('error while trying to add sourceBuffer:'+err.message);this.hls.trigger(events["a"/* default */].ERROR,{type:errors["b"/* ErrorTypes */].MEDIA_ERROR,details:errors["a"/* ErrorDetails */].BUFFER_ADD_CODEC_ERROR,fatal:false,err:err,mimeType:mimeType});}}}this.hls.trigger(events["a"/* default */].BUFFER_CREATED,{tracks:tracks});};BufferController.prototype.onBufferAppending=function onBufferAppending(data){if(!this._needsFlush){if(!this.segments){this.segments=[data];}else{this.segments.push(data);}this.doAppending();}};BufferController.prototype.onBufferAppendFail=function onBufferAppendFail(data){logger["b"/* logger */].error('sourceBuffer error:',data.event);// according to http://www.w3.org/TR/media-source/#sourcebuffer-append-error
 // this error might not always be fatal (it is fatal if decode error is set, in that case
 // it will be followed by a mediaElement error ...)
 this.hls.trigger(events["a"/* default */].ERROR,{type:errors["b"/* ErrorTypes */].MEDIA_ERROR,details:errors["a"/* ErrorDetails */].BUFFER_APPENDING_ERROR,fatal:false});};// on BUFFER_EOS mark matching sourcebuffer(s) as ended and trigger checkEos()
