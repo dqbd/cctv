@@ -6,6 +6,7 @@ const http = require('http')
 const cors = require('cors')
 const fs = require('fs')
 const net = require('net')
+const mediasoup = require('mediasoup')
 
 const Database = require('../lib/database')
 const Manifest = require('../lib/manifest')
@@ -14,11 +15,32 @@ const Room = require('../lib/room')
 
 const config = require('../config.js')
 
+const defaultRoom = Symbol('default')
+
 const main = async () => {
   const factory = new Manifest(config)
   const db = new Database(config.auth.mysql)
-  const soup = await Room.create(config.mediasoup)
   
+  const worker = await mediasoup.createWorker({
+    logLevel: 'debug',
+    logTags: ['info', 'ice', 'dtls', 'rtp', 'srtp', 'rtcp'],
+    rtcMinPort: 40000,
+    rtcMaxPort: 49999
+  })
+
+  worker.on('died', () => {
+    setTimeout(() => {
+      console.log('mediasoup died, stopping process')
+      process.exit(1)
+    }, 2000)
+  })
+
+  const soupRooms = new Map()
+  soupRooms.set(defaultRoom, await Room.create(config.mediasoup, worker))
+  for (const key of Object.keys(config.targets)) {
+    soupRooms.set(key, await Room.create(config.mediasoup, worker))
+  }
+
   const valve = new Smooth(db)
   const app = express()
 
@@ -28,8 +50,8 @@ const main = async () => {
     
     client.on('data', async (buffer) => {
       const payload = JSON.parse(buffer.toString('utf-8'))
-      if (!broadcaster && payload.id) {
-        broadcaster = await soup.createBroadcaster(payload)
+      if (!broadcaster && payload.id && soupRooms.has(payload.id)) {
+        broadcaster = await soupRooms.get(payload.id).createBroadcaster(payload)
       }
 
       if (broadcaster) {
@@ -41,7 +63,9 @@ const main = async () => {
     })
 
     client.on('close', async () => {
-      if (broadcaster) await soup.deleteBroadcaster({ id: broadcaster.id })
+      if (broadcaster) await soupRooms
+        .get(broadcaster.id)
+        .deleteBroadcaster({ id: broadcaster.id })
     })
   })
 
@@ -108,16 +132,22 @@ const main = async () => {
 
   protooServer.on('connectionrequest', (info, accept, reject) => {
 		const u = url.parse(info.request.url, true)
-		const peerId = u.query['peerId']
+    const peerId = u.query['peerId']
+    const roomId = u.query['roomId'] || defaultRoom
 
 		if (!peerId) {
 			reject(400, 'Connection request without peerId')
 			return
     }
+
+    if (!soupRooms.has(roomId)) {
+      reject(400, 'Invalid roomId')
+      return
+    }
     
     try {
       const protooWebSocketTransport = accept() 
-      soup.handleProtooConnection({ peerId, protooWebSocketTransport })
+      soupRooms.get(roomId).handleProtooConnection({ peerId, protooWebSocketTransport })
     } catch (err) {
       reject(err)
     }

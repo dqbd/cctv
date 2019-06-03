@@ -55,8 +55,6 @@ module.exports = {
         password: ''
     },
     mediasoup: {
-        rtcMinPort: 40000,
-        rtcMaxPort: 49999,
         mediaCodecs: [
             {
                 kind: 'video',
