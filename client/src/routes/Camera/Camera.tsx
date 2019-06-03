@@ -35,7 +35,7 @@ export default class Camera extends Component<Props, State> {
   generateUrl = ({ name, from, to, shift }: { name: string, from: number, to: number, shift: number }): string | null => {
     if (!shift && !from && !to) return null
     
-    let baseUrl = `/data/${name}/`
+    let baseUrl = `${API_URL}/data/${name}/`
     let type = 'stream.m3u8'
 
     let params = []
