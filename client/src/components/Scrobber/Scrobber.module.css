@@ -4,10 +4,73 @@
 	bottom: 0;
 	left: 0;
 	right: 0;
-	height: 80px;
-	background: linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,1));
-
+	padding: 2rem;
 	transition: opacity 0.3s;
+
+	display: grid;
+	grid-column-gap: 3rem;
+	grid-template-columns: 60px 1fr auto;
+}
+
+.center {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.center > *:not(:last-child) {
+	margin-right: 1rem;
+}
+
+.btn {
+	background: #434C5E;
+	border-radius: 30px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: white;
+	white-space: nowrap;
+	height: 60px;
+	border: none;
+}
+
+.pill {
+	position: relative;
+	padding: 0rem 1.5rem;
+}
+
+.pill .cover {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 100%;
+	width: 100%;
+	height: 30px;
+	background: white;
+	border: none;
+	box-sizing: border-box;
+	border-radius: 30px;
+	text-align: center;
+	margin-top: -30px;
+
+	background: none;
+	color: none;
+	opacity: 0;
+	margin-top: 0;
+	bottom: 0;
+	height: 100%;
+}
+
+.live {
+}
+
+.live span {
+	padding-left: 1rem;
+}
+
+.circle {
+	width: 60px;
 }
 
 .scrobber {

@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 
 import styles from './Camera.module.css'
-import Live from '../../components/Live/Live'
-import Dvr from '../../components/Dvr/Dvr'
+import Dvr from '../../components/HLSArchive/HLSArchive'
+import WebRTCLive from '../../components/WebRTCLive/WebRTCLive'
 import Scrobber from '../../components/Scrobber/Scrobber'
 
 import { API_URL } from '../../utils/constants'
@@ -35,7 +35,7 @@ export default class Camera extends Component<Props, State> {
   generateUrl = ({ name, from, to, shift }: { name: string, from: number, to: number, shift: number }): string | null => {
     if (!shift && !from && !to) return null
     
-    let baseUrl = `${API_URL}/data/${name}/`
+    let baseUrl = `/data/${name}/`
     let type = 'stream.m3u8'
 
     let params = []
@@ -80,8 +80,8 @@ export default class Camera extends Component<Props, State> {
 
     return (
       <div className={styles.camera}>
-        { url && url.indexOf('http') === 0 && <Dvr source={url} /> }
-        { url && url.indexOf('ws') === 0 && <Live source={url} /> }
+        { url && <Dvr source={url} /> }
+        { !url && <WebRTCLive room={name} /> }
         <Scrobber onShift={this.handleShiftChange} onStop={this.handlePause} name={name} />
       </div>
     )

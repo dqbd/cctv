@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@types/moment": "^2.13.0",
     "@types/random-string": "^0.0.28",
-    "hls.js": "^0.12.4",
+    "hls.js": "0.12.3-canary.4258",
     "mediasoup-client": "^3.0.0",
     "moment": "^2.24.0",
     "nosleep.js": "^0.9.0",

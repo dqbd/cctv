@@ -1,4 +1,4 @@
-import React, { Component, useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Route, RouteComponentProps } from 'react-router-dom'
 
 import Home from './routes/Home/Home'
@@ -19,7 +19,7 @@ const App = () => {
 		<Router>
 			<DataContext.Provider value={{ streams }}>
 				<div id="app">
-					<Route path="/" component={Home} />
+					<Route exact path="/" component={Home} />
 					<Route path="/camera/:name" render={({ match }: RouteComponentProps<{ name: string }>) => (<Camera name={match.params.name} streams={streams} />)} />
 				</div>
 			</DataContext.Provider>

@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
 import Hls from 'hls.js'
-import style from './Dvr.module.css'
+import style from './HLSArchive.module.css'
 
 type Props = {
   source: string,
 }
 
-export default class DVR extends Component<Props> {
+export default class HLSArchive extends Component<Props> {
   hls: Hls | null = null
   timer: number | null  = null
   ref: HTMLVideoElement | null = null
@@ -46,6 +46,8 @@ export default class DVR extends Component<Props> {
   handlePlayback = () => {
     const { source } = this.props
 
+    console.log(source)
+
     if (source && this.ref) {
       if (this.timer !== null) {
         clearTimeout(this.timer)
@@ -71,6 +73,6 @@ export default class DVR extends Component<Props> {
   }
 
   render() {
-    return <video className={style.video} ref={this.videoRef} autoPlay muted playsinline />
+    return <video className={style.video} ref={this.videoRef} autoPlay muted playsInline />
   }
 }
