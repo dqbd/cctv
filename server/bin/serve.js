@@ -7,6 +7,7 @@ const cors = require('cors')
 const fs = require('fs')
 const net = require('net')
 const mediasoup = require('mediasoup')
+const fetch = require('node-fetch')
 
 const Database = require('../lib/database')
 const Manifest = require('../lib/manifest')
@@ -113,6 +114,30 @@ const main = async () => {
     const { folder, date, file } = req.params
     if (file.indexOf('.ts') < 0) return next()
     res.sendFile(path.join(folder, date, file), { root: config.base })
+  })
+
+  app.get('/frame/:folder', async (req, res) => {
+    const { folder } = req.params
+    
+    if (!(folder in config.targets)) {
+      res.status(404)
+      res.send()
+      return
+    }
+    
+    try {
+      const request = fetch(config.targets[folder].screenshot)
+      const payload = await request.then(a => a.buffer())
+      const headers = (await request).headers
+
+      for (const [key, value] of headers.entries()) {
+        res.setHeader(key, value)
+      }
+      res.send(payload)
+    } catch (err) {
+      res.status(500)
+      res.send()
+    }
   })
   
   app.use(express.static(path.resolve(__dirname, '../../', 'client', 'build')))
