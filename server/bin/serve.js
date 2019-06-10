@@ -7,12 +7,12 @@ const cors = require('cors')
 const fs = require('fs')
 const net = require('net')
 const mediasoup = require('mediasoup')
-const fetch = require('node-fetch')
 
 const Database = require('../lib/database')
 const Manifest = require('../lib/manifest')
 const Smooth = require('../lib/smooth')
 const Room = require('../lib/room')
+const Preview = require('../lib/preview')
 
 const config = require('../config.js')
 
@@ -77,15 +77,7 @@ const main = async () => {
     res.send({
       data: Object
         .entries(config.targets)
-        .map(([key, { name, port }]) => ({ key, name, port })),
-    })
-  })
-
-  app.get('/scene/:folder', async (req, res) => {
-    const { folder } = req.params
-    res.set('Content-Type', 'application/json')
-    res.send({
-      data: await db.getScenes(folder),
+        .map(([key, { name }]) => ({ key, name })),
     })
   })
 
@@ -118,6 +110,7 @@ const main = async () => {
 
   app.get('/frame/:folder', async (req, res) => {
     const { folder } = req.params
+    const { refresh } = req.query
     
     if (!(folder in config.targets)) {
       res.status(404)
@@ -126,15 +119,12 @@ const main = async () => {
     }
     
     try {
-      const request = fetch(config.targets[folder].screenshot)
-      const payload = await request.then(a => a.buffer())
-      const headers = (await request).headers
-
-      for (const [key, value] of headers.entries()) {
-        res.setHeader(key, value)
-      }
+      const payload = await Preview.getScreenshot(config.targets[folder].onvif, !!refresh)
+      res.setHeader('Content-Type', 'image/jpeg')
+      res.setHeader('Content-Transfer-Encoding', 'binary')
       res.send(payload)
     } catch (err) {
+      console.log(err)
       res.status(500)
       res.send()
     }

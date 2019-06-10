@@ -13,45 +13,27 @@ module.exports = {
     targets: {
         VENKU: {
             name: "Venku",
-            source: "rtsp://192.168.2.168:554/user=admin&password=&channel=1&stream=0.sdp?real_stream",
-            preview: "rtsp://192.168.2.168:554/user=admin&password=&channel=1&stream=1.sdp?real_stream",
-            screenshot: "http://192.168.2.168/webcapture.jpg?command=snap&channel=1",
-            port: 9168,
+            onvif: "http://192.168.2.168:8899",
         },
         STARY_VCHOD: {
             name: "Starý - vchod",
-            source: "rtsp://192.168.2.172:554/user=admin&password=&channel=1&stream=0.sdp?real_stream",
-            preview: "rtsp://192.168.2.172:554/user=admin&password=&channel=1&stream=1.sdp?real_stream",
-            screenshot: "http://192.168.2.172/webcapture.jpg?command=snap&channel=1",
-            port: 9172,
+            onvif: "http://192.168.2.172:8899",
         },
         STARY_SPODNI: {
             name: "Starý - spodní prádlo",
-            source: "rtsp://192.168.2.176:554/user=admin&password=&channel=1&stream=0.sdp?real_stream",
-            preview: "rtsp://192.168.2.176:554/user=admin&password=&channel=1&stream=1.sdp?real_stream",
-            screenshot: "http://192.168.2.176/webcapture.jpg?command=snap&channel=1",
-            port: 9176,
+            onvif: "http://192.168.2.176:8899",
         },
         VPREDU_VCHOD: {
             name: "Vpředu - vchod",
-            source: "rtsp://192.168.2.180:554/user=admin&password=&channel=1&stream=0.sdp?real_stream",
-            preview: "rtsp://192.168.2.180:554/user=admin&password=&channel=1&stream=1.sdp?real_stream",
-            screenshot: "http://192.168.2.180/webcapture.jpg?command=snap&channel=1",
-            port: 9180,
+            onvif: "http://192.168.2.180:8899",
         },
         VZADU_KOSILE: {
             name: "Vzadu - košile",
-            source: "rtsp://192.168.2.184:554/user=admin&password=&channel=1&stream=0.sdp?real_stream",
-            preview: "rtsp://192.168.2.184:554/user=admin&password=&channel=1&stream=1.sdp?real_stream",
-            screenshot: "http://192.168.2.184/webcapture.jpg?command=snap&channel=1",
-            port: 9184,
+            onvif: "http://192.168.2.184:8899",
         },
         VZADU_PROSTERADLA: {
             name: "Vzadu - prostěradlo",
-            source: "rtsp://192.168.2.164:554/user=admin&password=&channel=1&stream=0.sdp?real_stream",
-            preview: "rtsp://192.168.2.164:554/user=admin&password=&channel=1&stream=1.sdp?real_stream",
-            screenshot: "http://192.168.2.164/webcapture.jpg?command=snap&channel=1",
-            port: 9164,
+            onvif: "http://192.168.2.164:8899",
         }
     },
     syncInterval: 60 * 60, /* sync time every day */

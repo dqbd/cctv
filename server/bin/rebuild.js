@@ -6,7 +6,6 @@ const Database = require('../lib/database.js')
 const readdir = util.promisify(fs.readdir)
 
 const config = require('../config.js')
-const segment = require('../lib/segment.js')
 
 const db = new Database(config.auth.mysql)
 
@@ -28,8 +27,6 @@ const main = async () => {
       const files = (await readdir(path.resolve(folderTarget, target))).map(file => path.join(target, file))
       await db.insertFolder(cameraKey, target, files)
     }
-
-    
   }
 
   db.close()
