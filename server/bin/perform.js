@@ -3,6 +3,7 @@ const path = require('path')
 const mkdirp = require('mkdirp')
 const ffmpeg = require('fluent-ffmpeg')
 const ClockSync = require('../lib/clocksync')
+const Onvif = require('../lib/onvif')
 const net = require('net')
 
 const config = require('../config.js')
@@ -13,8 +14,6 @@ const target = config.targets[cameraKey]
 if (!target) throw Error('Invalid argument')
 
 const credential = config.credential
-const address = target.source
-const hostname = url.parse(address).hostname
 
 const baseFolder = path.resolve(config.base, cameraKey)
 mkdirp.sync(baseFolder)
@@ -29,6 +28,8 @@ const exitAfterSocketConnect = () => {
 }
 
 const start = async () => {
+  const address = await Onvif.getStreamUrl(target.onvif)
+  const hostname = url.parse(address).hostname
 
   const soupConn = net.createConnection(config.ipcBase)
 

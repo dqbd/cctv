@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 
 import styles from './Camera.module.css'
-import Live from '../../components/Live/Live'
-import Dvr from '../../components/Dvr/Dvr'
+import Dvr from '../../components/HLSArchive/HLSArchive'
+import WebRTCLive from '../../components/WebRTCLive/WebRTCLive'
 import Scrobber from '../../components/Scrobber/Scrobber'
 
 import { API_URL } from '../../utils/constants'
@@ -80,8 +80,8 @@ export default class Camera extends Component<Props, State> {
 
     return (
       <div className={styles.camera}>
-        { url && url.indexOf('http') === 0 && <Dvr source={url} /> }
-        { url && url.indexOf('ws') === 0 && <Live source={url} /> }
+        { url && <Dvr source={url} /> }
+        { !url && <WebRTCLive room={name} /> }
         <Scrobber onShift={this.handleShiftChange} onStop={this.handlePause} name={name} />
       </div>
     )

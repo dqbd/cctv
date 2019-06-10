@@ -8,11 +8,6 @@ module.exports = {
       log_date_format: "YYYY-MM-DD HH:mm:ss",
     },
     {
-      name: "proxy",
-      script: "./bin/proxy.js",
-      log_date_format: "YYYY-MM-DD HH:mm:ss",
-    },
-    {
       name: "cleanup",
       script: "./bin/cleanup.js",
       log_date_format: "YYYY-MM-DD HH:mm:ss",
@@ -27,12 +22,6 @@ module.exports = {
       script: `./bin/perform.js`,
       args: `${name}`,
       log_date_format: "YYYY-MM-DD HH:mm:ss",
-    })),
-    ...Object.keys(config.targets).map((name) => ({
-      name: `motion:${name}`,
-      script: `./bin/motion.js`,
-      args: `${name}`,
-      log_date_format: "YYYY-MM-DD HH:mm:ss",
-    })),
+    }))
   ],
 }

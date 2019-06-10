@@ -28,11 +28,13 @@ const main = async () => {
           return cleanupTime <= nowTime
         })
 
-      await Promise.all(folders.map(folder => {
-        const target = path.resolve(baseFolder, folder)
-        return rimraf(target)
-      }))
-        
+      await folders.reduce((memo, folder) => {
+        return memo.then(() => {
+          const target = path.resolve(baseFolder, folder)
+          return rimraf(target)
+        })
+      }, Promise.resolve())
+
       console.log('Deleted folders', folders && folders.join(", "))
 
       await db.removeOldScenesAndMotion(cameraKey, config.maxAge)

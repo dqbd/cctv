@@ -1,4 +1,4 @@
-export const HOST = 'localhost'
+export const HOST = window.location.hostname
 export const API_URL = `http://${HOST}`
 
 export const COLORS = [

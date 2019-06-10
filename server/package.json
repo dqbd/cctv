@@ -21,6 +21,7 @@
     "mp4frag": "^0.1.1",
     "mysql": "^2.16.0",
     "node-fetch": "^2.3.0",
+    "node-onvif": "^0.1.7",
     "promise-mysql": "^3.3.1",
     "protoo-server": "^4.0.3",
     "rimraf": "^2.6.3",

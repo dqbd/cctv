@@ -1,6 +1,5 @@
 const EventEmitter = require('events').EventEmitter
 const protoo = require('protoo-server')
-const mediasoup = require('mediasoup')
 
 /**
  * Room class.
@@ -15,32 +14,14 @@ class Room extends EventEmitter {
 	 *
 	 * @async
 	 */
-	static async create(config) {
-		const mediasoupWorker = await mediasoup.createWorker({
-			logLevel: 'warn',
-			logTags: ['info', 'ice', 'dtls', 'rtp', 'srtp', 'rtcp'],
-			rtcMinPort: config.rtcMinPort,
-			rtcMaxPort: config.rtcMaxPort
-		})
-
-		mediasoupWorker.on('died', () => {
-			setTimeout(() => {
-				console.log('mediasoup died, stopping process')
-				process.exit(1)
-			}, 2000);
-		})
-
+	static async create(config, mediasoupWorker) {
 		// Create a protoo Room instance.
 		const protooRoom = new protoo.Room();
 
-		// Router media codecs.
-		let mediaCodecs = config.mediaCodecs;
-
 		// Create a mediasoup Router.
 		const mediasoupRouter = await mediasoupWorker.createRouter({
-			mediaCodecs
+			mediaCodecs: config.mediaCodecs
 		});
-
 
 		return new Room({
 			config,
@@ -156,13 +137,8 @@ class Room extends EventEmitter {
 
 			// If the Peer was joined, notify all Peers.
 			if (peer.data.joined) {
-				for (const otherPeer of this._getJoinedPeers({
-						excludePeer: peer
-					})) {
-					otherPeer.notify('peerClosed', {
-							peerId: peer.id
-						})
-						.catch(() => {});
+				for (const otherPeer of this._getJoinedPeers({ excludePeer: peer })) {
+					otherPeer.notify('peerClosed', { peerId: peer.id }).catch(() => {});
 				}
 			}
 
