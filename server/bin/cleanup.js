@@ -11,39 +11,40 @@ const db = new Database(config.auth.mysql)
 const wait = (delay) => new Promise(resolve => setTimeout(resolve, delay))
 
 const main = async () => {
-  const cleanup = () => Promise.all(Object.keys(config.targets).map(async (cameraKey) => {
-
-    console.log('Cleanup', cameraKey)
-    const baseFolder = path.resolve(config.base, cameraKey)
-
-    const now = new Date()
-    const nowTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0, 0).valueOf()
-
-    try {
-      const folders = (await readdir(baseFolder))
-        .filter((folderName) => {
-          const [year, month, day, hour] = folderName.split('_').map(num => Number.parseInt(num, 10))
-          const folderTime = new Date(year, month - 1, day, hour, 0, 0, 0).valueOf()
-          const cleanupTime = folderTime + config.maxAge * 1000
-          return cleanupTime <= nowTime
-        })
-
-      await folders.reduce((memo, folder) => {
-        return memo.then(() => {
-          const target = path.resolve(baseFolder, folder)
-          return rimraf(target)
-        })
-      }, Promise.resolve())
-
-      console.log('Deleted folders', folders && folders.join(", "))
-
-      await db.removeOldScenesAndMotion(cameraKey, config.maxAge)
-      console.log('Deleted from DB', cameraKey)
-
-    } catch (err) {
-      if (err.code !== 'ENOENT') throw err
+  const cleanup = () => {
+    for (const cameraKey of Object.keys(config.targets)) {
+      console.log('Cleanup', cameraKey)
+      const baseFolder = path.resolve(config.base, cameraKey)
+    
+      const now = new Date()
+      const nowTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0, 0).valueOf()
+    
+      try {
+        const folders = (await readdir(baseFolder))
+          .filter((folderName) => {
+            const [year, month, day, hour] = folderName.split('_').map(num => Number.parseInt(num, 10))
+            const folderTime = new Date(year, month - 1, day, hour, 0, 0, 0).valueOf()
+            const cleanupTime = folderTime + config.maxAge * 1000
+            return cleanupTime <= nowTime
+          })
+    
+        await folders.reduce((memo, folder) => {
+          return memo.then(() => {
+            const target = path.resolve(baseFolder, folder)
+            return rimraf(target)
+          })
+        }, Promise.resolve())
+    
+        console.log('Deleted folders', folders && folders.join(", "))
+    
+        await db.removeOldScenesAndMotion(cameraKey, config.maxAge)
+        console.log('Deleted from DB', cameraKey)
+    
+      } catch (err) {
+        if (err.code !== 'ENOENT') throw err
+      }
     }
-  }))
+  }
 
   const loop = async () => {
     await cleanup()
