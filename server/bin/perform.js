@@ -84,6 +84,7 @@ const start = async () => {
     .on('start', (cmd) => console.log('Command', cmd))
     .on('codecData', (data) => console.log('Codec data', data))
     .on('progress', (progress) => console.log('Processing', progress.frames, progress.timemark))
+    .on('stderr', console.log)
     .on('end', () => {
       console.log('main stream end')
       process.exit()

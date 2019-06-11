@@ -1,5 +1,5 @@
 import protooClient, { Peer } from 'protoo-client'
-import { HOST } from './constants'
+import { WS_URL } from './constants'
 
 import * as mediasoupClient from 'mediasoup-client'
 
@@ -63,7 +63,7 @@ export default class RoomClient {
   }) {
     this._forceTcp = forceTcp
     this._stateActions = stateActions
-    this._protooUrl = `ws://${HOST}/?peerId=${peerId}&roomId=${roomId}`
+    this._protooUrl = `${WS_URL}/?peerId=${peerId}&roomId=${roomId}`
   }
 
   close() {

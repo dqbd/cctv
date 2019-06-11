@@ -4,8 +4,6 @@ type Props = {
   source: string,
 }
 
-// ws://${HOST}:${this.props.port}
-
 export default class Livestream extends Component<Props> {
   ms: MediaSource | null = null
   video: HTMLVideoElement | null = null
