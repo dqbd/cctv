@@ -3,6 +3,7 @@ const express = require('express')
 const path = require('path')
 const url = require('url')
 const http = require('http')
+const os = require('os')
 const cors = require('cors')
 const fs = require('fs')
 const net = require('net')
@@ -21,25 +22,33 @@ const defaultRoom = Symbol('default')
 const main = async () => {
   const factory = new Manifest(config)
   const db = new Database(config.auth.database)
-  
-  const worker = await mediasoup.createWorker({
-    logLevel: 'debug',
-    logTags: ['info', 'ice', 'dtls', 'rtp', 'srtp', 'rtcp'],
-    rtcMinPort: 40000,
-    rtcMaxPort: 49999
-  })
 
-  worker.on('died', () => {
-    setTimeout(() => {
-      console.log('mediasoup died, stopping process')
-      process.exit(1)
-    }, 2000)
-  })
+  // create multiple workers, one per thread
+  const workers = await Promise.all(Object.keys(os.cpus()).map(async () => {
+    const worker = await mediasoup.createWorker({
+      logLevel: 'debug',
+      logTags: ['info', 'ice', 'dtls', 'rtp', 'srtp', 'rtcp'],
+      rtcMinPort: 40000,
+      rtcMaxPort: 49999
+    })
+
+    worker.on('died', () => {
+      setTimeout(() => {
+        console.log('mediasoup died, stopping process')
+        process.exit(1)
+      }, 2000)
+    })
+
+    return worker
+  }))
+
+  let workerIndex = 0
+  const getWorker = () => workers[(workerIndex++) % workers.length]
 
   const soupRooms = new Map()
-  soupRooms.set(defaultRoom, await Room.create(config.mediasoup, worker))
+  soupRooms.set(defaultRoom, await Room.create(config.mediasoup, getWorker()))
   for (const key of Object.keys(config.targets)) {
-    soupRooms.set(key, await Room.create(config.mediasoup, worker))
+    soupRooms.set(key, await Room.create(config.mediasoup, getWorker()))
   }
 
   const valve = new Smooth(db)
