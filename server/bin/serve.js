@@ -20,7 +20,7 @@ const defaultRoom = Symbol('default')
 
 const main = async () => {
   const factory = new Manifest(config)
-  const db = new Database(config.auth.mysql)
+  const db = new Database(config.auth.database)
   
   const worker = await mediasoup.createWorker({
     logLevel: 'debug',

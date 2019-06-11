@@ -4,7 +4,7 @@ class Manifest {
     }
 
     getManifest(token, segments, seq, end = false) {
-        const { tokens, config } = this
+        const { config } = this
         const buffer = [
             '#EXTM3U',
             '#EXT-X-VERSION:3',

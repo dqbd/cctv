@@ -7,7 +7,7 @@ const readdir = util.promisify(fs.readdir)
 
 const config = require('../config.js')
 
-const db = new Database(config.auth.mysql)
+const db = new Database(config.auth.database)
 
 const main = async () => {
 

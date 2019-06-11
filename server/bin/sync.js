@@ -1,16 +1,13 @@
 const path = require('path')
 const util = require('util')
-const mkdirp = require('mkdirp')
 const chokidar = require('chokidar')
 const fs = require('fs')
-const readdir = util.promisify(fs.readdir)
 const readFile = util.promisify(fs.readFile)
 
-const segment = require('../lib/segment.js')
 const Database = require('../lib/database.js')
 const config = require('../config.js')
 
-const db = new Database(config.auth.mysql)
+const db = new Database(config.auth.database)
 const wait = (delay) => new Promise(resolve => setTimeout(resolve, delay))
 
 const readNonEmptyFile = async (...args) => {

@@ -6,7 +6,7 @@ const rimraf = util.promisify(require('rimraf'))
 const Database = require('../lib/database.js')
 
 const config = require('../config.js')
-const db = new Database(config.auth.mysql)
+const db = new Database(config.auth.database)
 
 const wait = (delay) => new Promise(resolve => setTimeout(resolve, delay))
 
