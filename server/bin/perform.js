@@ -60,10 +60,7 @@ const start = async () => {
   const main = ffmpeg()
     .addInput(address)
     .inputOptions([
-      '-rtsp_transport tcp',
-      '-rtsp_flags prefer_tcp',
       '-stimeout 30000000',
-      '-re',
     ])
     .addOutput(path.resolve(baseFolder, config.manifest))
     .audioCodec('copy')
