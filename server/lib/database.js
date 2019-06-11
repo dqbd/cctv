@@ -1,5 +1,5 @@
 const path = require('path')
-const mariadb = require('mariadb')
+const mariadb = require('promise-mysql')
 
 const { createSegment } = require('./segment')
 

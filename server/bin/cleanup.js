@@ -48,6 +48,7 @@ const main = async () => {
 
   const loop = async () => {
     await cleanup()
+    console.log('Cleanup finished for now')
     await wait(config.cleanupPolling * 1000)
     loop()
   }
