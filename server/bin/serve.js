@@ -45,7 +45,11 @@ const main = async () => {
   const valve = new Smooth(db)
   const app = express()
 
-  fs.unlinkSync(config.ipcBase)
+  try {
+    fs.unlinkSync(config.ipcBase)
+  } catch (err) {
+    console.log(err)
+  }
   const unixServer = net.createServer((client) => {
     let broadcaster = null
     

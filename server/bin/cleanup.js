@@ -11,7 +11,7 @@ const db = new Database(config.auth.mysql)
 const wait = (delay) => new Promise(resolve => setTimeout(resolve, delay))
 
 const main = async () => {
-  const cleanup = () => {
+  const cleanup = async () => {
     for (const cameraKey of Object.keys(config.targets)) {
       console.log('Cleanup', cameraKey)
       const baseFolder = path.resolve(config.base, cameraKey)
