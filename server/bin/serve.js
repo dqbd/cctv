@@ -17,8 +17,6 @@ const Preview = require('../lib/preview')
 
 const config = require('../config.js')
 
-const defaultRoom = Symbol('default')
-
 const main = async () => {
   const factory = new Manifest(config)
   const db = new Database(config.auth.database)
@@ -46,7 +44,6 @@ const main = async () => {
   const getWorker = () => workers[(workerIndex++) % workers.length]
 
   const soupRooms = new Map()
-  soupRooms.set(defaultRoom, await Room.create(config.mediasoup, getWorker()))
   for (const key of Object.keys(config.targets)) {
     soupRooms.set(key, await Room.create(config.mediasoup, getWorker()))
   }
@@ -161,7 +158,7 @@ const main = async () => {
   protooServer.on('connectionrequest', (info, accept, reject) => {
 		const u = url.parse(info.request.url, true)
     const peerId = u.query['peerId']
-    const roomId = u.query['roomId'] || defaultRoom
+    const roomId = u.query['roomId']
 
 		if (!peerId) {
 			reject(400, 'Connection request without peerId')
