@@ -69,7 +69,7 @@ module.exports = {
         ],
         webRtcTransport: {
             listenIps: [
-                { ip: '127.0.0.1' }
+                { ip: '192.168.2.205' }
             ],
             maxIncomingBitrate: 1500000,
             initialAvailableOutgoingBitrate: 1000000
