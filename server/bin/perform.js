@@ -12,7 +12,7 @@ const cameraKey = process.argv.slice().pop()
 const target = config.targets[cameraKey]
 
 if (!target) throw Error('Invalid argument')
-const ssrc = 2222 + Object.keys(config.targets).indexOf(cameraKey)
+const ssrc = 2222 + Object.keys(config.targets).indexOf(cameraKey) + Math.floor(Math.random() * 1000)
 const payloadType = 101
 
 const credential = config.credential
