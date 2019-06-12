@@ -12,6 +12,8 @@ const cameraKey = process.argv.slice().pop()
 const target = config.targets[cameraKey]
 
 if (!target) throw Error('Invalid argument')
+const ssrc = 2222 + Object.keys(config.targets).indexOf(cameraKey)
+const payloadType = 101
 
 const credential = config.credential
 
@@ -40,10 +42,10 @@ const start = async () => {
       rtpParameters: {
         codecs: [{
           mimeType: 'video/h264',
-          payloadType: 101,
+          payloadType,
           clockRate: 90000
         }],
-        encodings: [{ ssrc: 2222 }] 
+        encodings: [{ ssrc }] 
       },
     }))
   })
@@ -76,8 +78,8 @@ const start = async () => {
     .addOutput(`rtp://${soupData.ip}:${soupData.port}`)
     .format('rtp')
     .outputOptions([
-      '-ssrc 2222',
-      '-payload_type 101',
+      `-ssrc ${ssrc}`,
+      `-payload_type ${payloadType}`,
     ])
     .videoCodec('copy')
     .audioCodec('copy')
