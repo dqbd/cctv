@@ -107,9 +107,12 @@ const main = async () => {
     let { shift = 0 } = req.query
     if (!folder) return res.status(400).send('Invalid parameters')
     const { seq, segments } = await valve.seek(folder, shift)
-
-    res.set('Content-Type', 'application/x-mpegURL')
-    res.send(factory.getManifest(shift, segments, seq))
+    if (shift === 0) {
+      res.sendFile(path.resolve(config.base, folder, config.manifest))
+    } else {
+      res.set('Content-Type', 'application/x-mpegURL')
+      res.send(factory.getManifest(shift, segments, seq))
+    }
   })
   
   app.get('/data/:folder/:date/:file', (req, res, next) => {
