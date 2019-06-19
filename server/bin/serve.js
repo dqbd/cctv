@@ -111,7 +111,7 @@ const main = async () => {
     
     if (shift === 0) {
       const file = fs.readFileSync(path.resolve(config.base, folder, config.manifest), { encoding: 'UTF-8' })
-      res.send(file.replace(config.base, '/data'))
+      res.send(file.split(config.base).join('/data'))
     } else {
       res.send(factory.getManifest(shift, segments, seq))
     }
