@@ -107,10 +107,12 @@ const main = async () => {
     let { shift = 0 } = req.query
     if (!folder) return res.status(400).send('Invalid parameters')
     const { seq, segments } = await valve.seek(folder, shift)
+    res.set('Content-Type', 'application/x-mpegURL')
+    
     if (shift === 0) {
-      res.sendFile(path.resolve(config.base, folder, config.manifest))
+      const file = fs.readFileSync(path.resolve(config.base, folder, config.manifest), { encoding: 'UTF-8' })
+      res.send(file.replace(config.base, '/data'))
     } else {
-      res.set('Content-Type', 'application/x-mpegURL')
       res.send(factory.getManifest(shift, segments, seq))
     }
   })
