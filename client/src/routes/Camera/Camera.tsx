@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 
 import styles from './Camera.module.css'
 import Dvr from '../../components/HLSArchive/HLSArchive'
-import WebRTCLive from '../../components/WebRTCLive/WebRTCLive'
+import MediaSourceLive from '../../components/MediaSourceLive/MediaSourceLive'
 import Scrobber from '../../components/Scrobber/Scrobber'
 
 import { API_URL } from '../../utils/constants'
@@ -21,6 +21,7 @@ type State = {
   from: number,
   to: number,
   shift: number,
+  debugDelay: number,
   showTools: boolean,
 }
 
@@ -29,11 +30,12 @@ export default class Camera extends Component<Props, State> {
     from: 0,
     to: 0,
     shift: 0,
+    debugDelay: 0,
     showTools: false,
   }
   
   generateUrl = ({ name, from, to, shift }: { name: string, from: number, to: number, shift: number }): string | null => {
-    if (!shift && !from && !to) return null
+    // if (!shift && !from && !to) return null
     
     let baseUrl = `${API_URL}/data/${name}/`
     let type = 'stream.m3u8'
@@ -75,13 +77,18 @@ export default class Camera extends Component<Props, State> {
 
   render() {
     const { name } = this.props
-    const { from, to, shift } = this.state
+    const { from, to, shift, debugDelay } = this.state
     const url = this.generateUrl({ name, from, to, shift })
 
     return (
       <div className={styles.camera}>
+        { debugDelay && <div className={styles.log}>
+          {debugDelay} ms
+        </div> }
         { url && <Dvr source={url} /> }
-        { !url && <WebRTCLive room={name} /> }
+        { !url && <MediaSourceLive delayLog={(add: number) => {
+          this.setState({ debugDelay: this.state.debugDelay + add })
+        }} /> }
         <Scrobber onShift={this.handleShiftChange} onStop={this.handlePause} name={name} />
       </div>
     )

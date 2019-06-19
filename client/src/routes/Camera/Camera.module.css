@@ -16,3 +16,11 @@
   object-fit: contain;
   object-position: center;
 }
+.log {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+}
