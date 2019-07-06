@@ -10,12 +10,11 @@ import { API_URL } from '../../utils/constants'
 type Props = {
   name: string,
   streams: {
-    port: number,
-    name: string,
     key: string,
+    name: string,
+    color: string,
   }[],
 }
-
 
 type State = {
   from: number,
@@ -72,9 +71,11 @@ export default class Camera extends Component<Props, State> {
   }
 
   render() {
-    const { name } = this.props
+    const { name, streams } = this.props
     const { from, to, shift, debugDelay } = this.state
     const url = this.generateUrl({ name, from, to, shift })
+
+    const stream = streams.find(({ key }) => key === name)
 
     return (
       <div className={styles.camera}>
@@ -82,7 +83,7 @@ export default class Camera extends Component<Props, State> {
         { !url && <MediaSourceLive delayLog={(add: number) => {
           this.setState({ debugDelay: this.state.debugDelay + add })
         }} /> }
-        <Scrobber onShift={this.handleShiftChange} />
+        { stream && <Scrobber onShift={this.handleShiftChange} stream={stream} /> }
       </div>
     )
   }

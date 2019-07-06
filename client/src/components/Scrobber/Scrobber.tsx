@@ -1,11 +1,12 @@
 import React, { useRef, useLayoutEffect, useState, useEffect } from 'react'
 import moment from 'moment'
-import { useGesture, GestureHandlersPartial } from 'react-use-gesture'
 
 import { vibrateDecorator } from '../../utils/vibrateDecorator'
 import styles from './Scrobber.module.css'
+import { NavLink } from 'react-router-dom'
+import { Slider } from '../Slider/Slider'
 
-const MAX_LENGTH = 7 * 24 * 60 * 60
+import { MAX_LENGTH } from '../../utils/constants'
 
 const formatTime = (time: number) => {
   const absTime = Math.abs(time)
@@ -52,143 +53,45 @@ export const useTimer = (callback: (now: number) => any) => {
 	}, [])
 }
 
-const Slider = ({
-	value,
-	onScrollEnd,
-	onScroll,
-}: {
-	value: number,
-	onScroll: (shift: number) => any,
-	onScrollEnd: (shift: number) => any,
-}) => {
-	const callbackRef = useRef<GestureHandlersPartial>({
-		onDrag: () => {},
-		onDragEnd: () => {},
-		onWheel: () => {},
-		onWheelEnd: () => {},
-	})
+const useVisibleTimer = (delay = 1000) => {
+	const [visible, setVisible] = useState(true)
+	const show = useRef<() => any>(() => setVisible(true))
+	const hide = useRef<() => any>(() => setVisible(false))
 
-	const canvasRef = useRef<HTMLCanvasElement>(null)
-	const bind = useGesture({
-		onWheel: (event) => {
-			if (callbackRef.current.onWheel) {
-				callbackRef.current.onWheel(event)
-			}
-		},
-		onWheelEnd: (event: any) => {
-			if (callbackRef.current.onWheelEnd) {
-				callbackRef.current.onWheelEnd(event)
-			}
-		},
-		onDrag: (event) => {
-			if (callbackRef.current.onDrag) {
-				callbackRef.current.onDrag(event)
-			}
-		},
-		onDragEnd: (event: any) => {
-			if (callbackRef.current.onDragEnd) {
-				callbackRef.current.onDragEnd(event)
-			}
-		},
-	})
+	useEffect(() => {
+		let timer: number | null = null
 
-	useLayoutEffect(() => {
-		let animationId: number | null = null
-		// the idea: we don't need to specify the day, it should be resolved by itself.
-		// just make sure we don't draw outside the canvas
-
-		// offset of the slider caused by value
-		const valueOffset = -Math.floor(value / 1000) 
-
-		// offset set temporarily during scrolling
-		let userOffset = 0
-
-		const draw = (canvas: HTMLCanvasElement | null) => {
-			if (!canvas) return
-			const ctx = canvas.getContext('2d')
-			if (!ctx) return
-			
-			canvas.width = window.innerWidth
-
-			// draws the line, receving arguments as px, not relative to time
-			const drawLine = (xFrom: number, xTo: number, viewOffset: number = 0) => {
-				const { width, height } = canvas.getBoundingClientRect()
-				
-				ctx.lineWidth = 10
-				ctx.strokeStyle = '#EB5757'
-
-				ctx.beginPath()
-				ctx.moveTo(Math.min(width, Math.max(0, xFrom + viewOffset)), height / 2)
-				ctx.lineTo(Math.min(width, Math.max(0, xTo + viewOffset)), height / 2)
-				ctx.closePath()
-				ctx.stroke()
-			}	
-			
-			// hide progress bar when necessary
-			const drawDayBoundedLine = (shift: number) => {
-				const { width } = canvas.getBoundingClientRect()
-
-				const now = moment()
-				const shiftedNow = now.clone().add(shift, 'seconds')
-				const startDayX = Math.min(MAX_LENGTH, now.diff(shiftedNow.clone().startOf('day'), 'second'))
-				const endDayX = Math.max(0, now.diff(shiftedNow.clone().endOf('day'), 'second'))
-
-				drawLine(endDayX + shift, startDayX + shift, width / 2)
-			}
-		
-			drawDayBoundedLine(valueOffset + userOffset)
+		hide.current = () => {
+			if (timer !== null) window.clearTimeout(timer)
+			setVisible(false)
 		}
 
-
-		const tick = () => {
-			draw(canvasRef.current)
-			animationId = window.requestAnimationFrame(tick)
+		show.current = () => {
+			if (timer !== null) window.clearTimeout(timer)
+			setVisible(true)
+			timer = window.setTimeout(hide.current, delay)
 		}
 
-		const handleScroll = (delta: number) => {
-			userOffset = delta
-
-			// limit userOffset to be in range of <-MAX_LENGTH_IN_SECONDS, 0>, as userOffset is negative in nature
-			// (valueOffset + userOffset) <= 0 && (valueOffset + userOffset) >= -MAX_LENGTH_IN_SECONDS
-			userOffset = Math.min(-valueOffset, Math.max(-MAX_LENGTH - valueOffset, userOffset))
-	
-			// onScroll assumes offset in ms
-			onScroll(-(valueOffset + userOffset) * 1000)
-		}
-
-		const handleScrollEnd = () => {
-			onScrollEnd(-(valueOffset + userOffset) * 1000)
-		}
-
-		callbackRef.current = {
-			onDrag: (event) => handleScroll(event.delta[0]),
-			onWheel: (event: any) => handleScroll(-event.delta[0] || event.delta[1]),
-			onDragEnd: () => handleScrollEnd(),
-			onWheelEnd: () => handleScrollEnd(),
-		}
-
-		tick()
+		show.current()
 
 		return () => {
-			if (animationId) window.cancelAnimationFrame(animationId)
+			if (timer !== null) window.clearTimeout(timer)
 		}
-	}, [value])
+	}, [delay])
 
-	return (
-		<div className={styles.canvas}>
-			<canvas
-				ref={canvasRef}
-				height={100}
-				{...bind()}
-			/>
-		</div>
-	)
+	return { visible, show, hide }
 }
 
 const Scrobber = ({
 	onShift,
+	stream,
 }: {
 	onShift: (shift: number) => void,
+	stream: {
+		key: string,
+		name: string,
+		color: string,
+	}
 }) => {
 
 	const [current, setCurrent] = useState(Date.now())
@@ -202,14 +105,14 @@ const Scrobber = ({
 		dateChange?: (value: Date | null) => any,
 	}>({})
 
-	const [visible, setVisible] = useState(true)
+	const { visible, show, hide } = useVisibleTimer(10 * 1000)
 
 	useTimer((now) => setCurrent(now))
 
 	useEffect(() => {
 		let handleTimeout: number | null = null
 		callbacks.current.commitShift = (newShift: number, noWait = false) => {
-			const shift = Math.max(0, Math.min(MAX_LENGTH, newShift))
+			const shift = Math.max(0, Math.min(MAX_LENGTH * 1000, newShift))
 			setShift(shift)
 	
 			if (handleTimeout) window.clearTimeout(handleTimeout)
@@ -261,7 +164,7 @@ const Scrobber = ({
 
 	const date = moment(new Date(current - shift))
 
-	let minRangeRounded = current - MAX_LENGTH
+	let minRangeRounded = current - MAX_LENGTH * 1000
 	minRangeRounded -= minRangeRounded % (60 * 1000)
 
 	let maxRangeRounded = current
@@ -271,18 +174,37 @@ const Scrobber = ({
 	const maxDate = moment(new Date(maxRangeRounded))
 
 	return (
-		<div className={styles.main}>
-			<div className={styles.timeline} style={{ opacity: visible ? 1 : 1 }}>
+		<div
+			className={styles.main}
+			style={{ opacity: visible ? 1 : 0 }}
+			onTouchStart={show.current}
+			onMouseMove={show.current}
+		>
+			<div className={styles.top}>
+				<NavLink to="/" className={styles.back}>
+					<svg viewBox="0 0 29 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M25 9.17424V11.8258H9.09091L16.3826 19.1174L14.5 21L4 10.5L14.5 0L16.3826 1.88258L9.09091 9.17424H25Z" fill="currentColor" />
+					</svg>
+				</NavLink>
+				<div className={styles.info}>
+					<span className={styles.color} style={{ backgroundColor: stream && stream.color }}></span>
+					<span className={styles.name}>{stream && stream.name}</span>
+				</div>
+			</div>
+			<div className={styles.timeline}>
 				<div className={styles.center}>
 					<div className={[styles.timewrapper].join(' ')}>
-						<div className={[styles.timeoffset].join(' ')}>
+						<div
+							onClick={() => callbacks.current.scrollChange && vibrateDecorator(callbacks.current.scrollChange)(0)}
+							className={[styles.timeoffset].join(' ')}
+						>
 							{!shift ? <span className={[styles.live].join(' ')}>Živě</span> : formatTime(-shift)}
 						</div>
 
 						<div className={[styles.pill, styles.margin].join(' ')}>
 							<input
 								className={styles.cover}
-								onChange={(e) => callbacks.current.timeChange && callbacks.current.timeChange(e.target.value)}
+								onChange={(e) => callbacks.current.timeChange && vibrateDecorator(callbacks.current.timeChange)(e.target.value)}
 								value={date.format('HH:mm')}
 								min={minDate.format('HH:mm')}
 								max={maxDate.format('HH:mm')}
@@ -294,7 +216,7 @@ const Scrobber = ({
 					<div className={[styles.pill].join(' ')}>
 						<input
 							className={styles.cover}
-							onChange={(e) => callbacks.current.dateChange && callbacks.current.dateChange(e.target.valueAsDate)}
+							onChange={(e) => callbacks.current.dateChange && vibrateDecorator(callbacks.current.dateChange)(e.target.valueAsDate)}
 							value={date.format('YYYY-MM-DD')}
 							min={minDate.format('YYYY-MM-DD')}
 							max={maxDate.format('YYYY-MM-DD')}
@@ -306,8 +228,9 @@ const Scrobber = ({
 			</div>
 			<Slider
 				onScroll={(shift) => setShift(shift)}
-				onScrollEnd={(shift) => callbacks.current.scrollChange && callbacks.current.scrollChange(shift)}
+				onScrollEnd={(shift) => callbacks.current.scrollChange && vibrateDecorator(callbacks.current.scrollChange)(shift)}
 				value={commitedShift}
+				color={stream.color}
 			/>
 		</div>
 	)
