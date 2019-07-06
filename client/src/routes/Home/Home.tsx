@@ -12,16 +12,14 @@ export default () => {
       <div className={styles.list}>
         <DataProvider.Consumer>
           {({ streams }) => streams.map(({ key, name }, index) => (
-            <NavLink to={`/camera/${key}`}>
-              <article className={styles.item} key={key}>
-                <section className={styles.header}>
-                  <h2 className={styles.name}>{name}</h2>
-                  <span className={styles.color} style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
-                </section>
-                <div className={styles.video}>
-                  <RefreshImg src={`${API_URL}/frame/${key}`} alt={name} />
-                </div>
-              </article>
+            <NavLink to={`/camera/${key}`} className={styles.item}>
+              <section className={styles.header}>
+                <h2 className={styles.name}>{name}</h2>
+                <span className={styles.color} style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
+              </section>
+              <div className={styles.video}>
+                <RefreshImg src={`${API_URL}/frame/${key}`} alt={name} />
+              </div>
             </NavLink>
           ))}
         </DataProvider.Consumer>

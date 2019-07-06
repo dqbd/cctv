@@ -16,6 +16,7 @@
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
     "react-scripts": "3.0.0",
+    "react-use-gesture": "^5.1.2",
     "typescript": "^3.4.4"
   },
   "scripts": {

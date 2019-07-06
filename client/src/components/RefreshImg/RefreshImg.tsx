@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-export const RefreshImg = ({ src, ...props }: {
+export const RefreshImg = ({ src, alt, ...props }: {
   src: string | null;
   [rest: string]: any;
 }) => {
@@ -13,5 +13,5 @@ export const RefreshImg = ({ src, ...props }: {
       window.clearInterval(ref.current);
     };
   }, []);
-  return <img src={`${src}?q=${session}`} {...props} />;
+  return <img src={`${src}?q=${session}`} alt={alt} {...props} />;
 };

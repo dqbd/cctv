@@ -1,193 +1,316 @@
-import React, { Component } from 'react'
-import { NavLink } from 'react-router-dom'
+import React, { useRef, useLayoutEffect, useState, useEffect } from 'react'
 import moment from 'moment'
+import { useGesture, GestureHandlersPartial } from 'react-use-gesture'
 
 import { vibrateDecorator } from '../../utils/vibrateDecorator'
 import styles from './Scrobber.module.css'
 
-type Scene = {
-  timestamp: number,
-  scene: number,
-}
+const MAX_LENGTH = 7 * 24 * 60 * 60
 
-type Props = {
-	onShift: (shift: number) => void,
-  onStop: () => void,
-  name: string,
-}
+const formatTime = (time: number) => {
+  const absTime = Math.abs(time)
 
-type State = {
-	shift: number,
-  current: number,
-  visible: boolean,
-  scenes: Scene[]
-}
-
-const DAY_LENGTH = 24 * 60 * 60 * 1000
-const MAX_LENGTH = 7 * DAY_LENGTH
-
-export default class Scrobber extends Component<Props, State> {
-  debounce: number | null = null
-  interval: number | null = null
-  timeout: number | null = null
-  sceneTimer: number | null = null
-  timer: number | null = null
-  ref: HTMLDivElement | null = null
-
-	state = {
-		shift: 0,
-		current: Date.now(),
-		visible: true,
-		scenes: [],
+  const seconds = Math.floor(absTime / 1000) % 60
+  const minutes = Math.floor(absTime / 1000 / 60) % 60
+	const hours = Math.floor(absTime / 1000 / 60 / 60) % 24
+	const days = Math.floor(absTime / 1000 / 60 / 60 / 24)
+	
+	let result = []
+	if (seconds > 0 || minutes > 0 || hours > 0) {
+		result.unshift(`${seconds.toFixed(0).padStart(2, '0')}s`)
 	}
 
-	onShift = (newShift: number) => {
-		const shift = Math.max(0, Math.min(MAX_LENGTH, newShift))
-		this.setState({ shift })
-    this.props.onShift(Math.ceil(shift / 1000))
-	}
-
-	performTick = () => {
-		if (!this.interval) {
-			this.interval = 0
-		}
-		
-		const current = Date.now()
-    this.setState({ current })
-    
-    if (this.timer !== null) {
-      clearTimeout(this.timer)
-    }
-
-    const callback: TimerHandler = this.performTick
-		this.timer = setTimeout(callback, Math.max(1000 - new Date(current).getMilliseconds(), 0))
-	}
-
-	extendOpacity = () => {
-    this.setState({ visible: true })
-    
-    if (this.timeout) {
-      clearTimeout(this.timeout)
-    }
-
-    const callback: TimerHandler = () => this.setState({ visible: false })
-		this.timeout = setTimeout(callback, 8000)
-	}
-
-	componentDidMount() {
-		this.extendOpacity()
-		document.addEventListener('touchstart', this.extendOpacity)
-		document.addEventListener('mousedown', this.extendOpacity)
-		document.addEventListener('mousemove', this.extendOpacity)
-		
-		this.performTick()
-	}
-
-	componentWillUnmount() {
-		document.removeEventListener('mousedown', this.extendOpacity)
-
-		if (this.timer) clearTimeout(this.timer)
-		if (this.debounce) clearTimeout(this.debounce)
-		if (this.timeout) clearTimeout(this.timeout)
-		if (this.sceneTimer) clearTimeout(this.sceneTimer)
-	}
-
-	handleLive = vibrateDecorator(() => this.onShift(0))
-	handleShiftRight = vibrateDecorator(() => this.onShift(this.state.shift + 30000))
-	handleShiftLeft = vibrateDecorator(() => this.onShift(this.state.shift - 30000))
-
-	handleTimeChange = (value: string) => {
-		const [hours, minutes] = value.split(':').map(item => Number.parseInt(item, 10))
-		
-		const now = moment()
-		const past = now.clone().subtract(this.state.shift, 'milliseconds')
-			.hours(hours)
-			.minutes(minutes)
-
-		this.onShift(now.diff(past))
+  if (minutes > 0 || hours > 0) {
+    result.unshift(`${minutes.toFixed(0).padStart(2, '0')}m`)
+  }
+  if (hours > 0) {
+    result.unshift(`${hours.toFixed(0).padStart(2, '0')}h`)
 	}
 	
-	handleDateChange = (value: Date | null) => {
-		if (!value) return
-		const now = moment()
-		const ref = moment().subtract(this.state.shift, 'milliseconds')
-		const past = moment(value)
-			.hours(ref.hours())
-			.minutes(ref.minutes())
-			.seconds(ref.seconds())
-			.milliseconds(ref.milliseconds())
-
-		this.onShift(now.diff(past))
+	if (days > 0) {
+		result.unshift(`${days}d`)
 	}
 
-	render() {
-		const { current, shift, visible } = this.state
-		const date = moment(new Date(current - shift))
+  return `${Math.sign(time) < 0 ? '-' : ''}${result.join(' ')}`
+}
 
-		let minRangeRounded = current - MAX_LENGTH
-		minRangeRounded -= minRangeRounded % (60 * 1000)
+export const useTimer = (callback: (now: number) => any) => {
+	useLayoutEffect(() => {
+		let timer: number | null = null
 
-		let maxRangeRounded = current
-		maxRangeRounded += (60 * 1000) - maxRangeRounded % (60 * 1000)
+		const tick = () => {
+			const now = Date.now()
+			callback(now)
+			if (timer !== null) window.clearTimeout(timer)
+			timer = window.setTimeout(tick, Math.max(1000 - new Date(now).getMilliseconds(), 0))
+		}
+		tick()
+		
+		return () => {
+			if (timer !== null) window.clearTimeout(timer)
+		}
+	}, [])
+}
 
-		const minDate = moment(new Date(minRangeRounded))
-		const maxDate = moment(new Date(maxRangeRounded))
+const Slider = ({
+	value,
+	onScrollEnd,
+	onScroll,
+}: {
+	value: number,
+	onScroll: (shift: number) => any,
+	onScrollEnd: (shift: number) => any,
+}) => {
+	const callbackRef = useRef<GestureHandlersPartial>({
+		onDrag: () => {},
+		onDragEnd: () => {},
+		onWheel: () => {},
+		onWheelEnd: () => {},
+	})
 
-		return (
-			<div className={styles.timeline} style={{ opacity: visible ? 1 : 0 }}>
-				<NavLink to="/">
-					<a className={[styles.btn, styles.circle, styles.back].join(' ')}>
-						<svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path d="M21 9.17424V11.8258H5.09091L12.3826 19.1174L10.5 21L0 10.5L10.5 0L12.3826 1.88258L5.09091 9.17424H21Z" fill="currentColor"/>
-						</svg>
-					</a>
-				</NavLink>
+	const canvasRef = useRef<HTMLCanvasElement>(null)
+	const bind = useGesture({
+		onWheel: (event) => {
+			if (callbackRef.current.onWheel) {
+				callbackRef.current.onWheel(event)
+			}
+		},
+		onWheelEnd: (event: any) => {
+			if (callbackRef.current.onWheelEnd) {
+				callbackRef.current.onWheelEnd(event)
+			}
+		},
+		onDrag: (event) => {
+			if (callbackRef.current.onDrag) {
+				callbackRef.current.onDrag(event)
+			}
+		},
+		onDragEnd: (event: any) => {
+			if (callbackRef.current.onDragEnd) {
+				callbackRef.current.onDragEnd(event)
+			}
+		},
+	})
 
+	useLayoutEffect(() => {
+		let animationId: number | null = null
+		// the idea: we don't need to specify the day, it should be resolved by itself.
+		// just make sure we don't draw outside the canvas
+
+		// offset of the slider caused by value
+		const valueOffset = -Math.floor(value / 1000) 
+
+		// offset set temporarily during scrolling
+		let userOffset = 0
+
+		const draw = (canvas: HTMLCanvasElement | null) => {
+			if (!canvas) return
+			const ctx = canvas.getContext('2d')
+			if (!ctx) return
+			
+			canvas.width = window.innerWidth
+
+			// draws the line, receving arguments as px, not relative to time
+			const drawLine = (xFrom: number, xTo: number, viewOffset: number = 0) => {
+				const { width, height } = canvas.getBoundingClientRect()
+				
+				ctx.lineWidth = 10
+				ctx.strokeStyle = '#EB5757'
+
+				ctx.beginPath()
+				ctx.moveTo(Math.min(width, Math.max(0, xFrom + viewOffset)), height / 2)
+				ctx.lineTo(Math.min(width, Math.max(0, xTo + viewOffset)), height / 2)
+				ctx.closePath()
+				ctx.stroke()
+			}	
+			
+			// hide progress bar when necessary
+			const drawDayBoundedLine = (shift: number) => {
+				const { width } = canvas.getBoundingClientRect()
+
+				const now = moment()
+				const shiftedNow = now.clone().add(shift, 'seconds')
+				const startDayX = Math.min(MAX_LENGTH, now.diff(shiftedNow.clone().startOf('day'), 'second'))
+				const endDayX = Math.max(0, now.diff(shiftedNow.clone().endOf('day'), 'second'))
+
+				drawLine(endDayX + shift, startDayX + shift, width / 2)
+			}
+		
+			drawDayBoundedLine(valueOffset + userOffset)
+		}
+
+
+		const tick = () => {
+			draw(canvasRef.current)
+			animationId = window.requestAnimationFrame(tick)
+		}
+
+		const handleScroll = (delta: number) => {
+			userOffset = delta
+
+			// limit userOffset to be in range of <-MAX_LENGTH_IN_SECONDS, 0>, as userOffset is negative in nature
+			// (valueOffset + userOffset) <= 0 && (valueOffset + userOffset) >= -MAX_LENGTH_IN_SECONDS
+			userOffset = Math.min(-valueOffset, Math.max(-MAX_LENGTH - valueOffset, userOffset))
+	
+			// onScroll assumes offset in ms
+			onScroll(-(valueOffset + userOffset) * 1000)
+		}
+
+		const handleScrollEnd = () => {
+			onScrollEnd(-(valueOffset + userOffset) * 1000)
+		}
+
+		callbackRef.current = {
+			onDrag: (event) => handleScroll(event.delta[0]),
+			onWheel: (event: any) => handleScroll(-event.delta[0] || event.delta[1]),
+			onDragEnd: () => handleScrollEnd(),
+			onWheelEnd: () => handleScrollEnd(),
+		}
+
+		tick()
+
+		return () => {
+			if (animationId) window.cancelAnimationFrame(animationId)
+		}
+	}, [value])
+
+	return (
+		<div className={styles.canvas}>
+			<canvas
+				ref={canvasRef}
+				height={100}
+				{...bind()}
+			/>
+		</div>
+	)
+}
+
+const Scrobber = ({
+	onShift,
+}: {
+	onShift: (shift: number) => void,
+}) => {
+
+	const [current, setCurrent] = useState(Date.now())
+	const [shift, setShift] = useState(0)
+	const [commitedShift, setCommitedShift] = useState(0)
+
+	const callbacks = useRef<{
+		commitShift?: (newShift: number, noWait: boolean) => any,
+		scrollChange?: (shift: number) => any,
+		timeChange?: (value: string) => any,
+		dateChange?: (value: Date | null) => any,
+	}>({})
+
+	const [visible, setVisible] = useState(true)
+
+	useTimer((now) => setCurrent(now))
+
+	useEffect(() => {
+		let handleTimeout: number | null = null
+		callbacks.current.commitShift = (newShift: number, noWait = false) => {
+			const shift = Math.max(0, Math.min(MAX_LENGTH, newShift))
+			setShift(shift)
+	
+			if (handleTimeout) window.clearTimeout(handleTimeout)
+			if (!noWait) {
+				handleTimeout = window.setTimeout(() => {
+					setCommitedShift(shift)
+					onShift(Math.ceil(shift / 1000))
+				}, 100)
+			} else {
+				setCommitedShift(shift)
+				onShift(Math.ceil(shift / 1000))
+			}
+		}
+
+		callbacks.current.scrollChange = (shift: number) => {
+			if (callbacks.current.commitShift) callbacks.current.commitShift(shift, true)
+		}
+	
+		callbacks.current.timeChange = (value: string) => {
+			const [hours, minutes] = value.split(':').map(item => Number.parseInt(item, 10))
+			console.log(hours,minutes)
+			const now = moment()
+			const past = now.clone().subtract(commitedShift, 'milliseconds')
+				.hours(hours)
+				.minutes(minutes)
+	
+			if (callbacks.current.commitShift) callbacks.current.commitShift(now.diff(past), true)
+		}
+		
+		callbacks.current.dateChange = (value: Date | null) => {
+			if (!value) return
+			const now = moment()
+			const ref = moment().subtract(commitedShift, 'milliseconds')
+			const past = moment(value)
+				.hours(ref.hours())
+				.minutes(ref.minutes())
+				.seconds(ref.seconds())
+				.milliseconds(ref.milliseconds())
+	
+			console.log(commitedShift, past.format('YYYY-MM-DD HH:mm:ss'))
+			if (callbacks.current.commitShift) callbacks.current.commitShift(now.diff(past), true)
+		}
+
+		return () => {
+			if (handleTimeout) window.clearTimeout(handleTimeout)
+		}
+
+	}, [commitedShift])
+
+	const date = moment(new Date(current - shift))
+
+	let minRangeRounded = current - MAX_LENGTH
+	minRangeRounded -= minRangeRounded % (60 * 1000)
+
+	let maxRangeRounded = current
+	maxRangeRounded += (60 * 1000) - maxRangeRounded % (60 * 1000)
+
+	const minDate = moment(new Date(minRangeRounded))
+	const maxDate = moment(new Date(maxRangeRounded))
+
+	return (
+		<div className={styles.main}>
+			<div className={styles.timeline} style={{ opacity: visible ? 1 : 1 }}>
 				<div className={styles.center}>
-					<button className={[styles.btn, styles.circle, styles.shift].join(' ')} onClick={this.handleShiftLeft}>
-						<svg width="21" height="14" viewBox="0 0 21 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path d="M16 0H13V14H16V0ZM11 0L0 7L11 14V0ZM21 0H18V14H21V0Z" fill="currentColor"/>
-						</svg>
-					</button>
+					<div className={[styles.timewrapper].join(' ')}>
+						<div className={[styles.timeoffset].join(' ')}>
+							{!shift ? <span className={[styles.live].join(' ')}>Živě</span> : formatTime(-shift)}
+						</div>
 
-					<div className={[styles.time, styles.btn, styles.pill].join(' ')}>
-						<input
-							className={styles.cover}
-							onChange={(e) => this.handleTimeChange(e.target.value)}
-							value={date.format('HH:mm')}
-							min={minDate.format('HH:mm')}
-							max={maxDate.format('HH:mm')}
-							type="time"
-						/>
-						{date.format('HH:mm:ss')}
+						<div className={[styles.pill, styles.margin].join(' ')}>
+							<input
+								className={styles.cover}
+								onChange={(e) => callbacks.current.timeChange && callbacks.current.timeChange(e.target.value)}
+								value={date.format('HH:mm')}
+								min={minDate.format('HH:mm')}
+								max={maxDate.format('HH:mm')}
+								type="time"
+							/>
+							<span className={[styles.time].join(' ')}>{date.format('HH:mm:ss')}</span>
+						</div>
 					</div>
-
-					<div className={[styles.calendar, styles.btn, styles.pill].join(' ')}>
+					<div className={[styles.pill].join(' ')}>
 						<input
 							className={styles.cover}
-							onChange={(e) => this.handleDateChange(e.target.valueAsDate)}
+							onChange={(e) => callbacks.current.dateChange && callbacks.current.dateChange(e.target.valueAsDate)}
 							value={date.format('YYYY-MM-DD')}
 							min={minDate.format('YYYY-MM-DD')}
 							max={maxDate.format('YYYY-MM-DD')}
 							type="date"
 						/>
-						{date.format('DD. MMMM YYYY')}
+						<span className={[styles.calendar].join(' ')}>{date.format('DD. MMMM YYYY')}</span>
 					</div>
-
-					<button className={[styles.btn, styles.circle, styles.shift].join(' ')} onClick={this.handleShiftRight}>
-						<svg width="21" height="14" viewBox="0 0 21 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path d="M5 0H8V14H5V0ZM10 0L21 7L10 14V0ZM0 0H3V14H0V0Z" fill="currentColor"/>
-						</svg>
-					</button>
 				</div>
-
-				<button className={[styles.btn, styles.pill, styles.live].join(' ')} onClick={this.handleLive}>
-					<svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path d="M25.4983 10.3367H15.8933L19.7749 6.34167C15.9074 2.51667 9.64578 2.375 5.77828 6.2C1.91078 10.0392 1.91078 16.23 5.77828 20.0833C9.64578 23.9083 15.9074 23.9083 19.7749 20.0833C21.7016 18.1708 22.6649 15.9467 22.6649 13.1417H25.4983C25.4983 15.9467 24.2516 19.5875 21.7583 22.0525C16.7858 26.9825 8.71078 26.9825 3.73828 22.0525C-1.22006 17.1367 -1.26256 9.14667 3.70994 4.23083C8.68244 -0.685 16.6583 -0.685 21.6308 4.23083L25.4983 0.25V10.3367ZM13.4566 7.33333V13.3542L18.4149 16.3008L17.3949 18.015L11.3316 14.4167V7.33333H13.4566Z" fill="currentColor"/>
-					</svg>
-					<span>Živý přenos</span>
-				</button>
 			</div>
-		)
-	}
+			<Slider
+				onScroll={(shift) => setShift(shift)}
+				onScrollEnd={(shift) => callbacks.current.scrollChange && callbacks.current.scrollChange(shift)}
+				value={commitedShift}
+			/>
+		</div>
+	)
 }
+
+export default Scrobber

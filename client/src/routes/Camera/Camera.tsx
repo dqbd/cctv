@@ -66,10 +66,6 @@ export default class Camera extends Component<Props, State> {
     }
   }
 
-  handlePause = () => {
-    console.log('handling pause')
-  }
-
   handleShiftChange = (shift: number) => {
     console.log(shift)
     this.setState({ shift })
@@ -82,14 +78,11 @@ export default class Camera extends Component<Props, State> {
 
     return (
       <div className={styles.camera}>
-        { debugDelay && <div className={styles.log}>
-          {debugDelay} ms
-        </div> }
         { url && <Dvr source={url} /> }
         { !url && <MediaSourceLive delayLog={(add: number) => {
           this.setState({ debugDelay: this.state.debugDelay + add })
         }} /> }
-        <Scrobber onShift={this.handleShiftChange} onStop={this.handlePause} name={name} />
+        <Scrobber onShift={this.handleShiftChange} />
       </div>
     )
   }
