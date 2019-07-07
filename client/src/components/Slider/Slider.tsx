@@ -90,7 +90,8 @@ export const Slider = ({
 				const startDayX = Math.min(MAX_LENGTH, now.diff(shiftedNow.clone().startOf('day'), 'second'))
 				const endDayX = Math.max(0, now.diff(shiftedNow.clone().endOf('day'), 'second'))
 
-				drawLine(endDayX + shift, startDayX + shift, width / 2)
+				// invert direction, as we want to line to act as a timeline
+				drawLine(-(endDayX + shift), -(startDayX + shift), width / 2)
 			}
 		
 			drawDayBoundedLine(valueOffset + userOffset)
@@ -118,8 +119,8 @@ export const Slider = ({
 		}
 
 		callbackRef.current = {
-			onDrag: (event) => handleScroll(event.delta[0]),
-			onWheel: (event: any) => handleScroll(-event.delta[0] || event.delta[1]),
+			onDrag: (event) => handleScroll(-event.delta[0]),
+			onWheel: (event: any) => handleScroll(event.delta[0] || -event.delta[1]),
 			onDragEnd: () => handleScrollEnd(),
 			onWheelEnd: () => handleScrollEnd(),
 		}
@@ -129,7 +130,7 @@ export const Slider = ({
 		return () => {
 			if (animationId) window.cancelAnimationFrame(animationId)
 		}
-	}, [value, color])
+	}, [value, color, onScroll, onScrollEnd])
 
 	return (
 		<div className={styles.canvas}>

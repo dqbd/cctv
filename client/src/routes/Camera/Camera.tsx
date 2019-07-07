@@ -20,7 +20,6 @@ type State = {
   from: number,
   to: number,
   shift: number,
-  debugDelay: number,
   showTools: boolean,
 }
 
@@ -29,7 +28,6 @@ export default class Camera extends Component<Props, State> {
     from: 0,
     to: 0,
     shift: 0,
-    debugDelay: 0,
     showTools: false,
   }
   
@@ -72,7 +70,7 @@ export default class Camera extends Component<Props, State> {
 
   render() {
     const { name, streams } = this.props
-    const { from, to, shift, debugDelay } = this.state
+    const { from, to, shift } = this.state
     const url = this.generateUrl({ name, from, to, shift })
 
     const stream = streams.find(({ key }) => key === name)
@@ -80,9 +78,7 @@ export default class Camera extends Component<Props, State> {
     return (
       <div className={styles.camera}>
         { url && <Dvr source={url} /> }
-        { !url && <MediaSourceLive delayLog={(add: number) => {
-          this.setState({ debugDelay: this.state.debugDelay + add })
-        }} /> }
+        { !url && <MediaSourceLive delayLog={(add: number) => console.log(add)} /> }
         { stream && <Scrobber onShift={this.handleShiftChange} stream={stream} /> }
       </div>
     )
