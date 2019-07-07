@@ -50,7 +50,7 @@ export const useTimer = (callback: (now: number) => any) => {
 		return () => {
 			if (timer !== null) window.clearTimeout(timer)
 		}
-	}, [callback])
+	}, [])
 }
 
 const useVisibleTimer = (delay = 1000) => {
@@ -160,7 +160,7 @@ const Scrobber = ({
 			if (handleTimeout) window.clearTimeout(handleTimeout)
 		}
 
-	}, [commitedShift, onShift])
+	}, [commitedShift])
 
 	const date = moment(new Date(current - shift))
 

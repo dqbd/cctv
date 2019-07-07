@@ -130,7 +130,7 @@ export const Slider = ({
 		return () => {
 			if (animationId) window.cancelAnimationFrame(animationId)
 		}
-	}, [value, color, onScroll, onScrollEnd])
+	}, [value, color])
 
 	return (
 		<div className={styles.canvas}>
