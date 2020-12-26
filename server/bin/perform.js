@@ -81,6 +81,7 @@ const start = async () => {
       `-ssrc ${ssrc}`,
       `-payload_type ${payloadType}`,
     ])
+    .addOption('-loglevel warning')
     .videoCodec('copy')
     .audioCodec('copy')
     .on('start', (cmd) => console.log('Command', cmd))

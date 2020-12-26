@@ -5,7 +5,7 @@ module.exports = {
     ipcBase: "/tmp/hackycctv",
     manifest: "manifest.m3u8",
     segmentName: "%Y_%m_%d_%H/sg_%s_%%t.ts",
-    maxAge: 3 * 24 * 60 * 60, /* emergency mode, only a day, reduce if still issucifient*/
+    maxAge: 7 * 24 * 60 * 60, /* emergency mode, only a day, reduce if still issucifient*/
     cleanupPolling: 60, /* every minute */
     segmentSize: 3,
     port: 80,
@@ -34,7 +34,10 @@ module.exports = {
         VZADU_PROSTERADLA: {
             name: "Vzadu - prostěradlo",
             onvif: "http://192.168.2.164:8899",
-        }
+        },
+	DEBUG: {
+            name: "Debug Camera", onvif: "http://192.168.1.158:8899"
+	}
     },
     syncInterval: 60 * 60, /* sync time every day */
     auth,
@@ -69,7 +72,7 @@ module.exports = {
         ],
         webRtcTransport: {
             listenIps: [
-                { ip: '192.168.2.205' }
+                { ip: '192.168.1.133' }
             ],
             maxIncomingBitrate: 1500000,
             initialAvailableOutgoingBitrate: 1000000
