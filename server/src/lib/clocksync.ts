@@ -1,12 +1,13 @@
-const net = require("net"),
-  crypto = require("crypto")
+import net from "net"
+import crypto from "crypto"
+
 const types = {
   AUTH: [0x00, 0x00, 0xe8, 0x03],
   SET_TIME: [0x00, 0x00, 0xaa, 0x05],
   SESSION_HEARTBEAT: [0x00, 0x00, 0xee, 0x03],
 }
 
-function setSystemTime(credential, ip, port = 34567, time) {
+export function setSystemTime(credential: { username: string, password: string }, ip: string, port = 34567, time?: Date) {
   return new Promise((resolve, reject) => {
     const socket = new net.Socket()
     let authenticated = false
@@ -21,7 +22,7 @@ function setSystemTime(credential, ip, port = 34567, time) {
       .on("data", async (data) => {
         if (authenticated) return socket.destroy()
         authenticated = true
-        let json = JSON.parse(data.slice(20, data.length - 1))
+        let json = JSON.parse(data.slice(20, data.length - 1).toString())
         let timePacket = packetBuilder(
           getTimePacket(json.SessionID, time),
           types.SET_TIME,
@@ -34,7 +35,7 @@ function setSystemTime(credential, ip, port = 34567, time) {
   })
 }
 
-function packetBuilder(obj, messageType, sessionID = 0) {
+function packetBuilder(obj: any, messageType: number[], sessionID = 0) {
   let data = Buffer.from(JSON.stringify(obj))
 
   let header = Buffer.from([0xff, 0x00, 0x00, 0x00]),
@@ -58,7 +59,7 @@ function packetBuilder(obj, messageType, sessionID = 0) {
     footer,
   ])
 }
-function getTimePacket(sessionID, customTime) {
+function getTimePacket(sessionID: string | number, customTime?: Date) {
   let today = customTime || new Date()
   return {
     Name: "OPTimeSetting",
@@ -69,7 +70,7 @@ function getTimePacket(sessionID, customTime) {
     SessionID: sessionID,
   }
 }
-function getLoginPacket(username, password) {
+function getLoginPacket(username: string, password: string) {
   return {
     EncryptType: "MD5",
     LoginType: "DVRIP-Web",
@@ -78,7 +79,7 @@ function getLoginPacket(username, password) {
   }
 }
 /*taken from https://github.com/tothi/pwn-hisilicon-dvr#password-hash-function*/
-function generatePasswordHash(password) {
+function generatePasswordHash(password: string) {
   let result = ""
   let hash = crypto.createHash("md5").update(password).digest()
   for (let i = 0; i < 8; i++) {
@@ -90,4 +91,3 @@ function generatePasswordHash(password) {
   return result
 }
 
-module.exports = { setSystemTime: setSystemTime }

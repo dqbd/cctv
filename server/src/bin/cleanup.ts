@@ -1,14 +1,14 @@
-// done
-const path = require("path")
-const util = require("util")
+import path from "path"
+import util from "util"
+import { Database } from "../lib/database.js"
+
 const readdir = util.promisify(require("fs").readdir)
 const rimraf = util.promisify(require("rimraf"))
-const Database = require("../lib/database.js")
 
 const config = require("../config.js")
 const db = new Database(config.auth.database)
 
-const wait = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
+const wait = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay))
 
 const main = async () => {
   const cleanup = async () => {
@@ -20,7 +20,7 @@ const main = async () => {
       const nowTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0, 0).valueOf()
 
       try {
-        const folders = (await readdir(baseFolder)).filter((folderName) => {
+        const folders = (await readdir(baseFolder)).filter((folderName: string) => {
           const [year, month, day, hour] = folderName
             .split("_")
             .map((num) => Number.parseInt(num, 10))
@@ -29,7 +29,7 @@ const main = async () => {
           return cleanupTime <= nowTime
         })
 
-        await folders.reduce((memo, folder) => {
+        await folders.reduce((memo: Promise<void>, folder: string) => {
           return memo.then(() => {
             const target = path.resolve(baseFolder, folder)
             return rimraf(target)

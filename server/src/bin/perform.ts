@@ -1,24 +1,28 @@
-const url = require("url")
-const path = require("path")
-const mkdirp = require("mkdirp")
-const ffmpeg = require("fluent-ffmpeg")
-const ClockSync = require("../lib/clocksync")
-const Onvif = require("../lib/onvif")
+import { getConfig } from "../lib/config"
 
-const config = require("../config.js")
+import url from "url"
+import path from "path"
+import mkdirp from "mkdirp"
+import ffmpeg from "fluent-ffmpeg"
+import { setSystemTime } from "../lib/clocksync"
+import { getStreamUrl } from "../lib/onvif"
+
+const config = getConfig()
 
 const cameraKey = process.argv.slice().pop()
+if (!cameraKey) throw Error("Invalid camera key")
+
 const target = config.targets[cameraKey]
 
 if (!target) throw Error("Invalid argument")
 
-const credential = config.credential
+const credential = config.auth.onvif
 
 const baseFolder = path.resolve(config.base, cameraKey)
 mkdirp.sync(baseFolder)
 
 const start = async () => {
-  const address = await Onvif.getStreamUrl(target.onvif)
+  const address = await getStreamUrl(target.onvif)
   const hostname = url.parse(address).hostname
 
   const main = ffmpeg()
@@ -35,9 +39,9 @@ const start = async () => {
       `-hls_flags second_level_segment_duration`,
       `-hls_segment_filename ${path.resolve(baseFolder, config.segmentName)}`,
     ])
-    .on("start", (cmd) => console.log("Command", cmd))
-    .on("codecData", (data) => console.log("Codec data", data))
-    .on("progress", (progress) =>
+    .on("start", (cmd: any) => console.log("Command", cmd))
+    .on("codecData", (data: any) => console.log("Codec data", data))
+    .on("progress", (progress: { frames: any, timemark: any }) =>
       console.log("Processing", progress.frames, progress.timemark)
     )
     .on("stderr", console.log)
@@ -45,33 +49,35 @@ const start = async () => {
       console.log("main stream end")
       process.exit()
     })
-    .on("error", (err, stdout, stderr) => {
+    .on("error", (err: any, stdout: any, stderr: any) => {
       console.log("An error occurred", err.message, stdout, stderr)
       process.exit()
     })
 
   main.run()
 
-  let timeSyncTimer = null
-  const timeSync = async () => {
-    clearTimeout(timeSyncTimer)
-    console.time(`timeSync ${cameraKey}`)
-    try {
-      await ClockSync.setSystemTime(credential, hostname)
-    } catch (err) {
-      console.error(`failed to set ${cameraKey} time:`, err)
+  let timeSyncTimer: NodeJS.Timeout
+  if (hostname) {
+    const timeSync = async () => {
+      clearTimeout(timeSyncTimer)
+      console.time(`timeSync ${cameraKey}`)
+      try {
+        await setSystemTime(credential, hostname)
+      } catch (err) {
+        console.error(`failed to set ${cameraKey} time:`, err)
+      }
+      console.timeEnd(`timeSync ${cameraKey}`)
+      timeSyncTimer = setTimeout(timeSync, 60 * 1000)
     }
-    console.timeEnd(`timeSync ${cameraKey}`)
-    timeSyncTimer = setTimeout(timeSync, 60 * 1000)
+    timeSync()
   }
-  timeSync()
 
   process.on("exit", () => {
     console.log("Closing", cameraKey)
     clearTimeout(timeSyncTimer)
 
     try {
-      if (main) main.kill()
+      if (main) main.kill("SIGKILL")
     } catch (err) {
       console.log(err)
     }

@@ -1,19 +1,22 @@
-const segment = require("./segment.js")
+import * as segment from "./segment"
+import { Database } from "./database"
 
-class Smooth {
-  constructor(db) {
-    this.tokens = {}
-    this.db = db
+export class Smooth {
+
+  tokens: { [key: string]: any } = {}
+
+  constructor(private db: Database) { }
+
+  createSegments(segments: { path: string }[]) {
+    return segments.map(({ path }) => segment.createSegment(path))?.filter(function (item): item is NonNullable<typeof item> {
+      return !!item
+    })
   }
 
-  createSegments(segments) {
-    return segments.map(({ path }) => segment.createSegment(path))
-  }
-
-  async seek(base, shift) {
-    const token = `${base}${shift}`
+  async seek(cameraKey: string, shift: number) {
+    const token = `${cameraKey}${shift}`
     let current = Math.floor(Date.now() / 1000) - shift
-    let segments = this.createSegments(await this.db.seekFrom(base, current))
+    let segments = this.createSegments(await this.db.seekFrom(cameraKey, current))
 
     if (
       typeof this.tokens[token] === "undefined" ||
@@ -35,7 +38,7 @@ class Smooth {
 
     if (this.tokens[token].next <= current) {
       segments = this.createSegments(
-        await this.db.seekFrom(base, this.tokens[token].next)
+        await this.db.seekFrom(cameraKey, this.tokens[token].next)
       )
 
       this.tokens[token].first = segments[0].timestamp
@@ -48,5 +51,3 @@ class Smooth {
     return { segments, seq: this.tokens[token].seq }
   }
 }
-
-module.exports = Smooth

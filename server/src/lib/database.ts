@@ -1,20 +1,29 @@
-const path = require("path")
-const mysql = require("promise-mysql")
+import path from "path"
+import mysql, { Connection } from "promise-mysql"
+import { createSegment } from "./segment"
 
-const { createSegment } = require("./segment")
+interface IDatabaseConfig {
+  host: string
+  user: string
+  password: string
+  database: string
+}
 
-module.exports = class Database {
-  constructor(config) {
+export class Database {
+
+  conn: Connection | null
+  hasCreated: {[key: string]: boolean}
+
+  constructor(private config: IDatabaseConfig) {
     this.conn = null
-    this.config = config
     this.hasCreated = {}
   }
 
-  getScenesTable(cameraKey) {
+  private getScenesTable(cameraKey: string) {
     return `${cameraKey}_SCENES`
   }
 
-  getMotionTable(cameraKey) {
+  private getMotionTable(cameraKey: string) {
     return `${cameraKey}_MOTION`
   }
 
@@ -30,11 +39,11 @@ module.exports = class Database {
     }
   }
 
-  async createTable(base) {
+  async createTable(cameraKey: string) {
     await this.init()
-    if (this.hasCreated[base]) return
+    if (this.hasCreated[cameraKey]) return
 
-    await this.conn.query(
+    await this.conn?.query(
       `
       CREATE TABLE IF NOT EXISTS ?? (
         timestamp BIGINT NOT NULL,
@@ -43,9 +52,9 @@ module.exports = class Database {
       )
       ENGINE = MyISAM
     `,
-      [this.getScenesTable(base)]
+      [this.getScenesTable(cameraKey)]
     )
-    await this.conn.query(
+    await this.conn?.query(
       `
       CREATE TABLE IF NOT EXISTS ?? (
         timestamp BIGINT NOT NULL,
@@ -54,21 +63,21 @@ module.exports = class Database {
       )
       ENGINE = MyISAM
     `,
-      [this.getMotionTable(base)]
+      [this.getMotionTable(cameraKey)]
     )
 
-    this.hasCreated[base] = true
+    this.hasCreated[cameraKey] = true
   }
 
-  async resetFolder(cameraKey) {
+  async resetFolder(cameraKey: string) {
     await this.createTable(cameraKey)
     return Promise.all([
-      this.conn.query("TRUNCATE TABLE ??", [this.getScenesTable(cameraKey)]),
-      this.conn.query("TRUNCATE TABLE ??", [this.getMotionTable(cameraKey)]),
+      this.conn?.query("TRUNCATE TABLE ??", [this.getScenesTable(cameraKey)]),
+      this.conn?.query("TRUNCATE TABLE ??", [this.getMotionTable(cameraKey)]),
     ])
   }
 
-  async insertFolder(cameraKey, keyBase, filenames, len = 3 * 24 * 3600) {
+  async insertFolder(cameraKey: string, keyBase: string, filenames: string[], len = 3 * 24 * 3600) {
     await this.createTable(cameraKey)
 
     console.log("Insert", cameraKey, keyBase, filenames.length)
@@ -77,7 +86,7 @@ module.exports = class Database {
       n = filenames.length
     while (i < n) {
       const slices = filenames.slice(i, (i += len))
-      const queries = slices.reduce((memo, filename) => {
+      const queries = slices.reduce<[number, string][]>((memo, filename) => {
         const segment = createSegment(filename)
         const target = path.join(keyBase, path.basename(filename))
         if (!segment) return memo
@@ -86,21 +95,21 @@ module.exports = class Database {
         return memo
       }, [])
 
-      await this.conn.query(
+      await this.conn?.query(
         `INSERT INTO ?? (timestamp, path) VALUES ? ON DUPLICATE KEY UPDATE path = path`,
         [this.getScenesTable(cameraKey), queries]
       )
     }
   }
 
-  async insert(cameraKey, relative) {
+  async insert(cameraKey: string, relative: string) {
     console.log("Insert", cameraKey, relative)
     await this.createTable(cameraKey)
 
     const segment = createSegment(path.basename(relative))
     if (!segment || segment.duration <= 0) return null
 
-    return this.conn.query(
+    return this.conn?.query(
       `
       INSERT INTO ?? (path, timestamp)
       VALUES (?, ?)
@@ -110,11 +119,11 @@ module.exports = class Database {
     )
   }
 
-  async seek(cameraKey, from, to, limit = 5) {
+  async seek(cameraKey: string, from: number, to: number, limit = 5) {
     await this.createTable(cameraKey)
 
     if (!to) {
-      return this.conn.query(
+      return this.conn?.query(
         `
           SELECT * FROM ??
           WHERE timestamp >= ?
@@ -124,7 +133,7 @@ module.exports = class Database {
       )
     }
 
-    return this.conn.query(
+    return this.conn?.query(
       `
         SELECT * FROM ??
         WHERE timestamp >= ? AND timestamp <= ?
@@ -134,10 +143,10 @@ module.exports = class Database {
     )
   }
 
-  async seekFrom(cameraKey, from, limit = 5) {
+  async seekFrom(cameraKey: string, from: number, limit = 5) {
     await this.createTable(cameraKey)
 
-    return this.conn.query(
+    return this.conn?.query(
       `
         SELECT * FROM ??
         WHERE timestamp >= ?
@@ -148,9 +157,9 @@ module.exports = class Database {
     )
   }
 
-  async shift(cameraKey, shift = 0, limit = 5) {
+  async shift(cameraKey: string, shift = 0, limit = 5) {
     await this.createTable(cameraKey)
-    return this.conn.query(
+    return this.conn?.query(
       `
         SELECT * FROM ??
         WHERE timestamp >= ?
@@ -165,19 +174,19 @@ module.exports = class Database {
     )
   }
 
-  async removeOldScenesAndMotion(cameraKey, maxAge) {
+  async removeOldScenesAndMotion(cameraKey: string, maxAge: number) {
     await this.createTable(cameraKey)
     const timestamp = Math.floor(Date.now() / 1000) - maxAge
 
     return Promise.all([
-      this.conn.query(
+      this.conn?.query(
         `
           DELETE FROM ??
           WHERE timestamp <= ?
         `,
         [this.getScenesTable(cameraKey), timestamp]
       ),
-      this.conn.query(
+      this.conn?.query(
         `
           DELETE FROM ??
           WHERE timestamp <= ?
@@ -187,9 +196,9 @@ module.exports = class Database {
     ])
   }
 
-  async getScenes(cameraKey) {
+  async getScenes(cameraKey: string) {
     await this.createTable(cameraKey)
-    return this.conn.query(
+    return this.conn?.query(
       `
         SELECT * FROM ??
         ORDER BY timestamp DESC
@@ -198,9 +207,9 @@ module.exports = class Database {
     )
   }
 
-  async addScene(cameraKey, value) {
+  async addScene(cameraKey: string, value: string) {
     await this.createTable(cameraKey)
-    return this.conn.query(
+    return this.conn?.query(
       `
           INSERT INTO ?? (timestamp, scene)
           VALUES (?, ?)

@@ -1,11 +1,11 @@
-const fs = require("fs")
-const path = require("path")
-const util = require("util")
-const mkdirp = require("mkdirp")
-const Database = require("../lib/database.js")
+import fs from "fs"
+import path from "path"
+import util from "util"
+import mkdirp from "mkdirp"
+import { Database } from "../lib/database"
+import { getConfig } from "../lib/config"
 const readdir = util.promisify(fs.readdir)
-
-const config = require("../config.js")
+const config = getConfig()
 
 const db = new Database(config.auth.database)
 

@@ -1,9 +1,16 @@
-class Manifest {
-  constructor(config) {
-    this.config = config
-  }
+interface IManifestConfig {
+  segmentSize: number
+}
 
-  getManifest(token, segments, seq, end = false) {
+interface IManifestSegment {
+  extinf: string
+  filename: string
+}
+
+export class Manifest {
+  constructor(private config: IManifestConfig) { }
+
+  getManifest(segments: IManifestSegment[], seq: number, end = false) {
     const { config } = this
     const buffer = [
       "#EXTM3U",
@@ -11,13 +18,9 @@ class Manifest {
       `#EXT-X-TARGETDURATION:${config.segmentSize}`,
       `#EXT-X-MEDIA-SEQUENCE:${seq}`,
     ]
-    segments.forEach(({ filename, extinf, path }) => {
+    segments.forEach(({ filename, extinf }) => {
       buffer.push(`#EXTINF:${extinf || "4.000"},`)
-      if (filename) {
-        buffer.push(filename)
-      } else {
-        buffer.push(path)
-      }
+      buffer.push(filename)
     })
 
     if (end) {
@@ -27,5 +30,3 @@ class Manifest {
     return buffer.join("\n") + "\n"
   }
 }
-
-module.exports = Manifest

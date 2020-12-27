@@ -1,14 +1,15 @@
-const express = require("express")
-const path = require("path")
-const cors = require("cors")
-const fs = require("fs")
+import express from "express"
+import path from "path"
+import cors from "cors"
+import fs from "fs"
 
-const Database = require("../lib/database")
-const Manifest = require("../lib/manifest")
-const Smooth = require("../lib/smooth")
-const Preview = require("../lib/preview")
+import { Database } from "../lib/database"
+import { Manifest } from "../lib/manifest"
+import { Smooth } from "../lib/smooth"
+import { getScreenshot } from "../lib/preview"
+import { getConfig } from "../lib/config"
 
-const config = require("../config.js")
+const config = getConfig()
 
 const main = async () => {
   const manifest = new Manifest(config)
@@ -29,19 +30,18 @@ const main = async () => {
     })
   })
 
-  app.get("/data/:folder/slice.m3u8", async (req, res) => {
+  app.get("/data/:folder/slice.m3u8", async (req, res, next) => {
     if (!req.query.from) return next()
     const { folder } = req.params
     const { from, to } = req.query
 
-    if (!folder || !from || !to)
+    if (!folder || !from || !to || typeof from !== "string")
       return res.status(400).send("No query parameters set")
 
     res.set("Content-Type", "application/x-mpegURL")
     res.send(
       manifest.getManifest(
-        `${from}${to}`,
-        await db.seek(folder, from, to),
+        await db.seek(folder, Number(from), Number(to)),
         1,
         true
       )
@@ -50,7 +50,7 @@ const main = async () => {
 
   app.get("/data/:folder/stream.m3u8", async (req, res) => {
     const { folder } = req.params
-    let { shift = 0 } = req.query
+    const shift = (req.query.shift && Number(req.query.shift)) || 0
     if (!folder) return res.status(400).send("Invalid parameters")
     const { seq, segments } = await smooth.seek(folder, shift)
     res.set("Content-Type", "application/x-mpegURL")
@@ -58,11 +58,11 @@ const main = async () => {
     if (shift === 0) {
       const file = fs.readFileSync(
         path.resolve(config.base, folder, config.manifest),
-        { encoding: "UTF-8" }
+        { encoding: "utf-8" }
       )
       res.send(file.split(config.base).join("/data"))
     } else {
-      res.send(manifest.getManifest(shift, segments, seq))
+      res.send(manifest.getManifest(segments, seq))
     }
   })
 
@@ -83,7 +83,7 @@ const main = async () => {
     }
 
     try {
-      const payload = await Preview.getScreenshot(
+      const payload = await getScreenshot(
         config.targets[folder].onvif,
         !!refresh
       )
@@ -97,11 +97,11 @@ const main = async () => {
     }
   })
 
-  app.use(express.static(path.resolve(__dirname, "../../", "client", "build")))
+  app.use(express.static(path.resolve(__dirname, "../../../", "client", "build")))
 
   app.get("*", (_, res) =>
     res.sendFile(
-      path.resolve(__dirname, "../../", "client", "build", "index.html")
+      path.resolve(__dirname, "../../../", "client", "build", "index.html")
     )
   )
 
