@@ -17,30 +17,14 @@ const main = async () => {
       const baseFolder = path.resolve(config.base, cameraKey)
 
       const now = new Date()
-      const nowTime = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        now.getHours(),
-        0,
-        0,
-        0
-      ).valueOf()
+      const nowTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0, 0).valueOf()
 
       try {
         const folders = (await readdir(baseFolder)).filter((folderName) => {
           const [year, month, day, hour] = folderName
             .split("_")
             .map((num) => Number.parseInt(num, 10))
-          const folderTime = new Date(
-            year,
-            month - 1,
-            day,
-            hour,
-            0,
-            0,
-            0
-          ).valueOf()
+          const folderTime = new Date(year, month - 1, day, hour, 0, 0, 0).valueOf()
           const cleanupTime = folderTime + config.maxAge * 1000
           return cleanupTime <= nowTime
         })

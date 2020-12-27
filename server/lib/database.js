@@ -1,5 +1,5 @@
 const path = require("path")
-const mariadb = require("promise-mysql")
+const mysql = require("promise-mysql")
 
 const { createSegment } = require("./segment")
 
@@ -20,7 +20,7 @@ module.exports = class Database {
 
   async init() {
     if (!this.conn) {
-      this.conn = await mariadb.createConnection(this.config)
+      this.conn = await mysql.createConnection(this.config)
     }
   }
 

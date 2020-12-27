@@ -4,7 +4,6 @@ const mkdirp = require("mkdirp")
 const ffmpeg = require("fluent-ffmpeg")
 const ClockSync = require("../lib/clocksync")
 const Onvif = require("../lib/onvif")
-const net = require("net")
 
 const config = require("../config.js")
 
@@ -12,59 +11,15 @@ const cameraKey = process.argv.slice().pop()
 const target = config.targets[cameraKey]
 
 if (!target) throw Error("Invalid argument")
-const ssrc =
-  2222 +
-  Object.keys(config.targets).indexOf(cameraKey) * 1000 +
-  Math.floor(Math.random() * 100)
-const payloadType = 101
 
 const credential = config.credential
 
 const baseFolder = path.resolve(config.base, cameraKey)
 mkdirp.sync(baseFolder)
 
-const exitAfterSocketConnect = () => {
-  const conn = net.connect(config.ipcBase, () => {
-    process.exit()
-  })
-  conn.on("error", () => {
-    setTimeout(exitAfterSocketConnect)
-  })
-}
-
 const start = async () => {
   const address = await Onvif.getStreamUrl(target.onvif)
   const hostname = url.parse(address).hostname
-
-  const soupConn = net.createConnection(config.ipcBase)
-
-  soupConn.once("connect", () => {
-    soupConn.write(
-      JSON.stringify({
-        id: cameraKey,
-        kind: "video",
-        rtpParameters: {
-          codecs: [
-            {
-              mimeType: "video/h264",
-              payloadType,
-              clockRate: 90000,
-            },
-          ],
-          encodings: [{ ssrc }],
-        },
-      })
-    )
-  })
-
-  const soupData = await new Promise((resolve, reject) => {
-    soupConn.once("data", (data) => {
-      const payload = JSON.parse(data.toString())
-      resolve(payload)
-    })
-  })
-
-  soupConn.on("close", exitAfterSocketConnect)
 
   const main = ffmpeg()
     .addInput(address)
@@ -80,12 +35,6 @@ const start = async () => {
       `-hls_flags second_level_segment_duration`,
       `-hls_segment_filename ${path.resolve(baseFolder, config.segmentName)}`,
     ])
-    .addOutput(`rtp://${soupData.ip}:${soupData.port}`)
-    .format("rtp")
-    .outputOptions([`-ssrc ${ssrc}`, `-payload_type ${payloadType}`])
-    .addOption("-loglevel warning")
-    .videoCodec("copy")
-    .audioCodec("copy")
     .on("start", (cmd) => console.log("Command", cmd))
     .on("codecData", (data) => console.log("Codec data", data))
     .on("progress", (progress) =>
