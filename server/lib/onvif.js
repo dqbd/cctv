@@ -1,7 +1,7 @@
-const { OnvifDevice } = require('node-onvif')
+const { OnvifDevice } = require("node-onvif")
 
 const initDevice = async (xaddr) => {
-  if (!xaddr) throw Error('Unknown xaddr')
+  if (!xaddr) throw Error("Unknown xaddr")
 
   const device = new OnvifDevice({ xaddr })
   await device.init()
@@ -10,12 +10,14 @@ const initDevice = async (xaddr) => {
 
 module.exports = {
   getStreamUrl: async (xaddr) => {
-    const { stream: { rtsp }} = (await initDevice(xaddr)).getCurrentProfile()
+    const {
+      stream: { rtsp },
+    } = (await initDevice(xaddr)).getCurrentProfile()
     return rtsp
   },
-  
+
   getSnapshotUrl: async (xaddr) => {
     const { snapshot } = (await initDevice(xaddr)).getCurrentProfile()
     return snapshot
-  }
+  },
 }

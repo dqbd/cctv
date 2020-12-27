@@ -1,5 +1,5 @@
-const fetch = require('node-fetch')
-const { getSnapshotUrl } = require('./onvif')
+const fetch = require("node-fetch")
+const { getSnapshotUrl } = require("./onvif")
 
 const SCREENSHOT_DELAY = 10 * 1000
 
@@ -11,7 +11,7 @@ module.exports = {
       cache.set(onvif, {
         timeout: 0,
         image: Buffer.from([]),
-        url: await getSnapshotUrl(onvif)
+        url: await getSnapshotUrl(onvif),
       })
     }
 
@@ -19,10 +19,10 @@ module.exports = {
     const cached = cache.get(onvif)
     const { timeout, url } = cached
     let { image } = cached
-    
+
     if (timeout + SCREENSHOT_DELAY <= now || refresh) {
       try {
-        image = await fetch(url).then(a => a.buffer())
+        image = await fetch(url).then((a) => a.buffer())
         cache.set(onvif, { timeout: now, image, url })
       } catch (err) {
         console.log(err)
@@ -30,5 +30,5 @@ module.exports = {
     }
 
     return image
-  }
+  },
 }
