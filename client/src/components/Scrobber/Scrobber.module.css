@@ -1,186 +1,186 @@
 .main {
-	user-select: none;
-	transition: opacity 0.3s;
+  user-select: none;
+  transition: opacity 0.3s;
 
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 
 .timeline {
-	position: absolute;
-	padding-bottom: calc(5em / 2 + 5px);
-	left: 0;
-	right: 0;
-	bottom: 0;
+  position: absolute;
+  padding-bottom: calc(5em / 2 + 5px);
+  left: 0;
+  right: 0;
+  bottom: 0;
 
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background: linear-gradient(rgba(10, 10, 10, 0), rgba(10, 10, 10, 1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(rgba(10, 10, 10, 0), rgba(10, 10, 10, 1));
 }
 
 .center {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: #D8DEE9;
-	background: #434C5E;
-	box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3); 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d8dee9;
+  background: #434c5e;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
 
-	padding: .8em;
-	border-radius: 2.25em;
-	margin-bottom: 1.25em;
+  padding: 0.8em;
+  border-radius: 2.25em;
+  margin-bottom: 1.25em;
 
-	position: relative;
+  position: relative;
 }
 
 .center::after {
-	content: "";
-	border: 1.25em solid transparent;
-	border-left-width: 0.8em;
-	border-right-width: 0.8em;
-	border-top-color: #434C5E;
-	border-bottom-width: 0;
-	position: absolute;
-	top: 100%;
+  content: "";
+  border: 1.25em solid transparent;
+  border-left-width: 0.8em;
+  border-right-width: 0.8em;
+  border-top-color: #434c5e;
+  border-bottom-width: 0;
+  position: absolute;
+  top: 100%;
 }
 
 .center > *:not(:last-child) {
-	margin-right: 1em;
+  margin-right: 1em;
 }
 
 .timewrapper {
-	display: flex;
+  display: flex;
 }
 
 .timeoffset {
-	background: #3B4252;
-	height: 2.5em;
-	border-radius: 1.25em 0 0 1.25em;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding: 0 calc(1em + 1.25em) 0 1em; 
-	text-align: center;
-	white-space: nowrap;
+  background: #3b4252;
+  height: 2.5em;
+  border-radius: 1.25em 0 0 1.25em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 calc(1em + 1.25em) 0 1em;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .timeoffset .live {
-	text-transform: uppercase;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .timeoffset .live:before {
-	content: "";
-	display: block;
-	margin-right: .75em;
-	width: 8px;
-	height: 8px;
-	margin-top: 1px;
+  content: "";
+  display: block;
+  margin-right: 0.75em;
+  width: 8px;
+  height: 8px;
+  margin-top: 1px;
 
-	background: #EB5757;
-	border-radius: 100%;
+  background: #eb5757;
+  border-radius: 100%;
 }
 
 .timewrapper .timeoffset + .pill {
-	margin-left: -1.25em;
+  margin-left: -1.25em;
 }
 
 .pill {
-	position: relative;
-	background: #545F75;
-	height: 2.5em;
-	padding: 0 2em;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+  position: relative;
+  background: #545f75;
+  height: 2.5em;
+  padding: 0 2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-	box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); 
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 
-	border-radius: 1.25em;
-	text-align: center;
-	white-space: nowrap;
+  border-radius: 1.25em;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .pill.margin {
-	padding: 0rem 3em;
+  padding: 0rem 3em;
 }
 
 .pill .cover {
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 100%;
-	width: 100%;
-	height: 30px;
-	background: white;
-	border: none;
-	box-sizing: border-box;
-	text-align: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  width: 100%;
+  height: 30px;
+  background: white;
+  border: none;
+  box-sizing: border-box;
+  text-align: center;
 
-	background: none;
-	color: none;
-	opacity: 0;
-	margin-top: 0;
-	bottom: 0;
-	height: 100%;
+  background: none;
+  color: none;
+  opacity: 0;
+  margin-top: 0;
+  bottom: 0;
+  height: 100%;
 
-	cursor: pointer;
+  cursor: pointer;
 }
 
 .time {
-	font-size: 1.25em;
+  font-size: 1.25em;
 }
 
 .calendar {
-	font-size: 1em;
+  font-size: 1em;
 }
 
 .top {
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
 
-	display: flex;
-	align-items: center;
-	padding: 2em;
-	background: linear-gradient(rgba(10, 10, 10, 1), rgba(10, 10, 10, 0));
+  display: flex;
+  align-items: center;
+  padding: 2em;
+  background: linear-gradient(rgba(10, 10, 10, 1), rgba(10, 10, 10, 0));
 }
 
 .back {
-	color: #D8DEE9;
-	background: #434C5E;
-	width: 4em;
-	height: 4em;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	border-radius: 100%;
-	box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3); 
+  color: #d8dee9;
+  background: #434c5e;
+  width: 4em;
+  height: 4em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100%;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .back svg {
-	width: 2em;
-	height: 2em;
+  width: 2em;
+  height: 2em;
 }
 
 .info {
-	display: flex;
-	background: #434C5E;
-	border-radius: 1em;
-	padding: .75em;
-	padding-right: 1em;
-	align-items: center;
+  display: flex;
+  background: #434c5e;
+  border-radius: 1em;
+  padding: 0.75em;
+  padding-right: 1em;
+  align-items: center;
 
-	margin-left: 1.5em;
-	box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3); 
+  margin-left: 1.5em;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .name {
@@ -188,21 +188,21 @@
   display: flex;
   align-items: center;
   margin: 0;
-  color: #D8DEE9;
+  color: #d8dee9;
   text-decoration: none;
-	font-size: 1em;
+  font-size: 1em;
 }
 
 .color {
-	width: 1.5em;
+  width: 1.5em;
   height: 1.5em;
   border-radius: 8px;
-	margin-right: .75em;
-	background: #EB5757;
+  margin-right: 0.75em;
+  background: #eb5757;
 }
 
 @media (max-width: 768px) {
-	.main {
-		font-size: 12px;
-	}
+  .main {
+    font-size: 12px;
+  }
 }

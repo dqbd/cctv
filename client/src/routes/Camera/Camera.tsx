@@ -1,26 +1,26 @@
-import React, { Component } from 'react'
+/** @jsxImportSource @emotion/react */
+import { Component } from "react"
 
-import styles from './Camera.module.css'
-import Dvr from '../../components/HLSArchive/HLSArchive'
-import MediaSourceLive from '../../components/MediaSourceLive/MediaSourceLive'
-import Scrobber from '../../components/Scrobber/Scrobber'
+import { HLSPlayer } from "components/HLSPlayer"
+import { Scrobber } from "components/Scrobber/Scrobber"
 
-import { API_URL } from '../../utils/constants'
+import { API_URL } from "utils/constants"
+import { css } from "@emotion/react"
 
 type Props = {
-  name: string,
+  name: string
   streams: {
-    key: string,
-    name: string,
-    color: string,
-  }[],
+    key: string
+    name: string
+    color: string
+  }[]
 }
 
 type State = {
-  from: number,
-  to: number,
-  shift: number,
-  showTools: boolean,
+  from: number
+  to: number
+  shift: number
+  showTools: boolean
 }
 
 export default class Camera extends Component<Props, State> {
@@ -30,28 +30,36 @@ export default class Camera extends Component<Props, State> {
     shift: 0,
     showTools: false,
   }
-  
-  generateUrl = ({ name, from, to, shift }: { name: string, from: number, to: number, shift: number }): string | null => {
-    // if (!shift && !from && !to) return null
-    
+
+  generateUrl = ({
+    name,
+    from,
+    to,
+    shift,
+  }: {
+    name: string
+    from: number
+    to: number
+    shift: number
+  }): string | null => {
     let baseUrl = `${API_URL}/data/${name}/`
-    let type = 'stream.m3u8'
+    let type = "stream.m3u8"
 
     let params = []
     if (from > 0) {
-      type = 'slice.m3u8'
+      type = "slice.m3u8"
       params.push(`from=${from}`)
 
       if (to > 0 && from < to) {
         params.push(`to=${to}`)
       }
     } else if (shift > 0) {
-      params.push(`shift=${shift}`)
+      params.push(`shift=${Math.ceil(shift / 1000)}`)
     }
 
     baseUrl += type
     if (params.length > 0) {
-      baseUrl += '?' + params.join('&')
+      baseUrl += "?" + params.join("&")
     }
 
     return baseUrl
@@ -63,11 +71,6 @@ export default class Camera extends Component<Props, State> {
     }
   }
 
-  handleShiftChange = (shift: number) => {
-    console.log(shift)
-    this.setState({ shift })
-  }
-
   render() {
     const { name, streams } = this.props
     const { from, to, shift } = this.state
@@ -76,10 +79,36 @@ export default class Camera extends Component<Props, State> {
     const stream = streams.find(({ key }) => key === name)
 
     return (
-      <div className={styles.camera}>
-        { url && <Dvr source={url} /> }
-        { !url && <MediaSourceLive delayLog={(add: number) => console.log(add)} /> }
-        { stream && <Scrobber onShift={this.handleShiftChange} stream={stream} /> }
+      <div
+        css={css`
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          position: absolute;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0;
+
+          background: #090909;
+
+          & > video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center;
+          }
+        `}
+      >
+        {url && <HLSPlayer source={url} />}
+        {stream && (
+          <Scrobber
+            onChange={(shift) => this.setState({ shift })}
+            value={shift}
+            stream={stream}
+          />
+        )}
       </div>
     )
   }

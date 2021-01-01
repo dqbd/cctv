@@ -3,21 +3,25 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emotion/babel-plugin": "^11.1.2",
+    "@emotion/react": "^11.1.4",
+    "@emotion/styled": "^11.0.0",
+    "@material-ui/core": "^5.0.0-alpha.21",
+    "@material-ui/lab": "^5.0.0-alpha.21",
     "@types/moment": "^2.13.0",
     "@types/random-string": "^0.0.28",
     "hls.js": "0.12.3-canary.4258",
-    "mediasoup-client": "^3.0.0",
     "moment": "^2.24.0",
     "nosleep.js": "^0.9.0",
-    "protoo-client": "^4.0.3",
     "random-string": "^0.2.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
+    "react-query": "^3.5.5",
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
-    "react-scripts": "3.0.0",
-    "react-use-gesture": "^5.1.2",
-    "typescript": "^3.4.4"
+    "react-scripts": "4.0.1",
+    "react-use-gesture": "5.1.2",
+    "typescript": "^4.1.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -44,6 +48,10 @@
     "@types/hls.js": "^0.12.4",
     "@types/react": "^16.8.14",
     "@types/react-dom": "^16.8.4",
-    "@types/react-router-dom": "^4.3.2"
+    "@types/react-router-dom": "^4.3.2",
+    "prettier": "^2.2.1"
+  },
+  "prettier": {
+    "semi": false
   }
 }

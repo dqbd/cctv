@@ -1,21 +1,81 @@
 :global(body) {
-  background: #D8DEE9; 
+  background: #d8dee9;
+}
+
+.heading {
+  margin: 1rem;
+  font-size: 4vw;
+  margin-top: 3rem;
+  font-weight: 700;
 }
 
 .item {
-  background: #ECEFF4;
-  box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.1);
-  border-radius: 20px;
-  padding: 1em;
+  border-radius: 8px;
   text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.item:hover {
+  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1), 0px 2px 2px rgba(0, 0, 0, 0.1),
+    0px 4px 4px rgba(0, 0, 0, 0.1), 0px 8px 8px rgba(0, 0, 0, 0.1),
+    0px 16px 16px rgba(0, 0, 0, 0.1);
+  transform: scale(1.05);
+  z-index: 2;
+}
+
+.item:active {
+  box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.1),
+    inset 0px 2px 2px rgba(0, 0, 0, 0.1), inset 0px 4px 4px rgba(0, 0, 0, 0.1),
+    inset 0px 8px 8px rgba(0, 0, 0, 0.1), inset 0px 16px 16px rgba(0, 0, 0, 0.1);
+  transform: scale(0.98);
+  z-index: 2;
+}
+
+.item:before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  z-index: 2;
+  content: "";
+  mix-blend-mode: lighten;
 }
 
 .header {
   display: flex;
-  align-items: center;
-  margin: 3px 6px 3px 10px;
+  align-items: flex-end;
+  vertical-align: middle;
+
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80%;
+  z-index: 3;
+
+  pointer-events: none;
+
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.8)
+  );
+  background-blend-mode: darken;
 }
 
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-grow: 1;
+  padding: 1em;
+}
 
 .color {
   width: 24px;
@@ -25,14 +85,13 @@
 
 .name {
   flex-grow: 1;
-  font-family: Futura;
   font-style: normal;
   font-weight: 500;
   font-size: 16px;
   display: flex;
   align-items: center;
   margin: 0;
-  color: #3B4252;
+  color: #fff;
   text-decoration: none;
 }
 
@@ -42,14 +101,12 @@
 
   position: relative;
 
-  margin-top: 15px;
-
-  border-radius: 15px;
   overflow: hidden;
-  background: #5E81AC;
+  background: #5e81ac;
 }
 
-.video video, .video img {
+.video video,
+.video img {
   object-fit: contain;
   width: 100%;
   height: 100%;
@@ -67,9 +124,9 @@
 
 .list {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
   grid-gap: 1em;
-  padding: 1em;
+  margin: 1em;
 }
 
 @media (max-width: 768px) {
