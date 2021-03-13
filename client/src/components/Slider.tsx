@@ -2,7 +2,7 @@
 import { css } from "@emotion/react"
 import { useRef, useLayoutEffect } from "react"
 import moment from "moment"
-import { GestureHandlersPartial, useGesture } from "react-use-gesture"
+import { useGesture } from "react-use-gesture"
 
 import { MAX_LENGTH } from "utils/constants"
 
@@ -12,7 +12,7 @@ export const Slider = (props: {
   onScroll?: (shift: number) => any
   onScrollEnd?: (shift: number) => any
 }) => {
-  const callbackRef = useRef<GestureHandlersPartial>({
+  const callbackRef = useRef<Partial<Parameters<typeof useGesture>[0]>>({
     onDrag: () => {},
     onDragEnd: () => {},
     onWheel: () => {},

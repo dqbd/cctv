@@ -22,37 +22,37 @@ object-assign
 
 /*! ModuleConcatenation bailout: Cannot concat with ./src/crypt/decrypter.js because of ./src/demux/demuxer-worker.js */
 
-/*! ModuleConcatenation bailout: Cannot concat with ./src/crypt/decrypter.js because of ./src/hls.js */
+/*! ModuleConcatenation bailout: Cannot concat with ./src/crypt/decrypter.js because of ./src/hls.ts */
 
 /*! ModuleConcatenation bailout: Cannot concat with ./src/demux/demuxer-inline.js because of ./src/demux/demuxer-worker.js */
 
 /*! ModuleConcatenation bailout: Cannot concat with ./src/demux/id3.js because of ./src/demux/demuxer-worker.js */
 
-/*! ModuleConcatenation bailout: Cannot concat with ./src/demux/id3.js because of ./src/hls.js */
+/*! ModuleConcatenation bailout: Cannot concat with ./src/demux/id3.js because of ./src/hls.ts */
 
 /*! ModuleConcatenation bailout: Cannot concat with ./src/demux/mp4demuxer.js because of ./src/demux/demuxer-worker.js */
 
-/*! ModuleConcatenation bailout: Cannot concat with ./src/demux/mp4demuxer.js because of ./src/hls.js */
+/*! ModuleConcatenation bailout: Cannot concat with ./src/demux/mp4demuxer.js because of ./src/hls.ts */
 
-/*! ModuleConcatenation bailout: Cannot concat with ./src/errors.js because of ./src/demux/demuxer-worker.js */
+/*! ModuleConcatenation bailout: Cannot concat with ./src/errors.ts because of ./src/demux/demuxer-worker.js */
 
-/*! ModuleConcatenation bailout: Cannot concat with ./src/errors.js because of ./src/hls.js */
+/*! ModuleConcatenation bailout: Cannot concat with ./src/errors.ts because of ./src/hls.ts */
 
 /*! ModuleConcatenation bailout: Cannot concat with ./src/events.js because of ./src/demux/demuxer-worker.js */
 
-/*! ModuleConcatenation bailout: Cannot concat with ./src/events.js because of ./src/hls.js */
+/*! ModuleConcatenation bailout: Cannot concat with ./src/events.js because of ./src/hls.ts */
 
-/*! ModuleConcatenation bailout: Cannot concat with ./src/polyfills/number-isFinite.js because of ./src/demux/demuxer-worker.js */
+/*! ModuleConcatenation bailout: Cannot concat with ./src/polyfills/number.js because of ./src/demux/demuxer-worker.js */
 
-/*! ModuleConcatenation bailout: Cannot concat with ./src/polyfills/number-isFinite.js because of ./src/hls.js */
+/*! ModuleConcatenation bailout: Cannot concat with ./src/polyfills/number.js because of ./src/hls.ts */
 
 /*! ModuleConcatenation bailout: Cannot concat with ./src/utils/get-self-scope.js because of ./src/demux/demuxer-worker.js */
 
-/*! ModuleConcatenation bailout: Cannot concat with ./src/utils/get-self-scope.js because of ./src/hls.js */
+/*! ModuleConcatenation bailout: Cannot concat with ./src/utils/get-self-scope.js because of ./src/hls.ts */
 
 /*! ModuleConcatenation bailout: Cannot concat with ./src/utils/logger.js because of ./src/demux/demuxer-worker.js */
 
-/*! ModuleConcatenation bailout: Cannot concat with ./src/utils/logger.js because of ./src/hls.js */
+/*! ModuleConcatenation bailout: Cannot concat with ./src/utils/logger.js because of ./src/hls.ts */
 
 /*! ModuleConcatenation bailout: Module is not an ECMAScript module */
 
@@ -70,12 +70,12 @@ object-assign
 
 /*! exports provided: getSelfScope */
 
-/*! exports provided: isFiniteNumber */
+/*! exports provided: isFiniteNumber, MAX_SAFE_INTEGER */
 
 /*! no static exports found */
 
 /*!***********************!*\
-        !*** ./src/errors.js ***!
+        !*** ./src/errors.ts ***!
         \***********************/
 
 /*!***********************!*\
@@ -95,7 +95,11 @@ object-assign
         \*********************************/
 
 /*!*********************************!*\
-        !*** ./src/hls.js + 50 modules ***!
+        !*** ./src/hls.ts + 50 modules ***!
+        \*********************************/
+
+/*!*********************************!*\
+        !*** ./src/polyfills/number.js ***!
         \*********************************/
 
 /*!*************************************!*\
@@ -105,10 +109,6 @@ object-assign
 /*!*************************************!*\
         !*** ./src/utils/get-self-scope.js ***!
         \*************************************/
-
-/*!******************************************!*\
-        !*** ./src/polyfills/number-isFinite.js ***!
-        \******************************************/
 
 /*!********************************************!*\
         !*** ./src/crypt/decrypter.js + 3 modules ***!
@@ -123,14 +123,14 @@ object-assign
         \**************************************************/
 
 /*!**************************************************!*\
-        !*** ./src/demux/demuxer-inline.js + 11 modules ***!
+        !*** ./src/demux/demuxer-inline.js + 12 modules ***!
         \**************************************************/
 
 /*!*****************************************************!*\
         !*** ./node_modules/url-toolkit/src/url-toolkit.js ***!
         \*****************************************************/
 
-/** @license React v0.19.1
+/** @license React v0.20.1
  * scheduler.production.min.js
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -148,7 +148,7 @@ object-assign
  * LICENSE file in the root directory of this source tree.
  */
 
-/** @license React v16.14.0
+/** @license React v17.0.1
  * react-dom.production.min.js
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -157,7 +157,7 @@ object-assign
  * LICENSE file in the root directory of this source tree.
  */
 
-/** @license React v16.14.0
+/** @license React v17.0.1
  * react-jsx-runtime.production.min.js
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -166,7 +166,7 @@ object-assign
  * LICENSE file in the root directory of this source tree.
  */
 
-/** @license React v16.14.0
+/** @license React v17.0.1
  * react.production.min.js
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
