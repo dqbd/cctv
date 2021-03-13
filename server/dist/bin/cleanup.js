@@ -10,12 +10,13 @@ var _util = _interopRequireDefault(require("util"));
 
 var _database = require("../lib/database.js");
 
+var _config = require("../lib/config");
+
 var readdir = _util.default.promisify(require("fs").readdir);
 
 var rimraf = _util.default.promisify(require("rimraf"));
 
-var config = require("../config.js");
-
+var config = (0, _config.getConfig)();
 var db = new _database.Database(config.auth.database);
 
 var wait = delay => new Promise(resolve => setTimeout(resolve, delay));
