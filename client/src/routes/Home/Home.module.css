@@ -21,11 +21,13 @@
     0 36.5px 29.2px rgba(0, 0, 0, 0.041), 0 100px 80px rgba(0, 0, 0, 0.06);
 }
 
-.item:hover {
-  transform: scale(1.02);
-  z-index: 2;
+@media (hover: hover) {
+  .item:hover {
+    transform: scale(1.02);
+    z-index: 2;
 
-  background: hsl(219deg, 28%, 95%);
+    background: hsl(219deg, 28%, 95%);
+  }
 }
 
 .item:active {
