@@ -1,6 +1,8 @@
 import path from "path"
 
-export function createSegment(filename: string): {
+export function createSegment(
+  filename: string
+): {
   filename: string
   timestamp: number
   duration: number
@@ -18,6 +20,6 @@ export function createSegment(filename: string): {
     filename,
     timestamp: Number(timestamp),
     duration: Number.parseInt(duration, 10),
-    extinf
+    extinf,
   }
 }

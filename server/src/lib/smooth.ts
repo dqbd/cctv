@@ -2,21 +2,24 @@ import * as segment from "./segment"
 import { Database } from "./database"
 
 export class Smooth {
-
   tokens: { [key: string]: any } = {}
 
-  constructor(private db: Database) { }
+  constructor(private db: Database) {}
 
   createSegments(segments: { path: string }[]) {
-    return segments.map(({ path }) => segment.createSegment(path))?.filter(function (item): item is NonNullable<typeof item> {
-      return !!item
-    })
+    return segments
+      .map(({ path }) => segment.createSegment(path))
+      ?.filter(function (item): item is NonNullable<typeof item> {
+        return !!item
+      })
   }
 
   async seek(cameraKey: string, shift: number) {
     const token = `${cameraKey}${shift}`
     let current = Math.floor(Date.now() / 1000) - shift
-    let segments = this.createSegments(await this.db.seekFrom(cameraKey, current))
+    let segments = this.createSegments(
+      await this.db.seekFrom(cameraKey, current)
+    )
 
     if (
       typeof this.tokens[token] === "undefined" ||

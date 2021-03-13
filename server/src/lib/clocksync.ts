@@ -7,7 +7,12 @@ const types = {
   SESSION_HEARTBEAT: [0x00, 0x00, 0xee, 0x03],
 }
 
-export function setSystemTime(credential: { username: string, password: string }, ip: string, port = 34567, time?: Date) {
+export function setSystemTime(
+  credential: { username: string; password: string },
+  ip: string,
+  port = 34567,
+  time?: Date
+) {
   return new Promise((resolve, reject) => {
     const socket = new net.Socket()
     let authenticated = false
@@ -90,4 +95,3 @@ function generatePasswordHash(password: string) {
   }
   return result
 }
-

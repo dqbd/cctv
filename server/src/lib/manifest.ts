@@ -8,7 +8,7 @@ interface IManifestSegment {
 }
 
 export class Manifest {
-  constructor(private config: IManifestConfig) { }
+  constructor(private config: IManifestConfig) {}
 
   getManifest(segments: IManifestSegment[], seq: number, end = false) {
     const { config } = this

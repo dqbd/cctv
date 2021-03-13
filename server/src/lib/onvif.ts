@@ -15,7 +15,7 @@ export async function getStreamUrl(xaddr: string) {
   return rtsp
 }
 
-export async function getSnapshotUrl (xaddr: string) {
+export async function getSnapshotUrl(xaddr: string) {
   const { snapshot } = (await initDevice(xaddr)).getCurrentProfile()
   return snapshot
 }

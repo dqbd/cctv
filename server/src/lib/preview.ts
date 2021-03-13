@@ -5,7 +5,7 @@ const SCREENSHOT_DELAY = 10 * 1000
 
 const cache = new Map()
 
-export async function getScreenshot(onvif: string, refresh = false)  {
+export async function getScreenshot(onvif: string, refresh = false) {
   if (!cache.has(onvif)) {
     cache.set(onvif, {
       timeout: 0,

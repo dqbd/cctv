@@ -51,7 +51,7 @@ const main = async () => {
   app.get("/data/:folder/stream.m3u8", async (req, res) => {
     const { folder } = req.params
     const shift = (req.query.shift && Number(req.query.shift)) || 0
-    const from = req.query.from 
+    const from = req.query.from
 
     if (!folder) return res.status(400).send("Invalid parameters")
     const { seq, segments } = await smooth.seek(folder, shift)
@@ -99,7 +99,9 @@ const main = async () => {
     }
   })
 
-  app.use(express.static(path.resolve(__dirname, "../../../", "client", "build")))
+  app.use(
+    express.static(path.resolve(__dirname, "../../../", "client", "build"))
+  )
 
   app.get("*", (_, res) =>
     res.sendFile(

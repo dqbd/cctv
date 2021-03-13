@@ -9,22 +9,26 @@ const configShape = z.object({
   cleanupPolling: z.number(),
   segmentSize: z.number(),
   port: z.number().positive(),
-  targets: z.record(z.object({
-    name: z.string(),
-    onvif: z.string()
-  })),
-  auth: z.object({
-    database: z.object({
-      host: z.string(),
-      user: z.string(),
-      password: z.string(),
-      database: z.string()
-    }),
-    onvif: z.object({
-      username: z.string(),
-      password: z.string()
+  targets: z.record(
+    z.object({
+      name: z.string(),
+      onvif: z.string(),
     })
-  }).nonstrict(),
+  ),
+  auth: z
+    .object({
+      database: z.object({
+        host: z.string(),
+        user: z.string(),
+        password: z.string(),
+        database: z.string(),
+      }),
+      onvif: z.object({
+        username: z.string(),
+        password: z.string(),
+      }),
+    })
+    .nonstrict(),
 })
 
 const validConfig = configShape.parse(config)

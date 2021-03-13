@@ -41,7 +41,7 @@ const start = async () => {
     ])
     .on("start", (cmd: any) => console.log("Command", cmd))
     .on("codecData", (data: any) => console.log("Codec data", data))
-    .on("progress", (progress: { frames: any, timemark: any }) =>
+    .on("progress", (progress: { frames: any; timemark: any }) =>
       console.log("Processing", progress.frames, progress.timemark)
     )
     .on("stderr", console.log)

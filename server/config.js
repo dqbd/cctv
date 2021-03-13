@@ -40,8 +40,4 @@ module.exports = {
     },
   },
   auth,
-  credential: {
-    username: "admin",
-    password: "",
-  }
 }

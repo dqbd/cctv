@@ -1,5 +1,5 @@
 :global(body) {
-  background: #d8dee9;
+  background: hsl(219deg, 28%, 88%);
 }
 
 .heading {
@@ -15,36 +15,24 @@
   position: relative;
   overflow: hidden;
   transition: all 0.2s;
+
+  box-shadow: 0 3.4px 2.7px rgba(0, 0, 0, 0.019),
+    0 8.7px 6.9px rgba(0, 0, 0, 0.027), 0 17.7px 14.2px rgba(0, 0, 0, 0.033),
+    0 36.5px 29.2px rgba(0, 0, 0, 0.041), 0 100px 80px rgba(0, 0, 0, 0.06);
 }
 
 .item:hover {
-  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1), 0px 2px 2px rgba(0, 0, 0, 0.1),
-    0px 4px 4px rgba(0, 0, 0, 0.1), 0px 8px 8px rgba(0, 0, 0, 0.1),
-    0px 16px 16px rgba(0, 0, 0, 0.1);
-  transform: scale(1.05);
+  transform: scale(1.02);
   z-index: 2;
+
+  background: hsl(219deg, 28%, 95%);
 }
 
 .item:active {
-  box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.1),
-    inset 0px 2px 2px rgba(0, 0, 0, 0.1), inset 0px 4px 4px rgba(0, 0, 0, 0.1),
-    inset 0px 8px 8px rgba(0, 0, 0, 0.1), inset 0px 16px 16px rgba(0, 0, 0, 0.1);
   transform: scale(0.98);
   z-index: 2;
-}
 
-.item:before {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 8px;
-  z-index: 2;
-  content: "";
-  mix-blend-mode: lighten;
+  background: hsl(219deg, 28%, 95%);
 }
 
 .header {
@@ -53,20 +41,20 @@
   vertical-align: middle;
 
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 80%;
+  bottom: 5px;
+  left: 5px;
+  right: 5px;
+  top: 5px;
   z-index: 3;
 
   pointer-events: none;
+  border-radius: 6px;
 
   background: linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 0) 0%,
-    rgba(0, 0, 0, 0.8)
+    hsla(219deg, 28%, 50%, 0.1) 0%,
+    hsla(219deg, 28%, 10%, 0.6)
   );
-  background-blend-mode: darken;
 }
 
 .headerContent {
@@ -74,7 +62,7 @@
   align-items: center;
   justify-content: space-between;
   flex-grow: 1;
-  padding: 1em;
+  padding: 1.2em;
 }
 
 .color {
@@ -102,20 +90,21 @@
   position: relative;
 
   overflow: hidden;
-  background: #5e81ac;
 }
 
 .video video,
 .video img {
   object-fit: contain;
-  width: 100%;
-  height: 100%;
+  width: calc(100% - 10px);
+  height: calc(100% - 10px);
 
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  top: 5px;
+  bottom: 5px;
+  left: 5px;
+  right: 5px;
+
+  border-radius: 6px;
 }
 
 .video img {

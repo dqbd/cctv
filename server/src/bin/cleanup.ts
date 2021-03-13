@@ -1,14 +1,16 @@
 import path from "path"
 import util from "util"
 import { Database } from "../lib/database.js"
+import { getConfig } from "../lib/config"
 
 const readdir = util.promisify(require("fs").readdir)
 const rimraf = util.promisify(require("rimraf"))
 
-const config = require("../config.js")
+const config = getConfig()
 const db = new Database(config.auth.database)
 
-const wait = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay))
+const wait = (delay: number) =>
+  new Promise((resolve) => setTimeout(resolve, delay))
 
 const main = async () => {
   const cleanup = async () => {
@@ -17,17 +19,35 @@ const main = async () => {
       const baseFolder = path.resolve(config.base, cameraKey)
 
       const now = new Date()
-      const nowTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0, 0).valueOf()
+      const nowTime = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        now.getHours(),
+        0,
+        0,
+        0
+      ).valueOf()
 
       try {
-        const folders = (await readdir(baseFolder)).filter((folderName: string) => {
-          const [year, month, day, hour] = folderName
-            .split("_")
-            .map((num) => Number.parseInt(num, 10))
-          const folderTime = new Date(year, month - 1, day, hour, 0, 0, 0).valueOf()
-          const cleanupTime = folderTime + config.maxAge * 1000
-          return cleanupTime <= nowTime
-        })
+        const folders = (await readdir(baseFolder)).filter(
+          (folderName: string) => {
+            const [year, month, day, hour] = folderName
+              .split("_")
+              .map((num) => Number.parseInt(num, 10))
+            const folderTime = new Date(
+              year,
+              month - 1,
+              day,
+              hour,
+              0,
+              0,
+              0
+            ).valueOf()
+            const cleanupTime = folderTime + config.maxAge * 1000
+            return cleanupTime <= nowTime
+          }
+        )
 
         await folders.reduce((memo: Promise<void>, folder: string) => {
           return memo.then(() => {

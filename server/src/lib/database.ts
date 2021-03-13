@@ -10,9 +10,8 @@ interface IDatabaseConfig {
 }
 
 export class Database {
-
   conn: Connection | null
-  hasCreated: {[key: string]: boolean}
+  hasCreated: { [key: string]: boolean }
 
   constructor(private config: IDatabaseConfig) {
     this.conn = null
@@ -77,7 +76,12 @@ export class Database {
     ])
   }
 
-  async insertFolder(cameraKey: string, keyBase: string, filenames: string[], len = 3 * 24 * 3600) {
+  async insertFolder(
+    cameraKey: string,
+    keyBase: string,
+    filenames: string[],
+    len = 3 * 24 * 3600
+  ) {
     await this.createTable(cameraKey)
 
     console.log("Insert", cameraKey, keyBase, filenames.length)
@@ -199,8 +203,7 @@ export class Database {
   async getScenes(cameraKey: string) {
     await this.createTable(cameraKey)
     return this.conn?.query(
-      `
-        SELECT * FROM ??
+      `SELECT * FROM ??
         ORDER BY timestamp DESC
       `,
       [this.getMotionTable(cameraKey)]

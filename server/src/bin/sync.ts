@@ -9,7 +9,8 @@ const readFile = util.promisify(fs.readFile)
 const config = getConfig()
 
 const db = new Database(config.auth.database)
-const wait = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay))
+const wait = (delay: number) =>
+  new Promise((resolve) => setTimeout(resolve, delay))
 
 async function readNonEmptyFile(target: string) {
   let content: string = ""
@@ -32,11 +33,15 @@ const main = async () => {
 
   const filesOfManifest = (manifest: string) =>
     manifest.split("\n").filter((line) => line.indexOf(".ts") >= 0)
-  const rdiff = (left: string[], right: string[]) => right.filter((val) => !left.includes(val))
-  const manifestCache: {[key: string]: string[]}  = {}
+  const rdiff = (left: string[], right: string[]) =>
+    right.filter((val) => !left.includes(val))
+  const manifestCache: { [key: string]: string[] } = {}
 
   const handleChange = async (targetFile: string) => {
-    const cameraKey = path.relative(config.base, targetFile).split(path.sep).shift()
+    const cameraKey = path
+      .relative(config.base, targetFile)
+      .split(path.sep)
+      .shift()
     if (!cameraKey) return
 
     const file = await readNonEmptyFile(targetFile)
