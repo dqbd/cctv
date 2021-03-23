@@ -1,13 +1,13 @@
 import path from "path"
 
-export function createSegment(
+export interface Segment {
   filename: string
-): {
-  filename: string
-  timestamp: number
+  timestamp: Date
   duration: number
   extinf: string
-} | null {
+}
+
+export function createSegment(filename: string): Segment | null {
   if (!filename || filename.indexOf(".ts") < 0) return null
   let [_, timestamp, duration] = path
     .basename(filename)
@@ -18,7 +18,7 @@ export function createSegment(
   let extinf = duration.slice(0, -6) + "." + duration.slice(-6)
   return {
     filename,
-    timestamp: Number(timestamp),
+    timestamp: new Date(Number.parseInt(timestamp, 10) * 1000),
     duration: Number.parseInt(duration, 10),
     extinf,
   }

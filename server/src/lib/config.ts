@@ -1,4 +1,6 @@
+// @ts-expect-error Loading config file is fine
 import config from "../../config"
+
 import * as z from "zod"
 const configShape = z.object({
   base: z.string(),
@@ -15,20 +17,12 @@ const configShape = z.object({
       onvif: z.string(),
     })
   ),
-  auth: z
-    .object({
-      database: z.object({
-        host: z.string(),
-        user: z.string(),
-        password: z.string(),
-        database: z.string(),
-      }),
-      onvif: z.object({
-        username: z.string(),
-        password: z.string(),
-      }),
-    })
-    .nonstrict(),
+  auth: z.object({
+    onvif: z.object({
+      username: z.string(),
+      password: z.string(),
+    }),
+  }),
 })
 
 const validConfig = configShape.parse(config)

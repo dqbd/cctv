@@ -7,7 +7,7 @@ import { getConfig } from "../lib/config"
 const readdir = util.promisify(fs.readdir)
 const config = getConfig()
 
-const db = new Database(config.auth.database)
+const db = new Database()
 
 const main = async () => {
   for (const cameraKey in config.targets) {
@@ -31,8 +31,6 @@ const main = async () => {
       await db.insertFolder(cameraKey, target, files)
     }
   }
-
-  db.close()
 }
 
 main()

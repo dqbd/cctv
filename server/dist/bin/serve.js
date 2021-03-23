@@ -22,12 +22,14 @@ var _preview = require("../lib/preview");
 
 var _config = require("../lib/config");
 
+var _segment = require("../lib/segment");
+
 var config = (0, _config.getConfig)();
 
 var main = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2.default)(function* () {
     var manifest = new _manifest.Manifest(config);
-    var db = new _database.Database(config.auth.database);
+    var db = new _database.Database();
     var smooth = new _smooth.Smooth(db);
     var app = (0, _express.default)();
     app.use((0, _cors.default)());
@@ -56,8 +58,10 @@ var main = /*#__PURE__*/function () {
           to
         } = req.query;
         if (!folder || !from || !to || typeof from !== "string") return res.status(400).send("No query parameters set");
-        res.set("Content-Type", "application/x-mpegURL");
-        res.send(manifest.getManifest(yield db.seek(folder, Number(from), Number(to)), 1, true));
+        var items = (yield db.seek(folder, Number(from), Number(to))).map(item => (0, _segment.createSegment)(item.path)).filter(x => {
+          return x != null;
+        });
+        res.send(manifest.getManifest(items, 1, true));
       });
 
       return function (_x, _x2, _x3) {

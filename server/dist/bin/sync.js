@@ -19,7 +19,7 @@ var _config = require("../lib/config");
 var readFile = _util.default.promisify(_fs.default.readFile);
 
 var config = (0, _config.getConfig)();
-var db = new _database.Database(config.auth.database);
+var db = new _database.Database();
 
 var wait = delay => new Promise(resolve => setTimeout(resolve, delay));
 

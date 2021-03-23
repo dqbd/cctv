@@ -13,6 +13,7 @@ var _config = _interopRequireDefault(require("../../config"));
 
 var z = _interopRequireWildcard(require("zod"));
 
+// @ts-expect-error Loading config file is fine
 var configShape = z.object({
   base: z.string(),
   manifest: z.string(),
@@ -27,17 +28,11 @@ var configShape = z.object({
     onvif: z.string()
   })),
   auth: z.object({
-    database: z.object({
-      host: z.string(),
-      user: z.string(),
-      password: z.string(),
-      database: z.string()
-    }),
     onvif: z.object({
       username: z.string(),
       password: z.string()
     })
-  }).nonstrict()
+  })
 });
 var validConfig = configShape.parse(_config.default);
 

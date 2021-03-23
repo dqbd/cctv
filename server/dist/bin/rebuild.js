@@ -19,7 +19,7 @@ var _config = require("../lib/config");
 var readdir = _util.default.promisify(_fs.default.readdir);
 
 var config = (0, _config.getConfig)();
-var db = new _database.Database(config.auth.database);
+var db = new _database.Database();
 
 var main = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2.default)(function* () {
@@ -45,8 +45,6 @@ var main = /*#__PURE__*/function () {
         yield* _loop(target);
       }
     }
-
-    db.close();
   });
 
   return function main() {

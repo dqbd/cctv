@@ -18,7 +18,7 @@ function createSegment(filename) {
   var extinf = duration.slice(0, -6) + "." + duration.slice(-6);
   return {
     filename,
-    timestamp: Number(timestamp),
+    timestamp: new Date(Number.parseInt(timestamp, 10) * 1000),
     duration: Number.parseInt(duration, 10),
     extinf
   };

@@ -17,7 +17,7 @@ var readdir = _util.default.promisify(require("fs").readdir);
 var rimraf = _util.default.promisify(require("rimraf"));
 
 var config = (0, _config.getConfig)();
-var db = new _database.Database(config.auth.database);
+var db = new _database.Database();
 
 var wait = delay => new Promise(resolve => setTimeout(resolve, delay));
 

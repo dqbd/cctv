@@ -7,7 +7,7 @@ const readdir = util.promisify(require("fs").readdir)
 const rimraf = util.promisify(require("rimraf"))
 
 const config = getConfig()
-const db = new Database(config.auth.database)
+const db = new Database()
 
 const wait = (delay: number) =>
   new Promise((resolve) => setTimeout(resolve, delay))

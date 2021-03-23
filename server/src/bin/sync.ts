@@ -7,8 +7,8 @@ import { getConfig } from "../lib/config"
 
 const readFile = util.promisify(fs.readFile)
 const config = getConfig()
+const db = new Database()
 
-const db = new Database(config.auth.database)
 const wait = (delay: number) =>
   new Promise((resolve) => setTimeout(resolve, delay))
 

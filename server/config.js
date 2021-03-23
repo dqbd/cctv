@@ -1,7 +1,7 @@
 const auth = require("./auth.json")
 
 module.exports = {
-  base: "/media/linaro/cctv",
+  base: "C:\\Work\\cctv-media",
   manifest: "manifest.m3u8",
   segmentName: "%Y_%m_%d_%H/sg_%s_%%t.ts",
   maxAge: 7 * 24 * 60 * 60,
@@ -33,10 +33,6 @@ module.exports = {
     VZADU_PROSTERADLA: {
       name: "Vzadu - prostěradlo",
       onvif: "http://192.168.2.164:8899",
-    },
-    DEBUG: {
-      name: "Debug Camera",
-      onvif: "http://192.168.1.158:8899",
     },
   },
   auth,

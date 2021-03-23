@@ -8,12 +8,13 @@ import { Manifest } from "../lib/manifest"
 import { Smooth } from "../lib/smooth"
 import { getScreenshot } from "../lib/preview"
 import { getConfig } from "../lib/config"
+import { createSegment, Segment } from "../lib/segment"
 
 const config = getConfig()
 
 const main = async () => {
   const manifest = new Manifest(config)
-  const db = new Database(config.auth.database)
+  const db = new Database()
 
   const smooth = new Smooth(db)
   const app = express()
@@ -38,14 +39,13 @@ const main = async () => {
     if (!folder || !from || !to || typeof from !== "string")
       return res.status(400).send("No query parameters set")
 
-    res.set("Content-Type", "application/x-mpegURL")
-    res.send(
-      manifest.getManifest(
-        await db.seek(folder, Number(from), Number(to)),
-        1,
-        true
-      )
-    )
+    const items = (await db.seek(folder, Number(from), Number(to)))
+      .map((item) => createSegment(item.path))
+      .filter((x): x is Segment => {
+        return x != null
+      })
+
+    res.send(manifest.getManifest(items, 1, true))
   })
 
   app.get("/data/:folder/stream.m3u8", async (req, res) => {
