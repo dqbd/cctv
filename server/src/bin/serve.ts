@@ -34,10 +34,14 @@ const main = async () => {
   app.get("/data/:folder/slice.m3u8", async (req, res, next) => {
     if (!req.query.from) return next()
     const { folder } = req.params
-    const { from, to } = req.query
+    let { from, to, length } = req.query
 
-    if (!folder || !from || !to || typeof from !== "string")
+    if (!folder || !from || (!to && !length) || typeof from !== "string")
       return res.status(400).send("No query parameters set")
+    if(to && length)
+      return res.status(400).send("Invalid parameters, can't have `to` and `length` at the same time")
+
+    if(length) to = from + length
 
     const items = (await db.seek(folder, Number(from), Number(to)))
       .map((item) => createSegment(item.path))
@@ -50,11 +54,11 @@ const main = async () => {
 
   app.get("/data/:folder/stream.m3u8", async (req, res) => {
     const { folder } = req.params
-    const shift = (req.query.shift && Number(req.query.shift)) || 0
-    const from = req.query.from
+    let shift = (req.query.shift && Number(req.query.shift)) || 0
+    if(req.query.from && Number(req.query.from))
+      shift = (Date.now() / 1000) - Number(req.query.from) + shift;
 
     if (!folder) return res.status(400).send("Invalid parameters")
-    const { seq, segments } = await smooth.seek(folder, shift)
     res.set("Content-Type", "application/x-mpegURL")
 
     if (shift === 0) {
@@ -64,6 +68,7 @@ const main = async () => {
       )
       res.send(file.split(config.base).join("/data"))
     } else {
+      const { segments, seq } = await smooth.seek(folder, shift)
       res.send(manifest.getManifest(segments, seq))
     }
   })
