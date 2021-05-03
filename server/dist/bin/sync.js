@@ -16,6 +16,8 @@ var _database = require("../lib/database");
 
 var _config = require("../lib/config");
 
+var _pQueue = _interopRequireDefault(require("p-queue"));
+
 var readdir = _util.default.promisify(require("fs").readdir);
 
 var rimraf = _util.default.promisify(require("rimraf"));
@@ -24,6 +26,9 @@ var readFile = _util.default.promisify(_fs.default.readFile);
 
 var config = (0, _config.getConfig)();
 var db = new _database.Database();
+var queue = new _pQueue.default({
+  concurrency: 1
+});
 
 var wait = delay => new Promise(resolve => setTimeout(resolve, delay));
 
@@ -75,7 +80,7 @@ var cleanup_main = /*#__PURE__*/function () {
               });
             }, Promise.resolve());
             console.log("Deleted folders", folders && folders.join(", "));
-            yield db.removeOldScenesAndMotion(cameraKey, config.maxAge);
+            yield queue.add(() => db.removeOldScenesAndMotion(cameraKey, config.maxAge));
             console.log("Deleted from DB", cameraKey);
           } catch (err) {
             if (err.code !== "ENOENT") throw err;
@@ -138,10 +143,14 @@ var sync_main = /*#__PURE__*/function () {
         if (manifestCache[cameraKey]) {
           var toInsert = rdiff(manifestCache[cameraKey], manifest);
 
-          for (var item of toInsert) {
+          var _loop2 = function* _loop2(item) {
             var relative = _path.default.relative(baseFolder, item);
 
-            yield db.insert(cameraKey, relative);
+            yield queue.add(() => db.insert(cameraKey, relative));
+          };
+
+          for (var item of toInsert) {
+            yield* _loop2(item);
           }
         }
 

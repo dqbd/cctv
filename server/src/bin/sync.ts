@@ -4,6 +4,7 @@ import chokidar from "chokidar"
 import fs from "fs"
 import { Database } from "../lib/database"
 import { getConfig } from "../lib/config"
+import PQueue from "p-queue"
 
 const readdir = util.promisify(require("fs").readdir)
 const rimraf = util.promisify(require("rimraf"))
@@ -11,6 +12,7 @@ const rimraf = util.promisify(require("rimraf"))
 const readFile = util.promisify(fs.readFile)
 const config = getConfig()
 const db = new Database()
+const queue = new PQueue({ concurrency: 1 })
 
 const wait = (delay: number) =>
   new Promise((resolve) => setTimeout(resolve, delay))
@@ -75,7 +77,7 @@ const cleanup_main = async () => {
 
         console.log("Deleted folders", folders && folders.join(", "))
 
-        await db.removeOldScenesAndMotion(cameraKey, config.maxAge)
+        await queue.add(() => db.removeOldScenesAndMotion(cameraKey, config.maxAge))
         console.log("Deleted from DB", cameraKey)
       } catch (err) {
         if (err.code !== "ENOENT") throw err
@@ -121,7 +123,7 @@ const sync_main = async () => {
 
       for (let item of toInsert) {
         const relative = path.relative(baseFolder, item)
-        await db.insert(cameraKey, relative)
+        await queue.add(() => db.insert(cameraKey, relative))
       }
     }
 
