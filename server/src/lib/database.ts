@@ -71,7 +71,7 @@ export class Database {
   }
 
   async seekFrom(camera: string, fromSec: number, limit = 5) {
-    const from = new Date(fromSec * 100)
+    const from = new Date(fromSec * 1000)
 
     return this.prisma.scene.findMany({
       where: { camera, timestamp: { gte: from } },
