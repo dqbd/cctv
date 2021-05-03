@@ -36,7 +36,7 @@ var main = /*#__PURE__*/function () {
     app.get("/streams", (_, res) => {
       res.set("Content-Type", "application/json");
       res.send({
-        data: Object.entries(config.targets).map((_ref2) => {
+        data: Object.entries(config.targets).map(_ref2 => {
           var [key, {
             name
           }] = _ref2;

@@ -16,7 +16,7 @@ class Manifest {
       config
     } = this;
     var buffer = ["#EXTM3U", "#EXT-X-VERSION:3", "#EXT-X-TARGETDURATION:".concat(config.segmentSize), "#EXT-X-MEDIA-SEQUENCE:".concat(seq)];
-    segments.forEach((_ref) => {
+    segments.forEach(_ref => {
       var {
         filename,
         extinf

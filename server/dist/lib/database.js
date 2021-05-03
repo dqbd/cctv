@@ -9,6 +9,8 @@ exports.Database = void 0;
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
 var _client = require("@prisma/client");
 
 var _path = _interopRequireDefault(require("path"));
@@ -16,7 +18,9 @@ var _path = _interopRequireDefault(require("path"));
 var _segment = require("./segment");
 
 class Database {
-  prisma = new _client.PrismaClient();
+  constructor() {
+    (0, _defineProperty2.default)(this, "prisma", new _client.PrismaClient());
+  }
 
   resetFolder(cameraKey) {
     var _this = this;
@@ -51,7 +55,7 @@ class Database {
           memo.push([segment.timestamp, target]);
           return memo;
         }, []);
-        yield _this2.prisma.$transaction(queries.map((_ref) => {
+        yield _this2.prisma.$transaction(queries.map(_ref => {
           var [timestamp, path] = _ref;
           return _this2.prisma.scene.create({
             data: {
