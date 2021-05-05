@@ -20,10 +20,11 @@ export class Smooth {
     let segments = this.createSegments(
       await this.db.seekFrom(cameraKey, current)
     )
+    current *= 1000 // convert back from seconds to ms
 
     if (
       typeof this.tokens[token] === "undefined" ||
-      Math.abs(current - this.tokens[token].first) > 60
+      Math.abs(current - this.tokens[token].first) > 60 * 1000
     ) {
       if (segments.length === 0) return { segments, seq: 0 }
       this.tokens[token] = {
@@ -41,7 +42,7 @@ export class Smooth {
 
     if (this.tokens[token].next <= current) {
       segments = this.createSegments(
-        await this.db.seekFrom(cameraKey, this.tokens[token].next)
+        await this.db.seekFrom(cameraKey, Math.floor(this.tokens[token].next / 1000)) // db.seekFrom accepts seconds
       )
 
       this.tokens[token].first = segments[0].timestamp

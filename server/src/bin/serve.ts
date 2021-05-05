@@ -48,7 +48,8 @@ const main = async () => {
       .filter((x): x is Segment => {
         return x != null
       })
-
+    
+    res.set("Content-Type", "application/x-mpegURL")
     res.send(manifest.getManifest(items, 1, true))
   })
 
