@@ -1,7 +1,7 @@
 const auth = require("./auth.json")
 
 module.exports = {
-  base: "C:\\Work\\cctv-media",
+  base: "/media/linaro/cctv",
   manifest: "manifest.m3u8",
   segmentName: "%Y_%m_%d_%H/sg_%s_%%t.ts",
   maxAge: 7 * 24 * 60 * 60,

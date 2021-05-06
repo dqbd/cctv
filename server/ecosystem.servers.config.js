@@ -6,11 +6,6 @@ module.exports = {
       log_date_format: "YYYY-MM-DD HH:mm:ss",
     },
     {
-      name: "cleanup",
-      script: "./dist/bin/cleanup.js",
-      log_date_format: "YYYY-MM-DD HH:mm:ss",
-    },
-    {
       name: "sync",
       script: "./dist/bin/sync.js",
       log_date_format: "YYYY-MM-DD HH:mm:ss",
