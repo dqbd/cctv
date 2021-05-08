@@ -3,10 +3,9 @@ import { useContext, useState } from "react"
 import { HLSPlayer } from "components/HLSPlayer"
 import { Scrobber } from "components/Scrobber/Scrobber"
 
-import { API_URL } from "utils/constants"
 import { css } from "@emotion/react"
 import { useRouter } from "next/dist/client/router"
-import { DataProvider } from "utils/dataProvider"
+import { StreamContext } from "utils/stream"
 
 type Props = {
   name: string
@@ -32,12 +31,12 @@ function generateUrl(args: {
 }): string | null {
   if (!args.name) return null
 
-  let baseUrl = `${API_URL}/data/${args.name}/`
-  let type = "stream.m3u8"
+  let baseUrl = `/api/data/${args.name}`
+  let type = "/stream.m3u8"
 
   let params = []
   if (args.from > 0) {
-    type = "slice.m3u8"
+    type = "/slice.m3u8"
     params.push(`from=${args.from}`)
 
     if (args.to > 0 && args.from < args.to) {
@@ -65,7 +64,7 @@ export default function Page(props: Props) {
 
   const { query } = useRouter()
   const name = query.cameraKey as string | undefined
-  const data = useContext(DataProvider)
+  const data = useContext(StreamContext)
   const stream = data.streams.find(({ key }) => key === name)
 
   const url = generateUrl({

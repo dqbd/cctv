@@ -1,5 +1,5 @@
 import { createContext } from "react"
 
-export const DataProvider = createContext<{
+export const StreamContext = createContext<{
   streams: { key: string; name: string; color: string }[]
 }>({ streams: [] })

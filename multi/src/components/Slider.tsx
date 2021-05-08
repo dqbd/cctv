@@ -2,8 +2,9 @@ import { css } from "@emotion/react"
 import { useRef, useLayoutEffect } from "react"
 import moment from "moment"
 import { useGesture, GestureHandlersPartial } from "react-use-gesture"
+import { getConfig } from "shared/config"
 
-import { MAX_LENGTH } from "utils/constants"
+const config = getConfig()
 
 export const Slider = (props: {
   value: number
@@ -75,7 +76,7 @@ export const Slider = (props: {
         const now = moment()
         const shiftedNow = now.clone().add(shift, "seconds")
         const startDayX = Math.min(
-          MAX_LENGTH,
+          config.maxAge,
           now.diff(shiftedNow.clone().startOf("day"), "second")
         )
         const endDayX = Math.max(
@@ -105,7 +106,7 @@ export const Slider = (props: {
       // (valueOffset + userOffset) <= 0 && (valueOffset + userOffset) >= -MAX_LENGTH_IN_SECONDS
       userOffset = Math.min(
         -valueOffset,
-        Math.max(-MAX_LENGTH - valueOffset, userOffset)
+        Math.max(-config.maxAge - valueOffset, userOffset)
       )
 
       // onScroll assumes offset in ms

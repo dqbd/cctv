@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client"
 
 import fsPath from "path"
-import { createSegment } from "./segment"
+import { createSegment } from "shared/segment"
 
 export class Database {
   prisma = new PrismaClient()

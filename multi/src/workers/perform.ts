@@ -1,11 +1,11 @@
-import { getConfig } from "./lib/config"
+import { getConfig } from "shared/config"
+import { getStreamUrl } from "shared/onvif"
+import { setSystemTime } from "shared/clocksync"
 
 import url from "url"
 import path from "path"
 import mkdirp from "mkdirp"
 import ffmpeg from "fluent-ffmpeg"
-import { setSystemTime } from "./lib/clocksync"
-import { getStreamUrl } from "./lib/onvif"
 
 const config = getConfig()
 

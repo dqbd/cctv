@@ -1,6 +1,3 @@
-const PORT = 80
-
-export const API_URL = `http://192.168.2.188`
 export const COLORS = [
   "#EB5757",
   "#F2994A",
@@ -12,5 +9,3 @@ export const COLORS = [
   "#56CCF2",
   "#9B51E0",
 ]
-
-export const MAX_LENGTH = 7 * 24 * 60 * 60

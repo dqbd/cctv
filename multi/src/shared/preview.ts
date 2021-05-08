@@ -1,8 +1,7 @@
-import { getSnapshotUrl } from "./onvif"
+import { getSnapshotUrl } from "shared/onvif"
 import fetch from "node-fetch"
 
 const SCREENSHOT_DELAY = 10 * 1000
-
 const cache = new Map()
 
 export async function getScreenshot(onvif: string, refresh = false) {

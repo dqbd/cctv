@@ -23,3 +23,9 @@ export function createSegment(filename: string): Segment | null {
     extinf,
   }
 }
+
+export function createSegments(paths: string[]) {
+  return paths
+    .map((item) => createSegment(item))
+    .filter((x): x is Segment => x != null)
+}

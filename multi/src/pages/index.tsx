@@ -1,9 +1,8 @@
 import { css, Global } from "@emotion/react"
-import { DataProvider } from "utils/dataProvider"
+import { StreamContext } from "utils/stream"
 import { RefreshImg } from "components/RefreshImg"
 import Link from "next/link"
 import Head from "next/head"
-import { API_URL } from "utils/constants"
 
 export default function Page() {
   return (
@@ -31,7 +30,7 @@ export default function Page() {
           }
         `}
       >
-        <DataProvider.Consumer>
+        <StreamContext.Consumer>
           {({ streams }) =>
             streams.map(({ key, name, color }) => (
               <Link href={`/camera/${key}`} key={key}>
@@ -150,13 +149,13 @@ export default function Page() {
                       }
                     `}
                   >
-                    <RefreshImg src={`${API_URL}/frame/${key}`} alt={name} />
+                    <RefreshImg src={`/api/data/${key}/frame.jpg`} alt={name} />
                   </div>
                 </div>
               </Link>
             ))
           }
-        </DataProvider.Consumer>
+        </StreamContext.Consumer>
       </div>
     </div>
   )

@@ -1,10 +1,12 @@
 import { useRef, useLayoutEffect, useState, useEffect } from "react"
 import moment from "moment"
-import { MAX_LENGTH } from "utils/constants"
 import { vibrateDecorator } from "utils/vibrateDecorator"
 import { Slider } from "components/Slider"
 import Link from "next/link"
 import * as S from "components/Scrobber/Scrobber.styled"
+import { getConfig } from "shared/config"
+
+const config = getConfig()
 
 const formatTime = (time: number) => {
   const absTime = Math.abs(time)
@@ -106,7 +108,7 @@ export function Scrobber(props: {
 
     function commitShift(newShift: number) {
       setScrollShift(null)
-      onChange(Math.max(0, Math.min(MAX_LENGTH * 1000, newShift)))
+      onChange(Math.max(0, Math.min(config.maxAge * 1000, newShift)))
     }
 
     callbacks.current.sliderChange = vibrateDecorator(commitShift)
@@ -142,7 +144,7 @@ export function Scrobber(props: {
   const contentShift = scrollShift != null ? scrollShift : props.value
   const date = moment(new Date(current - contentShift))
 
-  let minRangeRounded = current - MAX_LENGTH * 1000
+  let minRangeRounded = current - config.maxAge * 1000
   minRangeRounded -= minRangeRounded % (60 * 1000)
 
   let maxRangeRounded = current

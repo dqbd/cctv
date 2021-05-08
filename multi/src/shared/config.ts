@@ -1,4 +1,4 @@
-import config from "../../../config"
+import config from "../../config"
 
 import * as z from "zod"
 const configShape = z.object({
@@ -9,7 +9,6 @@ const configShape = z.object({
   syncInterval: z.number(),
   cleanupPolling: z.number(),
   segmentSize: z.number(),
-  port: z.number().positive(),
   targets: z.record(
     z.object({
       name: z.string(),

@@ -1,26 +1,23 @@
 import { css, Global } from "@emotion/react"
 import { AppProps } from "next/app"
 import Head from "next/head"
-import { useState, useEffect } from "react"
-import { API_URL, COLORS } from "utils/constants"
-import { DataProvider } from "utils/dataProvider"
+
+import { COLORS } from "utils/constants"
+import { StreamContext } from "utils/stream"
+import { getConfig } from "shared/config"
+
+const config = getConfig()
+
+const streams = Object.entries(config.targets).map(
+  ([key, { name }], index) => ({
+    key,
+    name,
+    color: COLORS[index % COLORS.length],
+  })
+)
 
 export default function App(props: AppProps) {
   const { Component, pageProps } = props
-  const [streams, setStreams] = useState([])
-
-  useEffect(() => {
-    fetch(`${API_URL}/streams`)
-      .then((a) => a.json())
-      .then(({ data }) =>
-        setStreams(
-          data.map((item: any, index: number) => ({
-            ...item,
-            color: COLORS[index % COLORS.length],
-          }))
-        )
-      )
-  }, [])
 
   return (
     <>
@@ -76,9 +73,9 @@ export default function App(props: AppProps) {
           }
         `}
       />
-      <DataProvider.Provider value={{ streams }}>
+      <StreamContext.Provider value={{ streams }}>
         <Component {...pageProps} />
-      </DataProvider.Provider>
+      </StreamContext.Provider>
     </>
   )
 }

@@ -2,14 +2,12 @@ import path from "path"
 import util from "util"
 import chokidar from "chokidar"
 import fs from "fs"
-import { Database } from "./lib/database"
-import { getConfig } from "./lib/config"
+import { Database } from "shared/database"
+import { getConfig } from "shared/config"
 import PQueue from "p-queue"
 
-const readdir = util.promisify(require("fs").readdir)
 const rimraf = util.promisify(require("rimraf"))
 
-const readFile = util.promisify(fs.readFile)
 const config = getConfig()
 const db = new Database()
 const queue = new PQueue({ concurrency: 1 })
@@ -25,14 +23,14 @@ async function readNonEmptyFile(target: string) {
   const maxAttempts = (config.segmentSize * 1000) / delay
 
   while (!content && attempts < maxAttempts) {
-    content = await readFile(target, "utf-8")
+    content = await fs.promises.readFile(target, "utf-8")
     if (!content) await wait(delay)
   }
   return content
 }
 
-const cleanup_main = async () => {
-  const cleanup = async () => {
+const cleanup = async () => {
+  async function task() {
     for (const cameraKey of Object.keys(config.targets)) {
       console.log("Cleanup", cameraKey)
       const baseFolder = path.resolve(config.base, cameraKey)
@@ -49,24 +47,15 @@ const cleanup_main = async () => {
       ).valueOf()
 
       try {
-        const folders = (await readdir(baseFolder)).filter(
-          (folderName: string) => {
-            const [year, month, day, hour] = folderName
-              .split("_")
-              .map((num) => Number.parseInt(num, 10))
-            const folderTime = new Date(
-              year,
-              month - 1,
-              day,
-              hour,
-              0,
-              0,
-              0
-            ).valueOf()
-            const cleanupTime = folderTime + config.maxAge * 1000
-            return cleanupTime <= nowTime
-          }
-        )
+        let folders = await fs.promises.readdir(baseFolder)
+        folders = folders.filter((folderName: string) => {
+          const [year, month, day, hour] = folderName
+            .split("_")
+            .map((num) => Number.parseInt(num, 10))
+          const folderTime = new Date(year, month - 1, day, hour, 0, 0, 0)
+          const cleanupTime = folderTime.valueOf() + config.maxAge * 1000
+          return cleanupTime <= nowTime
+        })
 
         await folders.reduce((memo: Promise<void>, folder: string) => {
           return memo.then(() => {
@@ -77,7 +66,9 @@ const cleanup_main = async () => {
 
         console.log("Deleted folders", folders && folders.join(", "))
 
-        await queue.add(() => db.removeOldScenesAndMotion(cameraKey, config.maxAge))
+        await queue.add(() =>
+          db.removeOldScenesAndMotion(cameraKey, config.maxAge)
+        )
         console.log("Deleted from DB", cameraKey)
       } catch (err) {
         if (err.code !== "ENOENT") throw err
@@ -86,7 +77,7 @@ const cleanup_main = async () => {
   }
 
   const loop = async () => {
-    await cleanup()
+    await task()
     console.log("Cleanup finished for now")
     await wait(config.cleanupPolling * 1000)
     loop()
@@ -95,7 +86,7 @@ const cleanup_main = async () => {
   loop()
 }
 
-const sync_main = async () => {
+async function sync() {
   const manifests = Object.keys(config.targets).map((cameraKey) => {
     return path.resolve(config.base, cameraKey, config.manifest)
   })
@@ -134,10 +125,8 @@ const sync_main = async () => {
 }
 
 const main = async () => {
-    cleanup_main();
-    sync_main();
+  cleanup()
+  sync()
 }
+
 main()
-
-// cleanup
-

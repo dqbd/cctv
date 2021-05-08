@@ -4,6 +4,9 @@ const fs = require("fs")
 const cwd = process.cwd()
 
 module.exports = {
+  future: {
+    webpack5: true,
+  },
   webpack: (config, { isServer }) => {
     if (isServer) {
       return {
@@ -20,8 +23,6 @@ module.exports = {
               memo[name] = path.resolve(cwd, "src/workers", filename)
               return memo
             }, {})
-
-            console.log(workerEntries)
 
             return {
               ...entry,
