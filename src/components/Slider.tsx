@@ -1,9 +1,8 @@
 import { css } from "@emotion/react"
 import { useRef, useLayoutEffect } from "react"
 import moment from "moment"
-import { useGesture, GestureHandlersPartial, Handler } from "react-use-gesture"
+import { useGesture, GestureHandlersPartial } from "react-use-gesture"
 import { getConfig } from "shared/config"
-import { Coordinates } from "react-use-gesture/states"
 
 const config = getConfig()
 

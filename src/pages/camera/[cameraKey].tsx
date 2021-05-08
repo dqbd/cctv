@@ -6,22 +6,7 @@ import { Scrobber } from "components/Scrobber/Scrobber"
 import { css } from "@emotion/react"
 import { useRouter } from "next/dist/client/router"
 import { StreamContext } from "utils/stream"
-
-type Props = {
-  name: string
-  streams: {
-    key: string
-    name: string
-    color: string
-  }[]
-}
-
-type State = {
-  from: number
-  to: number
-  shift: number
-  showTools: boolean
-}
+import nosleep from "nosleep.js"
 
 function generateUrl(args: {
   name?: string
@@ -54,8 +39,8 @@ function generateUrl(args: {
   return baseUrl
 }
 
-export default function Page(props: Props) {
-  const [state, setState] = useState<State>({
+export default function Page() {
+  const [state, setState] = useState({
     from: 0,
     to: 0,
     shift: 0,

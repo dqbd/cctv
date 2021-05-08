@@ -5,6 +5,9 @@ import Head from "next/head"
 import { COLORS } from "utils/constants"
 import { StreamContext } from "utils/stream"
 import { getConfig } from "shared/config"
+import { SleepContext } from "utils/sleep"
+import { useEffect, useState } from "react"
+import NoSleep from "nosleep.js"
 
 const config = getConfig()
 
@@ -18,6 +21,12 @@ const streams = Object.entries(config.targets).map(
 
 export default function App(props: AppProps) {
   const { Component, pageProps } = props
+
+  const [sleep, setSleep] = useState<NoSleep>()
+
+  useEffect(() => {
+    setSleep(new NoSleep())
+  }, [])
 
   return (
     <>
@@ -73,9 +82,11 @@ export default function App(props: AppProps) {
           }
         `}
       />
-      <StreamContext.Provider value={{ streams }}>
-        <Component {...pageProps} />
-      </StreamContext.Provider>
+      <SleepContext.Provider value={sleep}>
+        <StreamContext.Provider value={{ streams }}>
+          <Component {...pageProps} />
+        </StreamContext.Provider>
+      </SleepContext.Provider>
     </>
   )
 }
