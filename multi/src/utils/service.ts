@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-namespace */
 declare global {
   namespace NodeJS {
     interface Global {
-      db: any
-      smooth: any
+      db: unknown
+      smooth: unknown
     }
   }
 }

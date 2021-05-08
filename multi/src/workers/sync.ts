@@ -5,8 +5,9 @@ import fs from "fs"
 import { Database } from "shared/database"
 import { getConfig } from "shared/config"
 import PQueue from "p-queue"
+import rimrafCb from "rimraf"
 
-const rimraf = util.promisify(require("rimraf"))
+const rimraf = util.promisify(rimrafCb)
 
 const config = getConfig()
 const db = new Database()
@@ -16,7 +17,7 @@ const wait = (delay: number) =>
   new Promise((resolve) => setTimeout(resolve, delay))
 
 async function readNonEmptyFile(target: string) {
-  let content: string = ""
+  let content = ""
   let attempts = 0
 
   const delay = 100
@@ -25,6 +26,7 @@ async function readNonEmptyFile(target: string) {
   while (!content && attempts < maxAttempts) {
     content = await fs.promises.readFile(target, "utf-8")
     if (!content) await wait(delay)
+    attempts += 1
   }
   return content
 }
@@ -112,9 +114,12 @@ async function sync() {
     if (manifestCache[cameraKey]) {
       const toInsert = rdiff(manifestCache[cameraKey], manifest)
 
-      for (let item of toInsert) {
+      for (const item of toInsert) {
         const relative = path.relative(baseFolder, item)
-        await queue.add(() => db.insert(cameraKey, relative))
+        await queue.add(() => {
+          console.log("Insert", cameraKey, relative)
+          return db.insert(cameraKey, relative)
+        })
       }
     }
 

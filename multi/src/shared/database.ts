@@ -18,8 +18,6 @@ export class Database {
     filenames: string[],
     len = 3 * 24 * 3600
   ) {
-    console.log("Insert", camera, keyBase, filenames.length)
-
     let i = 0
     const n = filenames.length
 
@@ -46,7 +44,6 @@ export class Database {
   }
 
   async insert(camera: string, path: string) {
-    console.log("Insert", camera, path)
     const segment = createSegment(fsPath.basename(path))
     if (!segment || segment.duration <= 0) return null
 

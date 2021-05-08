@@ -12,7 +12,10 @@ const config = getConfig()
 const db = registerService("db", () => new Database())
 const smooth = registerService("smooth", () => new Smooth())
 
-export default async function (req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   res.send({ hello: "world" })
 
   const folder = req.query.folder as string

@@ -14,7 +14,10 @@ function parseNumberQuery(value: string | string[] | undefined) {
   }
   return undefined
 }
-export default async function (req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   const folder = req.query.folder as string
   if (!folder) return res.status(400).send("Missing from parameter")
 

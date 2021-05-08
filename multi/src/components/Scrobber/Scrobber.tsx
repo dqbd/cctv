@@ -3,7 +3,7 @@ import moment from "moment"
 import { vibrateDecorator } from "utils/vibrateDecorator"
 import { Slider } from "components/Slider"
 import Link from "next/link"
-import * as S from "components/Scrobber/Scrobber.styled"
+import * as S from "./Scrobber.styled"
 import { getConfig } from "shared/config"
 
 const config = getConfig()
@@ -16,7 +16,7 @@ const formatTime = (time: number) => {
   const hours = Math.floor(absTime / 1000 / 60 / 60) % 24
   const days = Math.floor(absTime / 1000 / 60 / 60 / 24)
 
-  let result = []
+  const result = []
   if (seconds > 0 || minutes > 0 || hours > 0) {
     result.unshift(`${seconds.toFixed(0).padStart(2, "0")}s`)
   }

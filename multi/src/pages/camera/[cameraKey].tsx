@@ -34,7 +34,7 @@ function generateUrl(args: {
   let baseUrl = `/api/data/${args.name}`
   let type = "/stream.m3u8"
 
-  let params = []
+  const params = []
   if (args.from > 0) {
     type = "/slice.m3u8"
     params.push(`from=${args.from}`)
@@ -73,8 +73,6 @@ export default function Page(props: Props) {
     to: state.to,
     shift: state.shift,
   })
-
-  console.log(url)
 
   return (
     <div

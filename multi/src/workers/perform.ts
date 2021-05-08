@@ -39,9 +39,9 @@ const start = async () => {
       `-hls_flags second_level_segment_duration`,
       `-hls_segment_filename ${path.resolve(baseFolder, config.segmentName)}`,
     ])
-    .on("start", (cmd: any) => console.log("Command", cmd))
-    .on("codecData", (data: any) => console.log("Codec data", data))
-    .on("progress", (progress: { frames: any; timemark: any }) =>
+    .on("start", (cmd) => console.log("Command", cmd))
+    .on("codecData", (data) => console.log("Codec data", data))
+    .on("progress", (progress) =>
       console.log("Processing", progress.frames, progress.timemark)
     )
     .on("stderr", console.log)
@@ -49,7 +49,7 @@ const start = async () => {
       console.log("main stream end")
       process.exit()
     })
-    .on("error", (err: any, stdout: any, stderr: any) => {
+    .on("error", (err, stdout, stderr) => {
       console.log("An error occurred", err.message, stdout, stderr)
       process.exit()
     })

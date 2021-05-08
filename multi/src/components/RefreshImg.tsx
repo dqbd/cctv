@@ -1,13 +1,9 @@
-import { useEffect, useState } from "react"
+import { forwardRef, ImgHTMLAttributes, useEffect, useState } from "react"
 
-export function RefreshImg({
-  src,
-  alt,
-  ...props
-}: {
-  src: string | null
-  [rest: string]: any
-}) {
+export const RefreshImg = forwardRef<
+  HTMLImageElement,
+  ImgHTMLAttributes<HTMLImageElement>
+>(({ src, alt, ...props }, ref) => {
   const [session, setSession] = useState(Date.now())
   const [visible, setVisible] = useState(false)
   useEffect(() => {
@@ -20,12 +16,13 @@ export function RefreshImg({
 
   return (
     <img
+      {...props}
       src={`${src}?q=${session}`}
       alt={alt}
+      ref={ref}
       onLoad={() => setVisible(true)}
       onError={() => setVisible(false)}
-      style={{ opacity: visible ? 1 : 0, transition: "all 0.3s" }}
-      {...props}
+      css={{ opacity: visible ? 1 : 0, transition: "all 0.3s" }}
     />
   )
-}
+})

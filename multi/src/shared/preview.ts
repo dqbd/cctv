@@ -19,12 +19,8 @@ export async function getScreenshot(onvif: string, refresh = false) {
   let { image } = cached
 
   if (timeout + SCREENSHOT_DELAY <= now || refresh) {
-    try {
-      image = await fetch(url).then((a) => a.buffer())
-      cache.set(onvif, { timeout: now, image, url })
-    } catch (err) {
-      console.log(err)
-    }
+    image = await fetch(url).then((a) => a.buffer())
+    cache.set(onvif, { timeout: now, image, url })
   }
 
   return image

@@ -26,6 +26,8 @@ const main = async () => {
       const files = (
         await fs.promises.readdir(path.resolve(folderTarget, target))
       ).map((file) => path.join(target, file))
+
+      console.log("Insert", cameraKey, target, files.length)
       await db.insertFolder(cameraKey, target, files)
     }
   }

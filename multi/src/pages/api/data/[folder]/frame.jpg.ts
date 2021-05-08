@@ -3,7 +3,11 @@ import { getConfig } from "shared/config"
 import { getScreenshot } from "shared/preview"
 
 const config = getConfig()
-export default async function (req: NextApiRequest, res: NextApiResponse) {
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   const folder = req.query.folder as string
   const refresh = req.query.refresh as string
 
@@ -17,6 +21,7 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
     res.setHeader("Content-Transfer-Encoding", "binary")
     res.send(payload)
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.log(err)
     res.status(500).end()
   }

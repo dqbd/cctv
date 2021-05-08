@@ -5,7 +5,10 @@ import { getConfig } from "shared/config"
 
 const config = getConfig()
 
-export default async function (req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   const folder = req.query.folder as string
   const date = req.query.date as string
   const file = req.query.file as string

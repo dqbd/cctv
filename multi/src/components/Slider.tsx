@@ -1,38 +1,36 @@
 import { css } from "@emotion/react"
 import { useRef, useLayoutEffect } from "react"
 import moment from "moment"
-import { useGesture, GestureHandlersPartial } from "react-use-gesture"
+import { useGesture, GestureHandlersPartial, Handler } from "react-use-gesture"
 import { getConfig } from "shared/config"
+import { Coordinates } from "react-use-gesture/states"
 
 const config = getConfig()
 
-export const Slider = (props: {
+export function Slider(props: {
   value: number
   color: string
-  onScroll?: (shift: number) => any
-  onScrollEnd?: (shift: number) => any
-}) => {
-  const callbackRef = useRef<GestureHandlersPartial>({
-    onDrag: () => {},
-    onDragEnd: () => {},
-    onWheel: () => {},
-    onWheelEnd: () => {},
+  onScroll?: (shift: number) => void
+  onScrollEnd?: (shift: number) => void
+}) {
+  const callbackRef = useRef<
+    Omit<GestureHandlersPartial, "onWheelEnd" | "onDragEnd"> & {
+      onDragEnd: () => void
+      onWheelEnd: () => void
+    }
+  >({
+    onDrag: () => void 0,
+    onDragEnd: () => void 0,
+    onWheel: () => void 0,
+    onWheelEnd: () => void 0,
   })
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const bind = useGesture({
-    onWheel: (event) => {
-      callbackRef.current.onWheel?.(event)
-    },
-    onWheelEnd: (event: any) => {
-      callbackRef.current.onWheelEnd?.(event)
-    },
-    onDrag: (event) => {
-      callbackRef.current.onDrag?.(event)
-    },
-    onDragEnd: (event: any) => {
-      callbackRef.current.onDragEnd?.(event)
-    },
+    onWheel: (event) => callbackRef.current.onWheel?.(event),
+    onDrag: (event) => callbackRef.current.onDrag?.(event),
+    onWheelEnd: () => callbackRef.current.onWheelEnd?.(),
+    onDragEnd: () => callbackRef.current.onDragEnd?.(),
   })
 
   useLayoutEffect(() => {
@@ -56,7 +54,7 @@ export const Slider = (props: {
       canvas.height = parentRect.height
 
       // draws the line, receving arguments as px, not relative to time
-      const drawLine = (xFrom: number, xTo: number, viewOffset: number = 0) => {
+      const drawLine = (xFrom: number, xTo: number, viewOffset = 0) => {
         const { width, height } = canvas.getBoundingClientRect()
 
         ctx.lineWidth = 10
@@ -119,7 +117,7 @@ export const Slider = (props: {
 
     callbackRef.current = {
       onDrag: (event) => handleScroll(-event.delta[0]),
-      onWheel: (event: any) => handleScroll(event.delta[0] || -event.delta[1]),
+      onWheel: (event) => handleScroll(event.delta[0] || -event.delta[1]),
       onDragEnd: () => handleScrollEnd(),
       onWheelEnd: () => handleScrollEnd(),
     }

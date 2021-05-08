@@ -5,8 +5,8 @@ export function HLSPlayer(props: { source: string }) {
   const ref = useRef<HTMLVideoElement | null>(null)
 
   useEffect(() => {
+    const videoRef = ref.current
     let timer: number
-    let videoRef = ref.current
     let hls: Hls | undefined
 
     if (props.source && videoRef) {

@@ -1,8 +1,8 @@
-export const vibrateDecorator = (
-  callback: ((...args: any) => any) | undefined | null
-) => {
+export function vibrateDecorator<T extends Array<unknown>, U>(
+  callback: ((...args: T) => U) | undefined | null
+) {
   if (!callback) return undefined
-  return (...args: any): any => {
+  return (...args: T): U => {
     try {
       navigator.vibrate(200)
     } catch (err) {}
