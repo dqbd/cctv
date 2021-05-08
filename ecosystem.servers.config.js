@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: "hackycctv",
-      script: "./.next/server/serve.js",
+      script: "yarn start -p 80",
       log_date_format: "YYYY-MM-DD HH:mm:ss",
     },
     {
