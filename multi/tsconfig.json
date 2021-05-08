@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "preserve",
+    "noFallthroughCasesInSwitch": true,
+    "jsxImportSource": "@emotion/react"
+  },
+  "include": [
+    "src",
+    "ecosystem.all.config.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts",
+    "src/sw-*.js",
+    "src/idb.js"
+  ]
+}
