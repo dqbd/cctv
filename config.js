@@ -8,7 +8,6 @@ module.exports = {
   syncInterval: 60 * 60 /* sync time every day */,
   cleanupPolling: 60 /* every minute */,
   segmentSize: 3,
-  port: 80,
   targets: {
     VENKU: {
       name: "Venku",
