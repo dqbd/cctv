@@ -16,8 +16,6 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  res.send({ hello: "world" })
-
   const folder = req.query.folder as string
   let shift = Number(req.query.shift || 0)
   if (Number(req.query.from || 0)) {
@@ -34,7 +32,16 @@ export default async function handler(
     }
 
     const file = await fs.promises.readFile(target, { encoding: "utf-8" })
-    res.send(file.split(config.base).join("/data"))
+    const transformed = file
+      .split("\n")
+      .map((line) =>
+        line.startsWith(config.base)
+          ? path.relative(path.join(config.base, folder), line)
+          : line
+      )
+      .join("\n")
+
+    res.send(transformed)
   } else {
     const { segments, seq } = await smooth.seek(db, folder, shift)
     res.send(getManifest(config, segments, seq))
