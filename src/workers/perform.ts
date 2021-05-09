@@ -1,4 +1,4 @@
-import { getConfig } from "shared/config"
+import { config } from "shared/config"
 import { getStreamUrl } from "shared/onvif"
 import { setSystemTime } from "shared/clocksync"
 
@@ -6,8 +6,6 @@ import url from "url"
 import path from "path"
 import mkdirp from "mkdirp"
 import ffmpeg from "fluent-ffmpeg"
-
-const config = getConfig()
 
 const cameraKey = process.argv.slice().pop()
 if (!cameraKey) throw Error("Invalid camera key")
@@ -37,7 +35,10 @@ const start = async () => {
       `-hls_start_number_source epoch`,
       `-use_localtime 1`,
       `-hls_flags second_level_segment_duration`,
-      `-hls_segment_filename ${path.resolve(baseFolder, config.segmentName)}`,
+      `-hls_segment_filename ${path.resolve(
+        baseFolder,
+        "%Y_%m_%d_%H/sg_%s_%%t.ts"
+      )}`,
     ])
     .on("start", (cmd) => console.log("Command", cmd))
     .on("codecData", (data) => console.log("Codec data", data))

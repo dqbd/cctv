@@ -1,12 +1,11 @@
 import { NextApiRequest, NextApiResponse } from "next"
-import { getConfig } from "shared/config"
+import { config } from "shared/config"
 import { Database } from "shared/database"
 import { getManifest } from "shared/manifest"
 import { createSegments } from "shared/segment"
 import { registerService } from "utils/service"
 
 const db = registerService("db", () => new Database())
-const config = getConfig()
 
 function parseNumberQuery(value: string | string[] | undefined) {
   if (typeof value === "string") {

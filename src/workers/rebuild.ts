@@ -2,8 +2,7 @@ import fs from "fs"
 import path from "path"
 import mkdirp from "mkdirp"
 import { Database } from "shared/database"
-import { getConfig } from "shared/config"
-const config = getConfig()
+import { config } from "shared/config"
 
 const db = new Database()
 

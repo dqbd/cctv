@@ -4,12 +4,10 @@ import Head from "next/head"
 
 import { COLORS } from "utils/constants"
 import { StreamContext } from "utils/stream"
-import { getConfig } from "shared/config"
+import { config } from "shared/config"
 import { SleepContext } from "utils/sleep"
 import { useEffect, useState } from "react"
 import NoSleep from "nosleep.js"
-
-const config = getConfig()
 
 const streams = Object.entries(config.targets).map(
   ([key, { name }], index) => ({

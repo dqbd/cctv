@@ -1,9 +1,7 @@
 import path from "path"
 import send from "send"
 import { NextApiRequest, NextApiResponse } from "next"
-import { getConfig } from "shared/config"
-
-const config = getConfig()
+import { config } from "shared/config"
 
 export default async function handler(
   req: NextApiRequest,

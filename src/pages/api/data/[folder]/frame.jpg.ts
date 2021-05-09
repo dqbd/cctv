@@ -1,8 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next"
-import { getConfig } from "shared/config"
+import { config } from "shared/config"
 import { getScreenshot } from "shared/preview"
-
-const config = getConfig()
 
 export default async function handler(
   req: NextApiRequest,

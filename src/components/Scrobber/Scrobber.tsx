@@ -4,9 +4,7 @@ import { vibrateDecorator } from "utils/vibrateDecorator"
 import { Slider } from "components/Slider"
 import Link from "next/link"
 import * as S from "./Scrobber.styled"
-import { getConfig } from "shared/config"
-
-const config = getConfig()
+import { config } from "shared/config"
 
 const formatTime = (time: number) => {
   const absTime = Math.abs(time)

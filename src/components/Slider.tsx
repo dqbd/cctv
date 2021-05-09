@@ -2,9 +2,7 @@ import { css } from "@emotion/react"
 import { useRef, useLayoutEffect } from "react"
 import moment from "moment"
 import { useGesture, GestureHandlersPartial } from "react-use-gesture"
-import { getConfig } from "shared/config"
-
-const config = getConfig()
+import { config } from "shared/config"
 
 export function Slider(props: {
   value: number

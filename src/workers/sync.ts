@@ -3,13 +3,12 @@ import util from "util"
 import chokidar from "chokidar"
 import fs from "fs"
 import { Database } from "shared/database"
-import { getConfig } from "shared/config"
+import { config } from "shared/config"
 import PQueue from "p-queue"
 import rimrafCb from "rimraf"
 
 const rimraf = util.promisify(rimrafCb)
 
-const config = getConfig()
 const db = new Database()
 const queue = new PQueue({ concurrency: 1 })
 
