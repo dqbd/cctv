@@ -1,8 +1,7 @@
 import { css, Global } from "@emotion/react"
 import { StreamContext } from "utils/stream"
 import { RefreshImg } from "components/RefreshImg"
-import Head from "next/head"
-import { useContext, useEffect } from "react"
+import { Fragment, useContext, useEffect } from "react"
 import { SleepContext } from "utils/sleep"
 import { useRouter } from "next/router"
 
@@ -15,10 +14,7 @@ export default function Page() {
   }, [sleep])
 
   return (
-    <div>
-      <Head>
-        <title>Kamera</title>
-      </Head>
+    <Fragment>
       <Global
         styles={css`
           body {
@@ -169,6 +165,6 @@ export default function Page() {
           }
         </StreamContext.Consumer>
       </div>
-    </div>
+    </Fragment>
   )
 }

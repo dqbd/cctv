@@ -8,6 +8,7 @@ import { config } from "shared/config"
 import { SleepContext } from "utils/sleep"
 import { useEffect, useState } from "react"
 import NoSleep from "nosleep.js"
+import { DefaultSeo } from "next-seo"
 
 const streams = Object.entries(config.targets).map(
   ([key, { name }], index) => ({
@@ -65,6 +66,7 @@ export default function App(props: AppProps) {
 
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
+      <DefaultSeo titleTemplate="%s | Kamera" defaultTitle="Kamera" />
       <Global
         styles={css`
           body {

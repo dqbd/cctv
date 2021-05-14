@@ -84,6 +84,7 @@ export const TimeOffset = styled.div`
   padding: 0 calc(1em + 1.25em) 0 1em;
   text-align: center;
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 `
 
 export const Live = styled.span`
@@ -166,9 +167,15 @@ export const Pill = styled.div`
   border-radius: 1.25em;
   text-align: center;
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.3s;
+
+  &:focus-within {
+    background: #687590;
+  }
 `
 
-export const PillCover = styled.input`
+export const PillInput = styled.input`
   position: absolute;
   top: 0;
   left: 0;
@@ -189,4 +196,5 @@ export const PillCover = styled.input`
   height: 100%;
 
   cursor: pointer;
+  outline: none;
 `

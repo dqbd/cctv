@@ -1,4 +1,4 @@
-import { useContext, useState } from "react"
+import { Fragment, useContext, useState } from "react"
 
 import { HLSPlayer } from "components/HLSPlayer"
 import { Scrobber } from "components/Scrobber/Scrobber"
@@ -6,7 +6,7 @@ import { Scrobber } from "components/Scrobber/Scrobber"
 import { css } from "@emotion/react"
 import { useRouter } from "next/dist/client/router"
 import { StreamContext } from "utils/stream"
-import nosleep from "nosleep.js"
+import { NextSeo } from "next-seo"
 
 function generateUrl(args: {
   name?: string
@@ -60,36 +60,39 @@ export default function Page() {
   })
 
   return (
-    <div
-      css={css`
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    <Fragment>
+      <NextSeo title={stream?.name} />
+      <div
+        css={css`
+          display: flex;
+          align-items: center;
+          justify-content: center;
 
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
+          position: absolute;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0;
 
-        background: #090909;
+          background: #090909;
 
-        & > video {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-          object-position: center;
-        }
-      `}
-    >
-      {url && <HLSPlayer source={url} />}
-      {stream && (
-        <Scrobber
-          onChange={(shift) => setState((state) => ({ ...state, shift }))}
-          value={state.shift}
-          stream={stream}
-        />
-      )}
-    </div>
+          & > video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center;
+          }
+        `}
+      >
+        {url && <HLSPlayer source={url} />}
+        {stream && (
+          <Scrobber
+            onChange={(shift) => setState((state) => ({ ...state, shift }))}
+            value={state.shift}
+            stream={stream}
+          />
+        )}
+      </div>
+    </Fragment>
   )
 }
