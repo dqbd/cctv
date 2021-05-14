@@ -44,6 +44,9 @@ function TimePicker(props: {
           renderInput={({ inputProps, inputRef }) => (
             <S.PillInput {...inputProps} ref={inputRef} />
           )}
+          cancelText="Zrušit"
+          todayText="Dnes"
+          toolbarTitle="Vybrat čas"
         />
 
         <span css={{ fontSize: "1.25em" }}>
@@ -64,7 +67,7 @@ function DatePicker(props: {
   const activeDate = moment(new Date(current - props.value))
 
   return (
-    <LocalizationProvider dateAdapter={AdapterMoment}>
+    <LocalizationProvider dateAdapter={AdapterMoment} locale="cs">
       <S.Pill className={props.className}>
         <MobileDatePicker
           value={inputDate}
@@ -84,6 +87,9 @@ function DatePicker(props: {
           renderInput={({ inputProps, inputRef }) => (
             <S.PillInput {...inputProps} ref={inputRef} />
           )}
+          cancelText="Zrušit"
+          todayText="Dnes"
+          toolbarTitle="Vybrat datum"
         />
         <span css={{ fontSize: "1em" }}>
           {activeDate.format("DD. MMMM YYYY")}
