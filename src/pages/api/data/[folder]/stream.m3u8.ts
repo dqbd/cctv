@@ -15,10 +15,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const folder = req.query.folder as string
-  let shift = Number(req.query.shift || 0)
-  if (Number(req.query.from || 0)) {
-    shift += Date.now() / 1000 - Number(req.query.from || 0)
-  }
+  const shift = Number(req.query.shift || 0)
 
   if (!folder) return res.status(400).send("Invalid parameters")
   res.setHeader("Content-Type", "application/x-mpegURL")

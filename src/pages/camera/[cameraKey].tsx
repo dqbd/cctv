@@ -7,57 +7,37 @@ import { css } from "@emotion/react"
 import { useRouter } from "next/dist/client/router"
 import { StreamContext } from "utils/stream"
 import { NextSeo } from "next-seo"
+import { encodeQuery } from "utils/query"
 
-function generateUrl(args: {
-  name?: string
-  from: number
-  to: number
-  shift: number
-}): string | null {
-  if (!args.name) return null
-
-  let baseUrl = `/api/data/${args.name}`
-  let type = "/stream.m3u8"
-
-  const params = []
-  if (args.from > 0) {
-    type = "/slice.m3u8"
-    params.push(`from=${args.from}`)
-
-    if (args.to > 0 && args.from < args.to) {
-      params.push(`to=${args.to}`)
-    }
-  } else if (args.shift > 0) {
-    params.push(`shift=${Math.ceil(args.shift / 1000)}`)
+function generateUrl(
+  name: string,
+  args: {
+    from?: number
+    to?: number
+    shift: number
+  }
+): string | null {
+  if ((args.from ?? 0) > 0) {
+    return encodeQuery(`/api/data/${name}/slice.m3u8`, {
+      from: args.from,
+      to: args.to,
+    })
   }
 
-  baseUrl += type
-  if (params.length > 0) {
-    baseUrl += "?" + params.join("&")
-  }
-
-  return baseUrl
+  return encodeQuery(`/api/data/${name}/stream.m3u8`, {
+    shift: args.shift,
+  })
 }
 
 export default function Page() {
-  const [state, setState] = useState({
-    from: 0,
-    to: 0,
-    shift: 0,
-    showTools: false,
-  })
+  const [shift, setShift] = useState(0)
 
   const { query } = useRouter()
   const name = query.cameraKey as string | undefined
   const data = useContext(StreamContext)
   const stream = data.streams.find(({ key }) => key === name)
 
-  const url = generateUrl({
-    name,
-    from: state.from,
-    to: state.to,
-    shift: state.shift,
-  })
+  const url = name ? generateUrl(name, { shift }) : null
 
   return (
     <Fragment>
@@ -86,11 +66,7 @@ export default function Page() {
       >
         {url && <HLSPlayer source={url} />}
         {stream && (
-          <Scrobber
-            onChange={(shift) => setState((state) => ({ ...state, shift }))}
-            value={state.shift}
-            stream={stream}
-          />
+          <Scrobber onChange={setShift} value={shift} stream={stream} />
         )}
       </div>
     </Fragment>
