@@ -1,5 +1,3 @@
-const auth = require("./auth.json")
-
 module.exports = {
   base: "/media/linaro/cctv",
   manifest: "manifest.m3u8",
@@ -33,5 +31,4 @@ module.exports = {
       onvif: "http://192.168.2.164:8899",
     },
   },
-  auth,
 }

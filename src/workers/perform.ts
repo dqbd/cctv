@@ -1,4 +1,4 @@
-import { config } from "shared/config"
+import { config, authConfig } from "shared/config"
 import { getStreamUrl } from "shared/onvif"
 import { setSystemTime } from "shared/clocksync"
 
@@ -14,7 +14,7 @@ const target = config.targets[cameraKey]
 
 if (!target) throw Error("Invalid argument")
 
-const credential = config.auth.onvif
+const credential = authConfig.onvif
 
 const baseFolder = path.resolve(config.base, cameraKey)
 mkdirp.sync(baseFolder)

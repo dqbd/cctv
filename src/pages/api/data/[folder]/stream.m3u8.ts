@@ -1,13 +1,13 @@
 import fs from "fs"
 import path from "path"
 import { NextApiRequest, NextApiResponse } from "next"
-import { config } from "shared/config"
+import { config, dbConfig } from "shared/config"
 import { registerService } from "utils/service"
 import { Database } from "shared/database"
 import { Smooth } from "shared/smooth"
 import { getManifest } from "shared/manifest"
 
-const db = registerService("db", () => new Database())
+const db = registerService("db", () => new Database(dbConfig))
 const smooth = registerService("smooth", () => new Smooth())
 
 export default async function handler(

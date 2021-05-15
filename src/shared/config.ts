@@ -1,5 +1,8 @@
 import userConfig from "../../config"
+import userDbConfig from "../../config.db"
+import userAuthConfig from "../../config.auth"
 import * as z from "zod"
+import { Knex } from "knex"
 
 export const config = z
   .object({
@@ -15,11 +18,15 @@ export const config = z
         onvif: z.string(),
       })
     ),
-    auth: z.object({
-      onvif: z.object({
-        username: z.string(),
-        password: z.string(),
-      }),
-    }),
   })
   .parse(userConfig)
+
+export const dbConfig: Knex.Config = userDbConfig
+export const authConfig = z
+  .object({
+    onvif: z.object({
+      username: z.string(),
+      password: z.string(),
+    }),
+  })
+  .parse(userAuthConfig)

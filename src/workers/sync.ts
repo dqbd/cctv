@@ -3,13 +3,13 @@ import util from "util"
 import chokidar from "chokidar"
 import fs from "fs"
 import { Database } from "shared/database"
-import { config } from "shared/config"
+import { config, dbConfig } from "shared/config"
 import PQueue from "p-queue"
 import rimrafCb from "rimraf"
 
 const rimraf = util.promisify(rimrafCb)
 
-const db = new Database()
+const db = new Database(dbConfig)
 const queue = new PQueue({ concurrency: 1 })
 
 const wait = (delay: number) =>
@@ -34,7 +34,6 @@ const cleanup = async () => {
   async function task() {
     for (const cameraKey of Object.keys(config.targets)) {
       console.log("Cleanup", cameraKey)
-      const baseFolder = path.resolve(config.base, cameraKey)
 
       const now = new Date()
       const nowTime = new Date(
@@ -48,29 +47,29 @@ const cleanup = async () => {
       ).valueOf()
 
       try {
-        let folders = await fs.promises.readdir(baseFolder)
-        folders = folders.filter((folderName) => {
-          const [year, month, day, hour] = folderName
-            .split("_")
-            .map((num) => Number.parseInt(num, 10))
-          const folderTime = new Date(year, month - 1, day, hour, 0, 0, 0)
-          const cleanupTime = folderTime.valueOf() + config.maxAge * 1000
-          return cleanupTime <= nowTime
+        await queue.add(async () => db.remove(cameraKey, config.maxAge), {
+          priority: 1,
         })
-
-        await folders.reduce<Promise<void>>((memo, folder) => {
-          return memo.then(() => {
-            const target = path.resolve(baseFolder, folder)
-            return rimraf(target)
-          })
-        }, Promise.resolve())
-
-        console.log("Deleted folders", folders && folders.join(", "))
-
-        await queue.add(() =>
-          db.removeOldScenesAndMotion(cameraKey, config.maxAge)
-        )
         console.log("Deleted from DB", cameraKey)
+
+        const cameraFolder = path.resolve(config.base, cameraKey)
+        const folders = (await fs.promises.readdir(cameraFolder))
+          .filter((folderName) => {
+            const [year, month, day, hour] = folderName
+              .split("_")
+              .map((num) => Number.parseInt(num, 10))
+
+            const folderTime = new Date(year, month - 1, day, hour, 0, 0, 0)
+            const cleanupTime = folderTime.valueOf() + config.maxAge * 1000
+            return cleanupTime <= nowTime
+          })
+          .map((folder) => path.resolve(cameraFolder, folder))
+
+        await queue.addAll(
+          folders.map((target) => () => rimraf(target)),
+          { priority: 0 }
+        )
+        console.log("Deleted from file system", cameraKey)
       } catch (err) {
         if (err.code !== "ENOENT") throw err
       }
@@ -114,10 +113,13 @@ async function sync() {
 
       for (const item of toInsert) {
         const relative = path.relative(baseFolder, item)
-        await queue.add(() => {
-          console.log("Insert", cameraKey, relative)
-          return db.insert(cameraKey, relative)
-        })
+        await queue.add(
+          () => {
+            console.log("Insert", cameraKey, relative)
+            return db.insert(cameraKey, relative)
+          },
+          { priority: 2 }
+        )
       }
     }
 
