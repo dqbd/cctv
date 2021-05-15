@@ -2,54 +2,27 @@ import { createSegments } from "shared/segment"
 import { Database } from "shared/database"
 
 export class Smooth {
-  tokens: Record<
-    string,
-    { first: Date; next: Date | undefined; seq: number }
-  > = {}
+  tokens: Record<string, { date: Date; seq: number } | undefined> = {}
 
   async seek(db: Database, cameraKey: string, shiftSec: number) {
-    const token = `${cameraKey}${shiftSec}`
-    const curr = Date.now() - shiftSec * 1000
-    let segments = createSegments(
-      (await db.seekFrom(cameraKey, Math.floor(curr / 1000))).map(
-        (item) => item.path
-      )
+    const tokenId = `${cameraKey}${shiftSec}`
+    const timestampSec = Math.floor((Date.now() - shiftSec * 1000) / 1000)
+
+    const segments = createSegments(
+      (await db.seekFrom(cameraKey, timestampSec)).map((item) => item.path)
     )
 
-    if (
-      typeof this.tokens[token] === "undefined" ||
-      Math.abs(curr - this.tokens[token].first.valueOf()) > 60 * 1000
-    ) {
-      if (segments.length === 0) return { segments, seq: 0 }
+    const compareDate = segments[0]?.timestamp
+    if (!compareDate) return { segments, seq: 0 }
 
-      this.tokens[token] = {
-        first: segments[0].timestamp,
-        next: segments[1] ? segments[1].timestamp : undefined,
-        seq: 0,
+    let token = this.tokens[tokenId]
+    if (token == null || compareDate.valueOf() !== token.date.valueOf()) {
+      this.tokens[tokenId] = token = {
+        date: compareDate,
+        seq: (token?.seq ?? 0) + 1,
       }
-
-      return { segments, seq: this.tokens[token].seq }
     }
 
-    if (this.tokens[token].next == null) {
-      this.tokens[token].next = segments[1] ? segments[1].timestamp : undefined
-    }
-
-    const next = this.tokens[token].next?.valueOf() ?? 0
-    if (next <= curr) {
-      segments = createSegments(
-        (await db.seekFrom(cameraKey, Math.floor(next / 1000))).map(
-          (item) => item.path
-        )
-      )
-
-      this.tokens[token].first = segments[0].timestamp
-      this.tokens[token].next = segments[1] ? segments[1].timestamp : undefined
-      this.tokens[token].seq += 1
-
-      return { segments, seq: this.tokens[token].seq }
-    }
-
-    return { segments, seq: this.tokens[token].seq }
+    return { segments, seq: token.seq }
   }
 }
