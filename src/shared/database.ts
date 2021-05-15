@@ -19,9 +19,7 @@ export class Database {
     len = 3 * 24 * 3600
   ) {
     let i = 0
-    const n = filenames.length
-
-    while (i < n) {
+    while (i < filenames.length) {
       const slices = filenames.slice(i, (i += len))
 
       const queries = slices.reduce<[Date, string][]>((memo, filename) => {
@@ -72,18 +70,6 @@ export class Database {
 
     return this.prisma.scene.findMany({
       where: { camera, timestamp: { gte: from } },
-      orderBy: { timestamp: "asc" },
-      take: limit,
-    })
-  }
-
-  async shift(camera: string, shiftSec = 0, limit = 5) {
-    const shift = shiftSec * 1000
-    return this.prisma.scene.findMany({
-      where: {
-        camera,
-        timestamp: { gte: new Date(Date.now() - shift) },
-      },
       orderBy: { timestamp: "asc" },
       take: limit,
     })

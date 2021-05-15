@@ -49,7 +49,7 @@ const cleanup = async () => {
 
       try {
         let folders = await fs.promises.readdir(baseFolder)
-        folders = folders.filter((folderName: string) => {
+        folders = folders.filter((folderName) => {
           const [year, month, day, hour] = folderName
             .split("_")
             .map((num) => Number.parseInt(num, 10))
@@ -58,7 +58,7 @@ const cleanup = async () => {
           return cleanupTime <= nowTime
         })
 
-        await folders.reduce((memo: Promise<void>, folder: string) => {
+        await folders.reduce<Promise<void>>((memo, folder) => {
           return memo.then(() => {
             const target = path.resolve(baseFolder, folder)
             return rimraf(target)
@@ -87,31 +87,30 @@ const cleanup = async () => {
   loop()
 }
 
+function getFilesInManifest(manifest: string) {
+  return manifest.split("\n").filter((line) => line.indexOf(".ts") >= 0)
+}
+
+function rightDiff(left: string[], right: string[]) {
+  return right.filter((val) => !left.includes(val))
+}
+
 async function sync() {
-  const manifests = Object.keys(config.targets).map((cameraKey) => {
-    return path.resolve(config.base, cameraKey, config.manifest)
-  })
-
-  const filesOfManifest = (manifest: string) =>
-    manifest.split("\n").filter((line) => line.indexOf(".ts") >= 0)
-  const rdiff = (left: string[], right: string[]) =>
-    right.filter((val) => !left.includes(val))
-  const manifestCache: { [key: string]: string[] } = {}
-
-  const handleChange = async (targetFile: string) => {
+  const cache: Record<string, string[]> = {}
+  async function handleChange(targetFile: string) {
     const cameraKey = path
       .relative(config.base, targetFile)
       .split(path.sep)
       .shift()
+
     if (!cameraKey) return
 
     const file = await readNonEmptyFile(targetFile)
-    const manifest = filesOfManifest(file)
-
+    const manifest = getFilesInManifest(file)
     const baseFolder = path.resolve(config.base, cameraKey)
 
-    if (manifestCache[cameraKey]) {
-      const toInsert = rdiff(manifestCache[cameraKey], manifest)
+    if (cache[cameraKey]) {
+      const toInsert = rightDiff(cache[cameraKey], manifest)
 
       for (const item of toInsert) {
         const relative = path.relative(baseFolder, item)
@@ -122,10 +121,19 @@ async function sync() {
       }
     }
 
-    if (manifest && manifest.length > 0) manifestCache[cameraKey] = manifest
+    if (manifest.length > 0) {
+      cache[cameraKey] = manifest
+    }
   }
 
-  chokidar.watch(manifests).on("add", handleChange).on("change", handleChange)
+  chokidar
+    .watch(
+      Object.keys(config.targets).map((cameraKey) =>
+        path.resolve(config.base, cameraKey, config.manifest)
+      )
+    )
+    .on("add", handleChange)
+    .on("change", handleChange)
 }
 
 const main = async () => {
