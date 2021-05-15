@@ -25,7 +25,7 @@ function generateUrl(
   }
 
   return encodeQuery(`/api/data/${name}/stream.m3u8`, {
-    shift: args.shift,
+    shift: Math.floor(args.shift / 1000),
   })
 }
 
