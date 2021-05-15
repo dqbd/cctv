@@ -157,7 +157,7 @@ export function Scrobber(props: {
 
   return (
     <S.Main
-      css={{ opacity: visible ? 1 : 1 }}
+      css={{ opacity: visible ? 1 : 0 }}
       onTouchStart={show.current}
       onMouseMove={show.current}
     >

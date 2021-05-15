@@ -85,10 +85,6 @@ export class Database {
 
   async seekFrom(camera: string, fromSec: number, limit = 5) {
     const from = new Date(fromSec * 1000)
-
-    const lowerLimit = Math.floor(limit / 2)
-    const upperLimit = limit - lowerLimit
-
     return this.knex
       .unionAll([
         this.knex
@@ -97,16 +93,14 @@ export class Database {
             this.knex<CameraTable>(camera)
               .where("timestamp", "<=", from)
               .orderBy("timestamp", "desc")
-              .limit(upperLimit)
+              .limit(1)
           ),
-        this.knex
-          .select()
-          .from(
-            this.knex<CameraTable>(camera)
-              .where("timestamp", ">", from)
-              .orderBy("timestamp", "asc")
-              .limit(lowerLimit)
-          ),
+        this.knex.select().from(
+          this.knex<CameraTable>(camera)
+            .where("timestamp", ">", from)
+            .orderBy("timestamp", "asc")
+            .limit(limit - 1)
+        ),
       ])
       .orderBy("timestamp", "asc")
   }
