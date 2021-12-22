@@ -66,35 +66,80 @@ function packetBuilder<T>(obj: T, messageType: number[], sessionID = 0) {
   ])
 }
 
+enum SystemTimeState {
+  DISCONNECT,
+  CONNECTED,
+  AUTHENTICATED,
+  UPDATED,
+}
+
 export function setSystemTime(
   credential: { username: string; password: string },
   ip: string,
   port = 34567,
   time?: Date
 ) {
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     const socket = new net.Socket()
-    let authenticated = false
-    socket.connect(port, ip, () => {
-      const authPacket = packetBuilder(
-        getLoginPacket(credential.username, credential.password),
-        types.AUTH
-      )
-      socket.write(authPacket)
-    })
+
+    let state = SystemTimeState.DISCONNECT
+    let lastError: unknown
+
     socket
       .on("data", async (data) => {
-        if (authenticated) return socket.destroy()
-        authenticated = true
-        const json = JSON.parse(data.slice(20, data.length - 1).toString())
-        const timePacket = packetBuilder(
-          getTimePacket(json.SessionID, time),
-          types.SET_TIME,
-          json.SessionID
-        )
-        socket.write(timePacket)
+        const payload = JSON.parse(data.slice(20, data.length - 1).toString())
+        const sessionId = payload.SessionID
+
+        try {
+          switch (state) {
+            case SystemTimeState.CONNECTED: {
+              state = SystemTimeState.AUTHENTICATED
+
+              if (payload.Ret !== 100) {
+                throw new Error(`Failed to authenticate ${payload.Ret}`)
+              }
+
+              socket.write(
+                packetBuilder(
+                  getTimePacket(sessionId, time),
+                  types.SET_TIME,
+                  sessionId
+                )
+              )
+              break
+            }
+            case SystemTimeState.AUTHENTICATED: {
+              state = SystemTimeState.UPDATED
+              if (payload.Ret !== 100) {
+                throw new Error(`Failed to set time ${payload.Ret}`)
+              }
+
+              socket.destroy()
+              break
+            }
+            default:
+              break
+          }
+        } catch (err) {
+          lastError = err
+          socket.destroy()
+        }
       })
-      .once("error", reject)
-      .once("end", resolve)
+      .once("error", (err) => (lastError = err))
+      .once("close", (hadError) => {
+        if (hadError || lastError) {
+          return reject(lastError)
+        }
+        resolve()
+      })
+      .connect(port, ip, () => {
+        state = SystemTimeState.CONNECTED
+        socket.write(
+          packetBuilder(
+            getLoginPacket(credential.username, credential.password),
+            types.AUTH
+          )
+        )
+      })
   })
 }

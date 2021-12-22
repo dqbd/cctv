@@ -3,11 +3,12 @@ import { Fragment, useContext, useState } from "react"
 import { HLSPlayer } from "components/HLSPlayer"
 import { Scrobber } from "components/Scrobber/Scrobber"
 
-import { css } from "@emotion/react"
+import { css, Global } from "@emotion/react"
 import { useRouter } from "next/dist/client/router"
 import { StreamContext } from "utils/stream"
 import { NextSeo } from "next-seo"
 import { encodeQuery } from "utils/query"
+import Head from "next/head"
 
 function generateUrl(
   name: string,
@@ -41,6 +42,20 @@ export default function Page() {
 
   return (
     <Fragment>
+      <Head>
+        <meta name="theme-color" content="#090909" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
+      </Head>
+      <Global
+        styles={css`
+          html {
+            background: #090909;
+          }
+        `}
+      />
       <NextSeo title={stream?.name} />
       <div
         css={css`
@@ -53,8 +68,6 @@ export default function Page() {
           right: 0;
           bottom: 0;
           left: 0;
-
-          background: #090909;
 
           & > video {
             width: 100%;

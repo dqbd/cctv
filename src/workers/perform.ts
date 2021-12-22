@@ -2,7 +2,6 @@ import { config, authConfig } from "shared/config"
 import { getStreamUrl } from "shared/onvif"
 import { setSystemTime } from "shared/clocksync"
 
-import url from "url"
 import path from "path"
 import mkdirp from "mkdirp"
 import ffmpeg from "fluent-ffmpeg"
@@ -11,17 +10,70 @@ const cameraKey = process.argv.slice().pop()
 if (!cameraKey) throw Error("Invalid camera key")
 
 const target = config.targets[cameraKey]
-
-if (!target) throw Error("Invalid argument")
+if (!target) throw Error("Invalid camera target")
 
 const credential = authConfig.onvif
-
 const baseFolder = path.resolve(config.base, cameraKey)
 mkdirp.sync(baseFolder)
 
-const start = async () => {
+function timeSyncLoop(hostname: string | null) {
+  let timeSyncTimer: NodeJS.Timeout
+
+  async function timeSync() {
+    if (hostname != null) {
+      clearTimeout(timeSyncTimer)
+      try {
+        console.time(`Time Sync`)
+        await setSystemTime(credential, hostname).finally(() => {
+          console.timeEnd(`Time Sync`)
+        })
+      } catch (err) {
+        console.error(`Failed to set ${cameraKey} time:`, err)
+      }
+      timeSyncTimer = setTimeout(timeSync, 60 * 1000)
+    }
+  }
+
+  timeSync()
+
+  return {
+    destroy: () => clearTimeout(timeSyncTimer),
+  }
+}
+
+function staleFrameLoop() {
+  let staleFrameTimer: NodeJS.Timeout
+  let lastFrameCount = -1
+
+  function trigger() {
+    console.error(
+      `Stale FFMPEG (frame=${lastFrameCount}), no new frames received`
+    )
+    process.exit(3)
+  }
+
+  function onFrame(frame: number) {
+    if (frame !== lastFrameCount) {
+      clearTimeout(staleFrameTimer)
+      staleFrameTimer = setTimeout(trigger, 60 * 60 * 1000)
+    }
+
+    lastFrameCount = frame
+  }
+
+  onFrame(0)
+  return {
+    onFrame,
+    destroy: () => clearTimeout(staleFrameTimer),
+  }
+}
+
+async function main() {
   const address = await getStreamUrl(target.onvif)
-  const hostname = url.parse(address).hostname
+  const hostname = new URL(address).hostname
+
+  const timeSync = timeSyncLoop(hostname)
+  const staleFrame = staleFrameLoop()
 
   const main = ffmpeg()
     .addInput(address)
@@ -40,53 +92,28 @@ const start = async () => {
         "%Y_%m_%d_%H/sg_%s_%%t.ts"
       )}`,
     ])
-    .on("start", (cmd) => console.log("Command", cmd))
-    .on("codecData", (data) => console.log("Codec data", data))
-    .on("progress", (progress) =>
-      console.log("Processing", progress.frames, progress.timemark)
-    )
-    .on("stderr", console.log)
+    .on("start", (cmd) => console.debug("Command", cmd))
+    .on("codecData", (data) => console.debug("Codec data", data))
+    .on("progress", (progress) => {
+      console.debug("Processing", progress.frames, progress.timemark)
+      staleFrame.onFrame(progress.frames)
+    })
     .on("end", () => {
-      console.log("main stream end")
-      process.exit()
+      console.error("Stream end on FFMPEG side")
+      process.exit(2)
     })
     .on("error", (err, stdout, stderr) => {
-      console.log("An error occurred", err.message, stdout, stderr)
-      process.exit()
+      console.error("FFMPEG error", err.message, stdout, stderr)
+      process.exit(1)
     })
 
   main.run()
 
-  let timeSyncTimer: NodeJS.Timeout
-  if (hostname) {
-    const timeSync = async () => {
-      clearTimeout(timeSyncTimer)
-      console.time(`timeSync ${cameraKey}`)
-      try {
-        await setSystemTime(credential, hostname)
-      } catch (err) {
-        console.error(`failed to set ${cameraKey} time:`, err)
-      }
-      console.timeEnd(`timeSync ${cameraKey}`)
-      timeSyncTimer = setTimeout(timeSync, 60 * 1000)
-    }
-    timeSync()
-  }
-
   process.on("exit", () => {
-    console.log("Closing", cameraKey)
-    clearTimeout(timeSyncTimer)
-
-    try {
-      if (main) main.kill("SIGKILL")
-    } catch (err) {
-      console.log(err)
-    }
+    timeSync.destroy()
+    staleFrame.destroy()
+    main.kill("SIGKILL")
   })
 }
 
-try {
-  start()
-} catch (err) {
-  console.log(err)
-}
+main()

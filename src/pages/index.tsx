@@ -4,6 +4,7 @@ import { RefreshImg } from "components/RefreshImg"
 import { Fragment, useContext, useEffect } from "react"
 import { SleepContext } from "utils/sleep"
 import { useRouter } from "next/router"
+import Head from "next/head"
 
 export default function Page() {
   const router = useRouter()
@@ -15,10 +16,14 @@ export default function Page() {
 
   return (
     <Fragment>
+      <Head>
+        <meta name="theme-color" content="#d8dee9" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+      </Head>
       <Global
         styles={css`
-          body {
-            background: hsl(219deg, 28%, 88%);
+          html {
+            background-color: #d8dee9;
           }
         `}
       />

@@ -170,6 +170,10 @@ export const Pill = styled.div`
   font-variant-numeric: tabular-nums;
   transition: background 0.3s;
 
+  @media (max-width: 768px) {
+    padding: 0 1em;
+  }
+
   &:focus-within {
     background: #687590;
   }

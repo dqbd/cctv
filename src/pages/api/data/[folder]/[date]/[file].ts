@@ -19,7 +19,13 @@ export default async function handler(
   await new Promise((resolve, reject) => {
     const stream = send(req, target, { root: config.base })
     stream.on("end", resolve)
-    stream.on("error", reject)
+    stream.on("error", (err) => {
+      if (err.statusCode) {
+        res.status(err.statusCode).end()
+      } else {
+        reject(err)
+      }
+    })
     stream.pipe(res)
   })
 }

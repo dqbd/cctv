@@ -21,7 +21,8 @@
     "jsx": "preserve",
     "noFallthroughCasesInSwitch": true,
     "downlevelIteration": true,
-    "jsxImportSource": "@emotion/react"
+    "jsxImportSource": "@emotion/react",
+    "incremental": true
   },
   "include": [
     "src",
