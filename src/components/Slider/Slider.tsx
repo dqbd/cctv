@@ -21,9 +21,7 @@ function usePropsRef<Props>(props: Props) {
   return ref
 }
 
-function useUserOffsetRef(props: {
-  value: number
-}): {
+function useUserOffsetRef(props: { value: number }): {
   ref: MutableRefObject<number>
   reset: () => { value: number; user: number }
   update: (value: number) => { value: number; user: number }

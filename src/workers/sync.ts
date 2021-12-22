@@ -3,13 +3,11 @@ import chokidar from "chokidar"
 import fs from "fs"
 import { Database } from "shared/database"
 import { config, dbConfig } from "shared/config"
+import { wait } from "utils/wait"
 import PQueue from "p-queue"
 
 const db = new Database(dbConfig)
 const queue = new PQueue({ concurrency: 1 })
-
-const wait = (delay: number) =>
-  new Promise((resolve) => setTimeout(resolve, delay))
 
 enum QueuePriority {
   REMOVE_FS = 0,

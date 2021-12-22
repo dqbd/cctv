@@ -1,6 +1,5 @@
 import fs from "fs"
 import path from "path"
-import mkdirp from "mkdirp"
 import { Database } from "shared/database"
 import { config, dbConfig } from "shared/config"
 
@@ -15,7 +14,7 @@ const main = async () => {
 
     console.log("- Creating folder")
     const folderTarget = path.resolve(config.base, cameraKey)
-    mkdirp.sync(folderTarget)
+    await fs.promises.mkdir(folderTarget, { recursive: true })
 
     console.log("- Reset folder")
     await db.resetFolder(cameraKey)

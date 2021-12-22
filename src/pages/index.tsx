@@ -18,7 +18,10 @@ export default function Page() {
     <Fragment>
       <Head>
         <meta name="theme-color" content="#d8dee9" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
       </Head>
       <Global
         styles={css`

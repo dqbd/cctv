@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "next start",
+    "start": "node ./.next/server/start.js",
+    "start:next": "next start",
+    "start:sync": "node ./.next/server/sync.js",
+    "start:workers": "node ./.next/server/workers.js",
     "dev": "next dev",
     "build": "next build",
     "fix": "run-p -lsc fix:*",

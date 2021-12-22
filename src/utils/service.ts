@@ -1,11 +1,7 @@
-/* eslint-disable @typescript-eslint/no-namespace */
+/* eslint-disable no-var */
 declare global {
-  namespace NodeJS {
-    interface Global {
-      db: unknown
-      smooth: unknown
-    }
-  }
+  var db: unknown
+  var smooth: unknown
 }
 
 export function registerService<T>(name: "db" | "smooth", fn: () => T) {
