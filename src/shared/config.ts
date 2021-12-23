@@ -1,5 +1,4 @@
 import userConfig from "../../config"
-import userDbConfig from "../../config.db"
 import userAuthConfig from "../../config.auth"
 import * as z from "zod"
 import { Knex } from "knex"
@@ -7,6 +6,7 @@ import { Knex } from "knex"
 export const config = z
   .object({
     base: z.string(),
+    database: z.string(),
     manifest: z.string(),
     maxAge: z.number(),
     syncInterval: z.number(),
@@ -21,7 +21,11 @@ export const config = z
   })
   .parse(userConfig)
 
-export const dbConfig: Knex.Config = userDbConfig
+export const dbConfig: Knex.Config = {
+  client: "sqlite",
+  connection: { filename: userConfig.database },
+}
+
 export const authConfig = z
   .object({
     onvif: z.object({

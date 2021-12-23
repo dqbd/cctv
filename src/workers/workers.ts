@@ -69,6 +69,7 @@ async function runWorker(cameraKey: string, attempt = 0) {
 
           prefixStream.write(`Worker has exit (${execTime}ms)\n`)
           if (delay > 0) prefixStream.write(`Waiting ${delay}ms\n`)
+          prefixStream.unpipe(process.stdout)
           prefixStream.destroy()
 
           wait(delay)
@@ -79,6 +80,7 @@ async function runWorker(cameraKey: string, attempt = 0) {
       )
 
       cameraCp.stdout.pipe(prefixStream, { end: false })
+      cameraCp.stderr.pipe(prefixStream, { end: false })
     } catch (err) {
       reject(err)
     }

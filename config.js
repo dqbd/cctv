@@ -1,5 +1,6 @@
 module.exports = {
-  base: "/media/linaro/cctv",
+  base: "/cctv/storage",
+  database: "/cctv/config/storage.db",
   manifest: "manifest.m3u8",
   maxAge: 7 * 24 * 60 * 60,
   syncInterval: 60 * 60 /* sync time every day */,

@@ -77,7 +77,7 @@ async function main() {
 
   const main = ffmpeg()
     .addInput(address)
-    .inputOptions(["-stimeout 30000000"])
+    .inputOptions(["-stimeout 30000000", "-rtsp_transport tcp"])
     .addOutput(path.resolve(baseFolder, config.manifest))
     .audioCodec("copy")
     .videoCodec("copy")
