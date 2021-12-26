@@ -5,7 +5,7 @@ module.exports = {
     connection: {
       host: "db",
       port: 3306,
-      user: 'root',
+      user: 'cctv',
       password: 'mysql',
       database: 'cctv'
     }

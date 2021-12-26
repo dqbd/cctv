@@ -8,10 +8,15 @@ services:
         condition: service_healthy
   db:
     restart: unless-stopped
-    image: mariadb
+    image: linuxserver/mariadb
     environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Europe/London
       MYSQL_ROOT_PASSWORD: mysql
+      MYSQL_USER: cctv
       MYSQL_DATABASE: cctv
+      MYSQL_PASSWORD: mysql
     healthcheck:
       test:
         [
@@ -19,10 +24,8 @@ services:
           "mysqladmin",
           "ping",
           "--host=localhost",
+          "--user=cctv",
           "--password=mysql",
-          "--user=root",
         ]
       timeout: 20s
       retries: 10
-    ports:
-      - 3306:3306
