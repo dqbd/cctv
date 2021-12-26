@@ -2,10 +2,27 @@ version: "3.9"
 services:
   app:
     build: .
+    restart: unless-stopped
     depends_on:
-      - db
+      db:
+        condition: service_healthy
   db:
-    image: postgres:alpine
-    user: postgres
+    restart: unless-stopped
+    image: mariadb
     environment:
-      POSTGRES_PASSWORD: postgres
+      MYSQL_ROOT_PASSWORD: mysql
+      MYSQL_DATABASE: cctv
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "--host=localhost",
+          "--password=mysql",
+          "--user=root",
+        ]
+      timeout: 20s
+      retries: 10
+    ports:
+      - 3306:3306

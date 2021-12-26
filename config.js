@@ -1,13 +1,13 @@
 module.exports = {
   base: "/cctv/storage",
   database: {
-    client: "pg",
+    client: "mysql2",
     connection: {
       host: "db",
-      port: 5432,
-      user: 'postgres',
-      password: 'postgres',
-      database: 'postgres'
+      port: 3306,
+      user: 'root',
+      password: 'mysql',
+      database: 'cctv'
     }
   },
   manifest: "manifest.m3u8",

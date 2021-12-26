@@ -8,7 +8,11 @@ export const config = z
     base: z.string(),
     database: z.union([
       z.object({
-        client: z.union([z.literal("pg"), z.literal("mysql")]),
+        client: z.union([
+          z.literal("pg"),
+          z.literal("mysql"),
+          z.literal("mysql2"),
+        ]),
         connection: z.object({
           host: z.string(),
           port: z.number(),
