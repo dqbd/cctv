@@ -5,18 +5,35 @@ import runAll from "npm-run-all"
 import { Database } from "shared/database"
 import { config, dbConfig } from "shared/config"
 
-const db = new Database(dbConfig)
-const main = async () => {
+async function init() {
+  const db = new Database(dbConfig)
   try {
     for (const cameraKey in config.targets) {
       await db.initFolder(cameraKey)
       const folderTarget = path.resolve(config.base, cameraKey)
       await fs.promises.mkdir(folderTarget, { recursive: true })
     }
-
+  } catch (err) {
+    console.error(err)
+    return false
+  } finally {
     await db.destroy()
+  }
 
-    await runAll(["start:*"], {
+  return true
+}
+
+async function main() {
+  if (!(await init())) {
+    return process.exit(1)
+  }
+
+  const scripts = process.argv.includes("--dev")
+    ? ["process:*"]
+    : ["start:*", "process:*"]
+
+  try {
+    await runAll(scripts, {
       parallel: true,
       printLabel: true,
       silent: true,
@@ -25,6 +42,7 @@ const main = async () => {
     })
   } catch (err) {
     console.error(err)
+    process.exit(2)
   }
 }
 

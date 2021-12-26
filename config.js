@@ -1,6 +1,15 @@
 module.exports = {
   base: "/cctv/storage",
-  database: "/cctv/config/storage.db",
+  database: {
+    client: "pg",
+    connection: {
+      host: "db",
+      port: 5432,
+      user: 'postgres',
+      password: 'postgres',
+      database: 'postgres'
+    }
+  },
   manifest: "manifest.m3u8",
   maxAge: 7 * 24 * 60 * 60,
   syncInterval: 60 * 60 /* sync time every day */,

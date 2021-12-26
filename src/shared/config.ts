@@ -6,7 +6,24 @@ import { Knex } from "knex"
 export const config = z
   .object({
     base: z.string(),
-    database: z.string(),
+    database: z.union([
+      z.object({
+        client: z.union([z.literal("pg"), z.literal("mysql")]),
+        connection: z.object({
+          host: z.string(),
+          port: z.number(),
+          user: z.string(),
+          password: z.string(),
+          database: z.string(),
+        }),
+      }),
+      z.object({
+        client: z.literal("sqlite"),
+        connection: z.object({
+          filename: z.string(),
+        }),
+      }),
+    ]),
     manifest: z.string(),
     maxAge: z.number(),
     syncInterval: z.number(),
@@ -21,10 +38,7 @@ export const config = z
   })
   .parse(userConfig)
 
-export const dbConfig: Knex.Config = {
-  client: "sqlite",
-  connection: { filename: userConfig.database },
-}
+export const dbConfig: Knex.Config = config.database
 
 export const authConfig = z
   .object({

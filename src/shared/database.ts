@@ -85,23 +85,31 @@ export class Database {
 
   async seekFrom(camera: string, fromSec: number, limit = 5) {
     const from = new Date(fromSec * 1000)
+
     return this.knex
-      .unionAll([
+      .with(
+        "inclusive",
         this.knex
-          .select()
-          .from(
-            this.knex<CameraTable>(camera)
-              .where("timestamp", "<=", from)
-              .orderBy("timestamp", "desc")
-              .limit(1)
-          ),
-        this.knex.select().from(
-          this.knex<CameraTable>(camera)
-            .where("timestamp", ">", from)
-            .orderBy("timestamp", "asc")
-            .limit(limit - 1)
-        ),
-      ])
+          .select("*")
+          .from<CameraTable>(camera)
+          .where("timestamp", "<=", from)
+          .orderBy("timestamp", "desc")
+          .limit(1)
+      )
+      .with(
+        "remaining",
+        this.knex
+          .select("*")
+          .from<CameraTable>(camera)
+          .where("timestamp", ">", from)
+          .orderBy("timestamp", "asc")
+          .limit(limit - 1)
+      )
+      .select("*")
+      .from("inclusive")
+      .union(function () {
+        this.select("*").from("remaining")
+      })
       .orderBy("timestamp", "asc")
   }
 
