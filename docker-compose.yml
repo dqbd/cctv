@@ -3,6 +3,8 @@ services:
   app:
     build: .
     restart: unless-stopped
+    environment:
+      TZ: Europe/Prague
     depends_on:
       db:
         condition: service_healthy
@@ -12,7 +14,7 @@ services:
     environment:
       PUID: 1000
       PGID: 1000
-      TZ: Europe/London
+      TZ: Europe/Prague
       MYSQL_ROOT_PASSWORD: mysql
       MYSQL_USER: cctv
       MYSQL_DATABASE: cctv

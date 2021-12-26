@@ -11,7 +11,7 @@ COPY --from=deps /app/node_modules ./node_modules
 RUN yarn build
 
 FROM node:14-alpine3.12 AS runner
-RUN apk add --update --no-cache ffmpeg
+RUN apk add --update --no-cache ffmpeg tzdata
 RUN mkdir -p /cctv/config && mkdir -p /cctv/storage
 
 WORKDIR /app
