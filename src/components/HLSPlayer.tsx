@@ -17,7 +17,7 @@ export function HLSPlayer(props: { source: string }) {
 
     if (props.source && videoRef) {
       if (Hls.isSupported()) {
-        hls = new Hls({ debug: true, startPosition: 0 })
+        hls = new Hls({ debug: false, startPosition: 0 })
         hls.attachMedia(videoRef)
 
         hls.on(Hls.Events.MEDIA_ATTACHED, () => {
