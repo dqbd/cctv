@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { ReactNode, useEffect, useState } from "react"
 import moment, { Moment } from "moment"
 import { vibrateDecorator } from "utils/vibrateDecorator"
 import { Slider } from "components/Slider/Slider"
@@ -13,6 +13,68 @@ import {
   MobileTimePicker,
 } from "@material-ui/lab"
 import AdapterMoment from "@material-ui/lab/AdapterMoment"
+import { css } from "@emotion/react"
+
+async function getServerTimeDiff() {
+  const clientStart = Date.now(),
+    timeBefore = performance.now()
+  const serverReq = await fetch("/api/time")
+  const timeAfter = performance.now()
+
+  const roundTripTime = timeAfter - timeBefore
+  const incomingTripTime = roundTripTime / 2
+  const serverTime = (await serverReq.json()).time - incomingTripTime
+
+  return serverTime - clientStart
+}
+
+function useServerTimeDiff() {
+  const [serverTimeDiff, setServerTimeDiff] = useState(0)
+  useEffect(() => {
+    getServerTimeDiff().then((diff) => setServerTimeDiff(diff))
+  }, [])
+
+  return serverTimeDiff
+}
+
+function DebugView(props: { children?: ReactNode }) {
+  return (
+    <div
+      css={css`
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 1111;
+        text-align: right;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      `}
+    >
+      <div
+        css={css`
+          aspect-ratio: 16 / 9;
+          width: 100%;
+        `}
+      >
+        <div
+          css={css`
+            color: white;
+            font-size: 24px;
+            -webkit-text-stroke: 1px black;
+            margin-top: 30px;
+          `}
+        >
+          {props.children}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function TimePicker(props: {
   onChange?: (shift: number) => void
@@ -20,8 +82,9 @@ function TimePicker(props: {
   className?: string
 }) {
   const current = useTimer()
+  const serverDiff = useServerTimeDiff()
   const [inputDate, setInputDate] = useState<Moment | null>(null)
-  const activeDate = moment(new Date(current - props.value))
+  const activeDate = moment(new Date(current - props.value + serverDiff))
 
   return (
     <LocalizationProvider dateAdapter={AdapterMoment}>
