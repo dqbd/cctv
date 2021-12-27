@@ -1,0 +1,15 @@
+version: '3.9'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      - .:/workspace:cached
+      - /var/run/docker.sock:/var/run/docker.sock 
+      - vscode-node_modules:/workspace/node_modules
+      - vscode-next:/workspace/.next
+    command: /bin/sh -c "while sleep 1000; do :; done"
+volumes:
+  vscode-node_modules:
+  vscode-next:
