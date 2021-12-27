@@ -12,6 +12,18 @@ export class Smooth {
       (await db.seekFrom(cameraKey, timestampSec)).map((item) => item.path)
     )
 
+    // console.log({
+    //   shiftSec,
+    //   link: `ffmpeg -i http://localhost:3000/api/data/${cameraKey}/${segments[0].filename} %d.jpg`,
+    //   serverDate: formatISO(new Date(timestampSec * 1000)),
+    //   segmentDate: formatISO(segments[0].timestamp),
+    // })
+
+    const offset = Math.max(
+      0,
+      timestampSec - segments[0].timestamp.valueOf() / 1000
+    )
+
     const compareDate = segments[0]?.timestamp
     if (!compareDate) return { segments, seq: 0 }
 
@@ -23,6 +35,6 @@ export class Smooth {
       }
     }
 
-    return { segments, seq: token.seq }
+    return { segments, seq: token.seq, offset }
   }
 }

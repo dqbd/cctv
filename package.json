@@ -26,6 +26,7 @@
     "@material-ui/lab": "^5.0.0-alpha.21",
     "@use-gesture/react": "^10.2.4",
     "chokidar": "^3.5.1",
+    "date-fns": "^2.27.0",
     "fluent-ffmpeg": "^2.1.2",
     "hls.js": "1.1.2",
     "knex": "^0.95.5",

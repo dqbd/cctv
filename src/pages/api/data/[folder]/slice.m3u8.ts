@@ -41,5 +41,5 @@ export default async function handler(
   )
 
   res.setHeader("Content-Type", "application/x-mpegURL")
-  res.send(getManifest(config, items, 1, true))
+  res.send(getManifest(config, items, 1, { end: true }))
 }

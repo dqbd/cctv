@@ -38,7 +38,7 @@ export default async function handler(
 
     res.send(transformed)
   } else {
-    const { segments, seq } = await smooth.seek(db, folder, shift)
-    res.send(getManifest(config, segments, seq))
+    const { segments, seq, offset } = await smooth.seek(db, folder, shift)
+    res.send(getManifest(config, segments, seq, { offset }))
   }
 }
