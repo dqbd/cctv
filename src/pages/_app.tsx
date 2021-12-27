@@ -66,7 +66,7 @@ export default function App(props: AppProps) {
 
         <meta
           name="viewport"
-          content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=5.0, viewport-fit=cover"
         />
       </Head>
       <DefaultSeo titleTemplate="%s | Kamera" defaultTitle="Kamera" />

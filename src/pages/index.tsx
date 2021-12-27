@@ -26,7 +26,7 @@ export default function Page() {
       <Global
         styles={css`
           html {
-            background-color: #d8dee9;
+            background-color: #434c5e;
           }
         `}
       />
@@ -36,6 +36,9 @@ export default function Page() {
           grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
           grid-gap: 1em;
           margin: 1em;
+
+          padding-top: env(safe-area-inset-top);
+          padding-bottom: env(safe-area-inset-top);
 
           @media (max-width: 768px) {
             font-size: 10px;

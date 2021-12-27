@@ -6,6 +6,7 @@ export const Main = styled.div`
 
   position: absolute;
   top: 0;
+  top: env(safe-area-inset-top);
   bottom: 0;
   left: 0;
   right: 0;

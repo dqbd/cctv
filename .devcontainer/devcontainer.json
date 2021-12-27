@@ -10,5 +10,6 @@
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode"
   ],
-  "runServices": ["db"]
+  "runServices": ["db"],
+  "forwardPorts": [3000]
 }

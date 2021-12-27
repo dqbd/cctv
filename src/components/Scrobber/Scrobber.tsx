@@ -216,7 +216,7 @@ export function Scrobber(props: {
     color: string
   }
 }) {
-  const { visible, show } = useVisibleTimer(10 * 1000 * 1000000)
+  const { visible, show } = useVisibleTimer(5 * 1000)
 
   return (
     <S.Main

@@ -98,7 +98,6 @@ export function Slider(props: {
         left: 0;
         right: 0;
         cursor: all-scroll;
-
         height: 5em;
       `}
     >

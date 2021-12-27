@@ -10,6 +10,8 @@ services:
       - vscode-node_modules:/workspace/node_modules
       - vscode-next:/workspace/.next
     command: /bin/sh -c "while sleep 1000; do :; done"
+    ports:
+      - 3000:3000
 volumes:
   vscode-node_modules:
   vscode-next:

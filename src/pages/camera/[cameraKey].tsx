@@ -45,6 +45,10 @@ export default function Page() {
       <Head>
         <meta name="theme-color" content="#090909" />
         <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=5.0, viewport-fit=cover"
+        />
+        <meta
           name="apple-mobile-web-app-status-bar-style"
           content="black-translucent"
         />
