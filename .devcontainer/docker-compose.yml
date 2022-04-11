@@ -12,6 +12,9 @@ services:
     command: /bin/sh -c "while sleep 1000; do :; done"
     ports:
       - 3000:3000
+  db:
+    ports:
+      - 3306:3306
 volumes:
   vscode-node_modules:
   vscode-next:

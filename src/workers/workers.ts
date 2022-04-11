@@ -4,58 +4,20 @@ import { config } from "shared/config"
 import { performance } from "perf_hooks"
 import { TransformCallback, Transform } from "stream"
 import path from "path"
+import { logger } from "utils/logger"
 
-const TARGET_SCRIPT = path.resolve(__dirname, "perform.js")
-const ALL_BR = /\n/g
+const TARGET_SCRIPT = path.resolve(__dirname, "worker.js")
 
 interface State {
   lastPrefix: string | null
   lastIsLinebreak: boolean
 }
 
-class PrefixTransform extends Transform {
-  prefix: string
-  state: State = {
-    lastPrefix: null,
-    lastIsLinebreak: true,
-  }
-
-  constructor(prefix: string) {
-    super()
-    this.prefix = `[${prefix}] `
-  }
-
-  _transform(
-    chunk: string | Buffer,
-    _: BufferEncoding,
-    callback: TransformCallback
-  ) {
-    const prefix = this.prefix
-    const nPrefix = `\n${prefix}`
-    const state = this.state
-    const firstPrefix = state.lastIsLinebreak
-      ? prefix
-      : state.lastPrefix !== prefix
-      ? "\n"
-      : ""
-
-    const prefixed = `${firstPrefix}${chunk}`.replace(ALL_BR, nPrefix)
-    const index = prefixed.indexOf(
-      prefix,
-      Math.max(0, prefixed.length - prefix.length)
-    )
-
-    state.lastPrefix = prefix
-    state.lastIsLinebreak = index !== -1
-
-    callback(null, index !== -1 ? prefixed.slice(0, index) : prefixed)
-  }
-}
 
 async function runWorker(cameraKey: string, attempt = 0) {
-  const prefixStream = new PrefixTransform(cameraKey)
-  prefixStream.pipe(process.stdout)
   prefixStream.write("Starting worker\n")
+
+  logger.debug({})
 
   return new Promise((resolve, reject) => {
     try {

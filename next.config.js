@@ -13,16 +13,23 @@ module.exports = {
         ...config,
         entry() {
           return config.entry().then(async (entry) => {
-            const contents = await fs.promises.readdir(
-              path.resolve(cwd, "src/workers")
-            )
+            const targets = ["src/workers", "src/scripts"]
 
-            const workerEntries = contents.reduce((memo, filename) => {
-              if (!filename.includes(".ts")) return memo
-              const name = filename.split(".").shift()
-              memo[name] = path.resolve(cwd, "src/workers", filename)
-              return memo
-            }, {})
+            let workerEntries = {}
+            for (const target of targets) {
+              const targetDir = path.resolve(cwd, target)
+              const workers = await fs.promises.readdir(targetDir)
+
+              workerEntries = {
+                ...workerEntries,
+                ...workers.reduce((memo, filename) => {
+                  if (!filename.includes(".ts")) return memo
+                  const name = filename.split(".").shift()
+                  memo[name] = path.resolve(targetDir, filename)
+                  return memo
+                }, {}),
+              }
+            }
 
             return {
               ...entry,
