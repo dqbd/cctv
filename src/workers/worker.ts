@@ -83,15 +83,21 @@ async function launchWorker(cameraKey: string | undefined) {
   const target = config.targets[cameraKey]
   if (!target) throw Error("Invalid camera target")
 
-  const credential = authConfig.onvif
   const baseFolder = path.resolve(config.base, cameraKey)
   mkdirp.sync(baseFolder)
 
-  const address = await getStreamUrl(target.onvif)
-  const hostname = new URL(address).hostname
-
-  const timeSync = timeSyncLoop(credential, hostname)
+  let address: string | undefined
+  let timeSync: ReturnType<typeof timeSyncLoop> | undefined
   let staleFrame: ReturnType<typeof staleFrameLoop> | undefined
+
+  if ("onvif" in target) {
+    address = await getStreamUrl(target.onvif)
+    timeSync = timeSyncLoop(authConfig.onvif, new URL(address).hostname)
+  } else if ("rtsp" in target) {
+    address = target.rtsp
+  }
+
+  if (address == null) throw new Error("No address received")
 
   const main = ffmpeg()
     .addInput(address)
@@ -126,7 +132,7 @@ async function launchWorker(cameraKey: string | undefined) {
         .run()
     })
   } finally {
-    timeSync.destroy()
+    timeSync?.destroy()
     staleFrame?.destroy()
     main.kill("SIGKILL")
   }

@@ -11,10 +11,16 @@ export const ConfigDto = z.object({
   cleanupPolling: z.number(),
   segmentSize: z.number(),
   targets: z.record(
-    z.object({
-      name: z.string(),
-      onvif: z.string(),
-    })
+    z.union([
+      z.object({
+        name: z.string(),
+        onvif: z.string(),
+      }),
+      z.object({
+        name: z.string(),
+        rtsp: z.string(),
+      }),
+    ])
   ),
 })
 

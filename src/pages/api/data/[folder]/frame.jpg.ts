@@ -12,12 +12,17 @@ export default async function handler(
   const folder = req.query.folder as string
   const refresh = req.query.refresh as string
 
-  if (!(folder in config.targets)) {
+  const target = config.targets[folder]
+  if (target == null) {
     return res.status(404).end()
   }
 
+  if (!("onvif" in target)) {
+    return res.status(422).end()
+  }
+
   try {
-    const payload = await getScreenshot(config.targets[folder].onvif, !!refresh)
+    const payload = await getScreenshot(target.onvif, !!refresh)
     res.setHeader("Content-Type", "image/jpeg")
     res.setHeader("Content-Transfer-Encoding", "binary")
     res.send(payload)
