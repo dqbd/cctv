@@ -1,19 +1,21 @@
 import { config, authConfig } from "shared/config"
 import { getStreamUrl } from "shared/onvif"
 import { setSystemTime } from "shared/clocksync"
+import { logger } from "utils/logger"
 
 import path from "path"
 import mkdirp from "mkdirp"
 import ffmpeg from "fluent-ffmpeg"
 
-function timeSyncLoop(credential: { username: string; password: string }, hostname: string | null) {
+function timeSyncLoop(
+  credential: { username: string; password: string },
+  hostname: string | null
+) {
   let timeSyncTimer: NodeJS.Timeout
 
   async function timeSync() {
     if (hostname != null) {
-      console.time(`Time Sync`)
       await setSystemTime(credential, hostname)
-      console.timeEnd(`Time Sync`)
     }
   }
 
@@ -22,7 +24,7 @@ function timeSyncLoop(credential: { username: string; password: string }, hostna
     try {
       await timeSync()
     } catch (err) {
-      console.error(err)
+      logger.error(err)
     }
 
     timeSyncTimer = setTimeout(timeSync, 60 * 1000)
@@ -39,7 +41,7 @@ function timeSyncLoop(credential: { username: string; password: string }, hostna
           reject(err)
         }
       })
-    }
+    },
   }
 }
 
@@ -48,7 +50,7 @@ function staleFrameLoop() {
   let lastFrameCount = -1
 
   function trigger() {
-    console.error(
+    logger.error(
       `Stale FFMPEG (frame=${lastFrameCount}), no new frames received`
     )
     process.exit(3)
@@ -109,9 +111,9 @@ async function launchWorker(cameraKey: string | undefined) {
 
     await new Promise((_, reject) => {
       main
-        .on("start", (cmd) => console.debug("Command", cmd))
+        .on("start", (cmd) => logger.debug("Command", cmd))
         .on("progress", (progress) => {
-          console.debug("Processing", progress.frames, progress.timemark)
+          logger.debug("Processing", progress.frames, progress.timemark)
           staleFrame?.onFrame(progress.frames)
         })
         .on("end", () => reject(new Error("Stream end on FFMPEG side")))
@@ -123,11 +125,9 @@ async function launchWorker(cameraKey: string | undefined) {
     staleFrame?.destroy()
     main.kill("SIGKILL")
   }
-
 }
 
 launchWorker(process.argv.slice().pop()).catch((err) => {
-  console.log("Worker promise error")
-  console.error(err)
+  logger.error(err)
   process.exit(1)
 })

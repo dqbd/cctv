@@ -1,6 +1,5 @@
 import fsPath from "path"
 import { createSegment } from "shared/segment"
-
 import knex, { Knex } from "knex"
 
 interface CameraTable {

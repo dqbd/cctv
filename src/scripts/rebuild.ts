@@ -1,37 +1,37 @@
-/* eslint-disable no-console */
 import fs from "fs"
 import path from "path"
 import { Database } from "shared/database"
-import { config, dbConfig } from "shared/config"
+import { config } from "shared/config"
+import { logger } from "utils/logger"
 
-const db = new Database(dbConfig)
+const db = new Database(config.database)
 
 const main = async () => {
   for (const cameraKey in config.targets) {
-    console.log("Rebuilding", cameraKey)
+    logger.info("Rebuilding", cameraKey)
 
-    console.log("- Init table")
+    logger.info("- Init table")
     await db.initFolder(cameraKey)
 
-    console.log("- Creating folder")
+    logger.info("- Creating folder")
     const folderTarget = path.resolve(config.base, cameraKey)
     await fs.promises.mkdir(folderTarget, { recursive: true })
 
-    console.log("- Reset folder")
+    logger.info("- Reset folder")
     await db.resetFolder(cameraKey)
 
-    console.log("- Reading folder list")
+    logger.info("- Reading folder list")
     const toInsert = (await fs.promises.readdir(folderTarget)).filter(
       (folder) => folder.indexOf("_") >= 0
     )
 
     for (const target of toInsert) {
-      console.log("- Reading folder", target)
+      logger.info("- Reading folder", target)
       const files = (
         await fs.promises.readdir(path.resolve(folderTarget, target))
       ).map((file) => path.join(target, file))
 
-      console.log("- Inserting", target, files.length)
+      logger.info("- Inserting", target, files.length)
       await db.insertFolder(cameraKey, target, files)
     }
   }

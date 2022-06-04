@@ -1,11 +1,15 @@
 import { ReactNode, useEffect, useState } from "react"
 import moment, { Moment } from "moment"
-import { vibrateDecorator } from "utils/vibrateDecorator"
 import { Slider } from "components/Slider/Slider"
 import Link from "next/link"
 import * as S from "./Scrobber.styled"
 import { config } from "shared/config"
-import { useTimer, useVisibleTimer, formatTime } from "./Scrobber.utils"
+import {
+  useTimer,
+  useVisibleTimer,
+  formatTime,
+  vibrateDecorator,
+} from "./Scrobber.utils"
 
 import {
   MobileDatePicker,

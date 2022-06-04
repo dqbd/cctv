@@ -34,7 +34,7 @@ module.exports = {
     "no-caller": "warn",
     "no-cond-assign": ["warn", "except-parens"],
     "no-const-assign": "warn",
-    "no-console": ["warn", { allow: ["warn", "error"] }],
+    "no-console": ["error"],
     "no-debugger": "warn",
     "no-alert": "warn",
     "no-control-regex": "warn",
@@ -244,12 +244,6 @@ module.exports = {
         "@typescript-eslint/prefer-as-const": "error",
         "@typescript-eslint/prefer-namespace-keyword": "error",
         "@typescript-eslint/triple-slash-reference": "error",
-      },
-    },
-    {
-      files: ["src/workers/*.ts"],
-      rules: {
-        "no-console": "off",
       },
     },
   ],

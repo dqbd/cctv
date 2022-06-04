@@ -3,10 +3,11 @@ import path from "path"
 import runAll from "npm-run-all"
 
 import { Database } from "shared/database"
-import { config, dbConfig } from "shared/config"
+import { config } from "shared/config"
+import { logger } from "utils/logger"
 
 async function init() {
-  const db = new Database(dbConfig)
+  const db = new Database(config.database)
   try {
     for (const cameraKey in config.targets) {
       await db.initFolder(cameraKey)
@@ -14,7 +15,7 @@ async function init() {
       await fs.promises.mkdir(folderTarget, { recursive: true })
     }
   } catch (err) {
-    console.error(err)
+    logger.error(err)
     return false
   } finally {
     await db.destroy()
@@ -41,7 +42,7 @@ async function main() {
       stderr: process.stderr,
     })
   } catch (err) {
-    console.error(err)
+    logger.error(err)
     process.exit(2)
   }
 }

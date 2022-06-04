@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import { config } from "shared/config"
 import { getScreenshot } from "shared/preview"
+import { logger } from "utils/logger"
 
 export default async function handler(
   req: NextApiRequest,
@@ -19,8 +20,7 @@ export default async function handler(
     res.setHeader("Content-Transfer-Encoding", "binary")
     res.send(payload)
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.log(err)
+    logger.error(err)
     res.status(500).end()
   }
 }

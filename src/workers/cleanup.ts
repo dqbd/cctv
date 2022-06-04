@@ -1,11 +1,11 @@
 import path from "path"
 import fs from "fs"
 import { Database } from "shared/database"
-import { config, dbConfig } from "shared/config"
+import { config } from "shared/config"
 import { wait } from "utils/wait"
 import { logger } from "utils/logger"
 
-const db = new Database(dbConfig)
+const db = new Database(config.database)
 
 async function cleanup() {
   async function taskCamera(cameraKey: string) {
@@ -34,10 +34,13 @@ async function cleanup() {
       .map((folder) => path.resolve(cameraFolder, folder))
 
     await Promise.all(
-      folders.map((target) => () => fs.promises.rm(target, {
-        recursive: true,
-        force: true,
-      }))
+      folders.map(
+        (target) => () =>
+          fs.promises.rm(target, {
+            recursive: true,
+            force: true,
+          })
+      )
     )
   }
 

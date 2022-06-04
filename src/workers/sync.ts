@@ -2,13 +2,14 @@ import path from "path"
 import chokidar from "chokidar"
 import fs from "fs"
 import { Database } from "shared/database"
-import { config, dbConfig } from "shared/config"
+import { config } from "shared/config"
 import { wait } from "utils/wait"
+import { logger } from "utils/logger"
 
-const db = new Database(dbConfig)
+const db = new Database(config.database)
 
 async function sync() {
-  console.log("Sync start")
+  logger.info("Sync start")
   const cache: Record<string, string[]> = {}
 
   function getFilesInManifest(manifest: string) {
@@ -51,7 +52,7 @@ async function sync() {
 
       for (const item of toInsert) {
         const relative = path.relative(baseFolder, item)
-        console.log(`[${cameraKey}]`, relative)
+        logger.info(`[${cameraKey}]`, relative)
         return db.insert(cameraKey, relative)
       }
     }
@@ -72,12 +73,12 @@ async function sync() {
 }
 
 process.on("unhandledRejection", (err) => {
-  console.error(err)
+  logger.error(err)
   process.exit(1)
 })
 
 process.on("exit", () => {
-  console.log("Sync shutdown")
+  logger.info("Sync shutdown")
 })
 
 sync()
