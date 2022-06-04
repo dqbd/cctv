@@ -1,0 +1,14 @@
+{
+  "base": "/Users/duongtat/Work/cctv/data",
+  "manifest": "manifest.m3u8",
+  "maxAge": 604800,
+  "syncInterval": 3600,
+  "cleanupPolling": 60,
+  "segmentSize": 3,
+  "targets": {
+    "VENKU": {
+      "name": "dummy",
+      "rtsp": "rtsp://172.16.1.160:8554/dummy"
+    }
+  }
+}

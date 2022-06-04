@@ -2,12 +2,18 @@ version: "3.9"
 services:
   app:
     build: .
+    command:
+      - yarn start
     restart: unless-stopped
     environment:
       TZ: Europe/Prague
+      CONFIG_PATH: /config/config.json
+      AUTH_CONFIG_PATH: /config/config.auth.json
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - ./config:/config
   db:
     restart: unless-stopped
     image: linuxserver/mariadb
@@ -33,12 +39,12 @@ services:
       retries: 10
     ports:
       - 3306
-  prometheus:
-    image: prom/prometheus
-    volumes:
-      - ./config:/etc/prometheus/
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-    ports:
-      - 9090:9090
-    restart: always
+  # prometheus:
+  #   image: prom/prometheus
+  #   volumes:
+  #     - ./config:/etc/prometheus/
+  #   command:
+  #     - "--config.file=/etc/prometheus/prometheus.yml"
+  #   ports:
+  #     - 9090:9090
+  #   restart: always
