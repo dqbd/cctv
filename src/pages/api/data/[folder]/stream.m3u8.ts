@@ -1,18 +1,20 @@
 import fs from "fs"
 import path from "path"
 import { NextApiRequest, NextApiResponse } from "next"
-import { config } from "shared/config"
+import { loadServerConfig } from "shared/config"
 import { Database } from "shared/database"
 import { Smooth } from "shared/smooth"
 import { getManifest } from "shared/manifest"
 
-const db = new Database(config.database)
 const smooth = new Smooth()
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  const { config } = await loadServerConfig()
+  const db = new Database(config.database)
+
   const folder = req.query.folder as string
   const shift = Number(req.query.shift || 0)
 

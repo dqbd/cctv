@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next"
-import { config } from "shared/config"
+import { loadServerConfig } from "shared/config"
+
 import { getScreenshot } from "shared/preview"
 import { logger } from "utils/logger"
 
@@ -7,6 +8,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  const { config } = await loadServerConfig()
   const folder = req.query.folder as string
   const refresh = req.query.refresh as string
 

@@ -1,9 +1,8 @@
-import { ReactNode, useEffect, useState } from "react"
+import { ReactNode, useContext, useEffect, useState } from "react"
 import moment, { Moment } from "moment"
 import { Slider } from "components/Slider/Slider"
 import Link from "next/link"
 import * as S from "./Scrobber.styled"
-import { config } from "shared/config"
 import {
   useTimer,
   useVisibleTimer,
@@ -18,6 +17,7 @@ import {
 } from "@material-ui/lab"
 import AdapterMoment from "@material-ui/lab/AdapterMoment"
 import { css } from "@emotion/react"
+import { ConfigContext } from "shared/config"
 
 async function getServerTimeDiff() {
   const clientStart = Date.now(),
@@ -171,6 +171,7 @@ function Timeline(props: {
   value: number
   onChange: (shift: number) => void
 }) {
+  const config = useContext(ConfigContext)
   const [scrollShift, setScrollShift] = useState<number | null>(null)
   const onShiftCommit = vibrateDecorator((shift: number) => {
     setScrollShift(null)

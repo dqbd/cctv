@@ -1,5 +1,4 @@
 import moment from "moment"
-import { config } from "shared/config"
 
 const SECONDS_PER_DAY = 24 * 60 * 60
 const LINE_HEIGHT = 10
@@ -8,7 +7,8 @@ export function drawCanvas(
   canvas: HTMLCanvasElement | null,
   valueOffset: number,
   userOffset: number,
-  color: string
+  color: string,
+  options: { maxAge: number }
 ) {
   if (!canvas || !canvas.parentElement) return
   const ctx = canvas.getContext("2d")
@@ -49,7 +49,7 @@ export function drawCanvas(
     const shiftedStart = shiftedNow.clone().startOf("day")
     const shiftedEnd = shiftedNow.clone().endOf("day")
 
-    const startDayX = Math.min(config.maxAge, now.diff(shiftedStart, "second"))
+    const startDayX = Math.min(options.maxAge, now.diff(shiftedStart, "second"))
     const endDayX = Math.max(0, now.diff(shiftedEnd, "second"))
 
     // invert direction, as we want to line to act as a timeline

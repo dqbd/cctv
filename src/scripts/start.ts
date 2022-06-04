@@ -3,10 +3,14 @@ import path from "path"
 import runAll from "npm-run-all"
 
 import { Database } from "shared/database"
-import { config } from "shared/config"
 import { logger } from "utils/logger"
+import { loadEnvConfig } from "@next/env"
+import { loadServerConfig } from "shared/config"
 
 async function init() {
+  loadEnvConfig(path.resolve("."), false, logger)
+  const { config } = await loadServerConfig()
+
   const db = new Database(config.database)
   try {
     for (const cameraKey in config.targets) {

@@ -1,13 +1,16 @@
 import path from "path"
 import fs from "fs"
 import { Database } from "shared/database"
-import { config } from "shared/config"
 import { wait } from "utils/wait"
 import { logger } from "utils/logger"
-
-const db = new Database(config.database)
+import { loadEnvConfig } from "@next/env"
+import { loadServerConfig } from "shared/config"
 
 async function cleanup() {
+  loadEnvConfig(path.resolve("."), false, logger)
+  const { config } = await loadServerConfig()
+  const db = new Database(config.database)
+
   async function taskCamera(cameraKey: string) {
     const now = new Date()
     const nowTime = new Date(

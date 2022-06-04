@@ -1,6 +1,4 @@
 import { useRef, useLayoutEffect, useState, useEffect } from "react"
-import { config } from "shared/config"
-import moment from "moment"
 
 export const formatTime = (time: number) => {
   const absTime = Math.abs(time)
@@ -75,19 +73,6 @@ export const useVisibleTimer = (delay = 1000) => {
   }, [delay])
 
   return { visible, show, hide }
-}
-
-export function getDateBounds(now: number) {
-  let minRangeRounded = now - config.maxAge * 1000
-  minRangeRounded -= minRangeRounded % (60 * 1000)
-
-  let maxRangeRounded = now
-  maxRangeRounded += 60 * 1000 - (maxRangeRounded % (60 * 1000))
-
-  const min = moment(new Date(minRangeRounded))
-  const max = moment(new Date(maxRangeRounded))
-
-  return { min, max }
 }
 
 export function vibrateDecorator<T extends Array<unknown>, U>(

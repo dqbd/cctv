@@ -1,12 +1,15 @@
 import fs from "fs"
 import path from "path"
-import { Database } from "shared/database"
-import { config } from "shared/config"
+import { loadServerConfig } from "shared/config"
 import { logger } from "utils/logger"
-
-const db = new Database(config.database)
+import { loadEnvConfig } from "@next/env"
+import { Database } from "shared/database"
 
 const main = async () => {
+  loadEnvConfig(path.resolve("."), false, logger)
+  const { config } = await loadServerConfig()
+  const db = new Database(config.database)
+
   for (const cameraKey in config.targets) {
     logger.info("Rebuilding", cameraKey)
 

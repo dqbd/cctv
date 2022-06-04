@@ -1,4 +1,3 @@
-import { config, authConfig } from "shared/config"
 import { getStreamUrl } from "shared/onvif"
 import { setSystemTime } from "shared/clocksync"
 import { logger } from "utils/logger"
@@ -6,6 +5,9 @@ import { logger } from "utils/logger"
 import path from "path"
 import mkdirp from "mkdirp"
 import ffmpeg from "fluent-ffmpeg"
+
+import { loadEnvConfig } from "@next/env"
+import { loadServerConfig } from "shared/config"
 
 function timeSyncLoop(
   credential: { username: string; password: string },
@@ -73,6 +75,9 @@ function staleFrameLoop() {
 }
 
 async function launchWorker(cameraKey: string | undefined) {
+  loadEnvConfig(path.resolve("."), false, logger)
+  const { config, authConfig } = await loadServerConfig()
+
   if (!cameraKey) throw Error("Invalid camera key")
 
   const target = config.targets[cameraKey]

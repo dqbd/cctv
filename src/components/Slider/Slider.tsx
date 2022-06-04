@@ -5,10 +5,11 @@ import {
   useEffect,
   useCallback,
   MutableRefObject,
+  useContext,
 } from "react"
 import { useGesture } from "@use-gesture/react"
-import { config } from "shared/config"
 import { drawCanvas } from "./Slider.utils"
+import { ConfigContext } from "shared/config"
 
 function usePropsRef<Props>(props: Props) {
   const ref = useRef<Props>(props)
@@ -21,7 +22,7 @@ function usePropsRef<Props>(props: Props) {
   return ref
 }
 
-function useUserOffsetRef(props: { value: number }): {
+function useUserOffsetRef(props: { value: number; maxAge: number }): {
   ref: MutableRefObject<number>
   reset: () => { value: number; user: number }
   update: (value: number) => { value: number; user: number }
@@ -39,10 +40,10 @@ function useUserOffsetRef(props: { value: number }): {
       value: props.value,
       user: (ref.current = Math.min(
         -props.value,
-        Math.max(-config.maxAge - props.value, newUser)
+        Math.max(-props.maxAge - props.value, newUser)
       )),
     }),
-    [props.value]
+    [props.maxAge, props.value]
   )
 
   return { ref, reset, update }
@@ -54,8 +55,9 @@ export function Slider(props: {
   onScroll?: (shift: number) => void
   onScrollEnd?: (shift: number) => void
 }) {
+  const config = useContext(ConfigContext)
   const value = -Math.floor(props.value / 1000)
-  const userOffset = useUserOffsetRef({ value })
+  const userOffset = useUserOffsetRef({ value, maxAge: config.maxAge })
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   const propsRef = usePropsRef({
@@ -82,13 +84,19 @@ export function Slider(props: {
   useLayoutEffect(() => {
     let animationId = 0
     function loop() {
-      drawCanvas(canvasRef.current, value, userOffset.ref.current, props.color)
+      drawCanvas(
+        canvasRef.current,
+        value,
+        userOffset.ref.current,
+        props.color,
+        { maxAge: config.maxAge }
+      )
       animationId = window.requestAnimationFrame(loop)
     }
     loop()
 
     return () => window.cancelAnimationFrame(animationId)
-  }, [props.color, value, userOffset.ref])
+  }, [config.maxAge, props.color, value, userOffset.ref])
 
   return (
     <div

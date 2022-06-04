@@ -2,13 +2,16 @@ import path from "path"
 import chokidar from "chokidar"
 import fs from "fs"
 import { Database } from "shared/database"
-import { config } from "shared/config"
 import { wait } from "utils/wait"
 import { logger } from "utils/logger"
-
-const db = new Database(config.database)
+import { loadEnvConfig } from "@next/env"
+import { loadServerConfig } from "shared/config"
 
 async function sync() {
+  loadEnvConfig(path.resolve("."), false, logger)
+  const { config } = await loadServerConfig()
+  const db = new Database(config.database)
+
   logger.info("Sync start")
   const cache: Record<string, string[]> = {}
 

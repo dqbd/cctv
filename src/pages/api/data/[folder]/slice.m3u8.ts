@@ -1,10 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next"
-import { config } from "shared/config"
+
 import { Database } from "shared/database"
 import { getManifest } from "shared/manifest"
 import { createSegments } from "shared/segment"
-
-const db = new Database(config.database)
+import { loadServerConfig } from "shared/config"
 
 function parseNumberQuery(value: string | string[] | undefined) {
   if (typeof value === "string") {
@@ -16,6 +15,9 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  const { config } = await loadServerConfig()
+  const db = new Database(config.database)
+
   const folder = req.query.folder as string
   if (!folder) return res.status(400).send("Missing from parameter")
 

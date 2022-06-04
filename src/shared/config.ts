@@ -1,9 +1,9 @@
-import userConfig from "../../config"
-import userAuthConfig from "../../config.auth"
 import { z } from "zod"
-import { Knex } from "knex"
+import { promises as fs } from "fs"
+import * as path from "path"
+import { createContext } from "react"
 
-const ConfigDto = z.object({
+export const ConfigDto = z.object({
   base: z.string(),
   database: z.union([
     z.object({
@@ -40,12 +40,47 @@ const ConfigDto = z.object({
   ),
 })
 
-const AuthConfigDto = z.object({
+export const AuthConfigDto = z.object({
   onvif: z.object({
     username: z.string(),
     password: z.string(),
   }),
 })
 
-export const config = ConfigDto.parse(userConfig)
-export const authConfig = AuthConfigDto.parse(userAuthConfig)
+export const EnvDto = z.object({
+  CONFIG_PATH: z.string().min(1),
+  AUTH_CONFIG_PATH: z.string().min(1),
+})
+
+export type EnvTypes = z.infer<typeof EnvDto>
+
+export function parseConfig(props: { config: unknown; authConfig: unknown }) {
+  return {
+    config: ConfigDto.parse(props.config),
+    authConfig: AuthConfigDto.parse(props.authConfig),
+  }
+}
+
+export async function loadServerConfig() {
+  if (process.browser)
+    throw new Error("Cannot load server config from client bundle")
+
+  EnvDto.parse(process.env)
+
+  const config = JSON.parse(
+    await fs.readFile(path.resolve(process.env.CONFIG_PATH), {
+      encoding: "utf-8",
+    })
+  )
+
+  const authConfig = JSON.parse(
+    await fs.readFile(path.resolve(process.env.AUTH_CONFIG_PATH), {
+      encoding: "utf-8",
+    })
+  )
+
+  return parseConfig({ config, authConfig })
+}
+
+// @ts-expect-error Force context
+export const ConfigContext = createContext<z.infer<typeof ConfigDto>>(null)

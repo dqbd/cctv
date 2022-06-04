@@ -1,12 +1,14 @@
 import path from "path"
 import send from "send"
 import { NextApiRequest, NextApiResponse } from "next"
-import { config } from "shared/config"
+import { loadServerConfig } from "shared/config"
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  const { config } = await loadServerConfig()
+
   const folder = req.query.folder as string
   const date = req.query.date as string
   const file = req.query.file as string

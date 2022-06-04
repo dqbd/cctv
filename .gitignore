@@ -35,7 +35,8 @@ yarn-error.log*
 
 sql.db
 
-config.auth.js
-config.db.js
+config.auth.json
+config.db.json
 
 media
+tsconfig.tsbuildinfo

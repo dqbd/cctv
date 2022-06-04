@@ -2,11 +2,7 @@
   "compilerOptions": {
     "baseUrl": "src",
     "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -24,14 +20,6 @@
     "jsxImportSource": "@emotion/react",
     "incremental": true
   },
-  "include": [
-    "src",
-    "ecosystem.all.config.js"
-  ],
-  "exclude": [
-    "node_modules",
-    "**/*.spec.ts",
-    "src/sw-*.js",
-    "src/idb.js"
-  ]
+  "include": ["src", "ecosystem.all.config.js", "global.d.ts"],
+  "exclude": ["node_modules", "**/*.spec.ts", "src/sw-*.js", "src/idb.js"]
 }
