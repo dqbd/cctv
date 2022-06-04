@@ -7,8 +7,8 @@ import { Database } from "shared/database"
 
 const main = async () => {
   loadEnvConfig(path.resolve("."), false, logger)
-  const { config } = await loadServerConfig()
-  const db = new Database(config.database)
+  const { config, authConfig } = await loadServerConfig()
+  const db = new Database(authConfig.database)
 
   for (const cameraKey in config.targets) {
     logger.info("Rebuilding", cameraKey)

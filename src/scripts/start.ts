@@ -9,9 +9,9 @@ import { loadServerConfig } from "shared/config"
 
 async function init() {
   loadEnvConfig(path.resolve("."), false, logger)
-  const { config } = await loadServerConfig()
+  const { config, authConfig } = await loadServerConfig()
+  const db = new Database(authConfig.database)
 
-  const db = new Database(config.database)
   try {
     for (const cameraKey in config.targets) {
       await db.initFolder(cameraKey)

@@ -4,7 +4,7 @@ import Head from "next/head"
 
 import { COLORS } from "utils/constants"
 import { StreamContext } from "utils/stream"
-import { ConfigContext, loadServerConfig, parseConfig } from "shared/config"
+import { ConfigContext, ConfigDto, loadServerConfig } from "shared/config"
 import { SleepContext } from "utils/sleep"
 import { useEffect, useState } from "react"
 import { DefaultSeo } from "next-seo"
@@ -19,7 +19,7 @@ export default function App(props: AppProps) {
     setSleep(new NoSleep())
   }, [])
 
-  const { config } = parseConfig(pageProps)
+  const config = ConfigDto.parse(pageProps.config)
 
   const streams = Object.entries(config.targets).map(
     ([key, { name }], index) => ({
@@ -102,7 +102,8 @@ export default function App(props: AppProps) {
 }
 
 App.getInitialProps = async (): Promise<AppInitialProps> => {
+  const { config } = await loadServerConfig()
   return {
-    pageProps: await loadServerConfig(),
+    pageProps: { config },
   }
 }

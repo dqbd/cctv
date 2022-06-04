@@ -9,8 +9,8 @@ import { loadServerConfig } from "shared/config"
 
 async function sync() {
   loadEnvConfig(path.resolve("."), false, logger)
-  const { config } = await loadServerConfig()
-  const db = new Database(config.database)
+  const { config, authConfig } = await loadServerConfig()
+  const db = new Database(authConfig.database)
 
   logger.info("Sync start")
   const cache: Record<string, string[]> = {}

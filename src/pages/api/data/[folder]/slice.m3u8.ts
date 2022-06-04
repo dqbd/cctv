@@ -15,8 +15,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { config } = await loadServerConfig()
-  const db = new Database(config.database)
+  const { config, authConfig } = await loadServerConfig()
+  const db = new Database(authConfig.database)
 
   const folder = req.query.folder as string
   if (!folder) return res.status(400).send("Missing from parameter")

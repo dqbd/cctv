@@ -5,6 +5,20 @@ import { createContext } from "react"
 
 export const ConfigDto = z.object({
   base: z.string(),
+  manifest: z.string(),
+  maxAge: z.number(),
+  syncInterval: z.number(),
+  cleanupPolling: z.number(),
+  segmentSize: z.number(),
+  targets: z.record(
+    z.object({
+      name: z.string(),
+      onvif: z.string(),
+    })
+  ),
+})
+
+export const AuthConfigDto = z.object({
   database: z.union([
     z.object({
       client: z.union([
@@ -27,20 +41,6 @@ export const ConfigDto = z.object({
       }),
     }),
   ]),
-  manifest: z.string(),
-  maxAge: z.number(),
-  syncInterval: z.number(),
-  cleanupPolling: z.number(),
-  segmentSize: z.number(),
-  targets: z.record(
-    z.object({
-      name: z.string(),
-      onvif: z.string(),
-    })
-  ),
-})
-
-export const AuthConfigDto = z.object({
   onvif: z.object({
     username: z.string(),
     password: z.string(),
@@ -53,13 +53,6 @@ export const EnvDto = z.object({
 })
 
 export type EnvTypes = z.infer<typeof EnvDto>
-
-export function parseConfig(props: { config: unknown; authConfig: unknown }) {
-  return {
-    config: ConfigDto.parse(props.config),
-    authConfig: AuthConfigDto.parse(props.authConfig),
-  }
-}
 
 export async function loadServerConfig() {
   if (process.browser)
@@ -79,7 +72,10 @@ export async function loadServerConfig() {
     })
   )
 
-  return parseConfig({ config, authConfig })
+  return {
+    config: ConfigDto.parse(config),
+    authConfig: AuthConfigDto.parse(authConfig),
+  }
 }
 
 // @ts-expect-error Force context

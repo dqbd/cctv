@@ -8,8 +8,8 @@ import { loadServerConfig } from "shared/config"
 
 async function cleanup() {
   loadEnvConfig(path.resolve("."), false, logger)
-  const { config } = await loadServerConfig()
-  const db = new Database(config.database)
+  const { config, authConfig } = await loadServerConfig()
+  const db = new Database(authConfig.database)
 
   async function taskCamera(cameraKey: string) {
     const now = new Date()

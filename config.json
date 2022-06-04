@@ -1,15 +1,5 @@
 {
   "base": "/cctv/storage",
-  "database": {
-    "client": "mysql2",
-    "connection": {
-      "host": "db",
-      "port": 3306,
-      "user": "cctv",
-      "password": "mysql",
-      "database": "cctv"
-    }
-  },
   "manifest": "manifest.m3u8",
   "maxAge": 604800,
   "syncInterval": 3600,
