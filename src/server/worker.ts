@@ -99,17 +99,18 @@ async function launchWorker(cameraKey: string | undefined) {
 
   if (address == null) throw new Error("No address received")
 
+  // use ffmpeg version 5
   const main = ffmpeg()
     .addInput(address)
-    .inputOptions(["-stimeout 30000000", "-rtsp_transport tcp"])
+    .inputOptions(["-timeout 30000000", "-rtsp_transport tcp"])
     .addOutput(path.resolve(baseFolder, config.manifest))
     .audioCodec("copy")
     .videoCodec("copy")
     .outputOptions([
       `-hls_time ${config.segmentSize}`,
-      `-use_localtime_mkdir 1`,
+      `-strftime_mkdir 1`,
+      `-strftime 1`,
       `-hls_start_number_source epoch`,
-      `-use_localtime 1`,
       `-hls_flags second_level_segment_duration`,
       `-hls_segment_filename ${path.resolve(
         baseFolder,
@@ -122,7 +123,7 @@ async function launchWorker(cameraKey: string | undefined) {
 
     await new Promise((_, reject) => {
       main
-        .on("start", (cmd) => logger.debug("Command", cmd))
+        .on("start", (cmd) => logger.info(`Command ${cmd}`))
         .on("progress", (progress) => {
           logger.debug("Processing", progress.frames, progress.timemark)
           staleFrame?.onFrame(progress.frames)

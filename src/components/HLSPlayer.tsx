@@ -73,7 +73,7 @@ export function HLSPlayer(props: { source: string }) {
 
   return (
     <>
-      <video ref={ref} autoPlay playsInline />
+      <video ref={ref} autoPlay playsInline muted />
       {paused && (
         <div
           css={css`

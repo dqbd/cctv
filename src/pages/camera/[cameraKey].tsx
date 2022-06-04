@@ -9,6 +9,8 @@ import { StreamContext } from "utils/stream"
 import { NextSeo } from "next-seo"
 import { encodeQuery } from "utils/query"
 import Head from "next/head"
+import { GetServerSideProps } from "next"
+import { loadServerConfig } from "shared/config"
 
 function generateUrl(
   name: string,
@@ -88,4 +90,12 @@ export default function Page() {
       </div>
     </Fragment>
   )
+}
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const { config } = await loadServerConfig()
+
+  return {
+    props: { config },
+  }
 }

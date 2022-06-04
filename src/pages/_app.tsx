@@ -100,10 +100,3 @@ export default function App(props: AppProps) {
     </ConfigContext.Provider>
   )
 }
-
-App.getInitialProps = async (): Promise<AppInitialProps> => {
-  const { config } = await loadServerConfig()
-  return {
-    pageProps: { config },
-  }
-}

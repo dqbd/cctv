@@ -17,7 +17,7 @@ module.exports = {
         ...config,
         entry() {
           return config.entry().then(async (entry) => {
-            const targets = ["src/workers", "src/scripts"]
+            const targets = ["src/server"]
 
             let workerEntries = {}
             for (const target of targets) {
@@ -26,12 +26,14 @@ module.exports = {
 
               workerEntries = {
                 ...workerEntries,
-                ...workers.reduce((memo, filename) => {
-                  if (!filename.includes(".ts")) return memo
-                  const name = filename.split(".").shift()
-                  memo[name] = path.resolve(targetDir, filename)
-                  return memo
-                }, {}),
+                ...Object.fromEntries(
+                  workers
+                    .filter((filename) => filename.includes(".ts"))
+                    .map((filename) => [
+                      filename.split(".").shift(),
+                      path.resolve(targetDir, filename),
+                    ])
+                ),
               }
             }
 

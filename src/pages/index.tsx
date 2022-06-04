@@ -5,6 +5,8 @@ import { Fragment, useContext, useEffect } from "react"
 import { SleepContext } from "utils/sleep"
 import { useRouter } from "next/router"
 import Head from "next/head"
+import { GetServerSideProps } from "next"
+import { loadServerConfig } from "shared/config"
 
 export default function Page() {
   const router = useRouter()
@@ -178,4 +180,14 @@ export default function Page() {
       </div>
     </Fragment>
   )
+}
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const { config } = await loadServerConfig()
+
+  return {
+    props: {
+      config,
+    },
+  }
 }
