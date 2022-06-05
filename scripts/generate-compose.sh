@@ -3,7 +3,7 @@ CONFIG_FOLDER="config/$1"
 TEMPLATE_FILE="$CONFIG_FOLDER/docker-compose.yml"
 CONFIG_FILE="$CONFIG_FOLDER/config.json"
 
-if [ ! -n $1 ]; then
+if [ ! -n "$1" ]; then
   echo "Error: Provide config folder"
   exit 1
 fi
