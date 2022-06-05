@@ -1,6 +1,4 @@
 #!/bin/sh
-if ! node ./.next/server/init.js; then
-  exit 1
-fi
-
+set -e
+node ./.next/server/init.js
 exec "$@"

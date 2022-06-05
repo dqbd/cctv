@@ -2,41 +2,21 @@ version: "3.9"
 services:
   app:
     build: .
-    command:
-      - yarn start
+    command: ["yarn", "start"]
     restart: unless-stopped
     environment:
       TZ: Europe/Prague
-      CONFIG_PATH: /config/config.json
-      AUTH_CONFIG_PATH: /config/config.auth.json
-    depends_on:
-      db:
-        condition: service_healthy
     volumes:
       - ./config:/config
   db:
     restart: unless-stopped
     image: linuxserver/mariadb
     environment:
-      PUID: 1000
-      PGID: 1000
       TZ: Europe/Prague
       MYSQL_ROOT_PASSWORD: mysql
       MYSQL_USER: cctv
       MYSQL_DATABASE: cctv
       MYSQL_PASSWORD: mysql
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "mysqladmin",
-          "ping",
-          "--host=localhost",
-          "--user=cctv",
-          "--password=mysql",
-        ]
-      timeout: 20s
-      retries: 10
     ports:
       - 3306
   # prometheus:

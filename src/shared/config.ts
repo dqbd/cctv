@@ -54,8 +54,8 @@ export const AuthConfigDto = z.object({
 })
 
 export const EnvDto = z.object({
-  CONFIG_PATH: z.string().min(1),
-  AUTH_CONFIG_PATH: z.string().min(1),
+  CONFIG_PATH: z.string().default("/config/config.json"),
+  AUTH_CONFIG_PATH: z.string().default("/config/config.auth.json"),
 })
 
 export type EnvTypes = z.infer<typeof EnvDto>
@@ -64,18 +64,14 @@ export async function loadServerConfig() {
   if (process.browser)
     throw new Error("Cannot load server config from client bundle")
 
-  EnvDto.parse(process.env)
+  const env = EnvDto.parse(process.env)
 
   const config = JSON.parse(
-    await fs.readFile(path.resolve(process.env.CONFIG_PATH), {
-      encoding: "utf-8",
-    })
+    await fs.readFile(path.resolve(env.CONFIG_PATH), { encoding: "utf-8" })
   )
 
   const authConfig = JSON.parse(
-    await fs.readFile(path.resolve(process.env.AUTH_CONFIG_PATH), {
-      encoding: "utf-8",
-    })
+    await fs.readFile(path.resolve(env.AUTH_CONFIG_PATH), { encoding: "utf-8" })
   )
 
   return {
