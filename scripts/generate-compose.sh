@@ -1,8 +1,17 @@
 #!/bin/sh
+CONFIG_FOLDER="config/$1"
+TEMPLATE_FILE="$CONFIG_FOLDER/docker-compose.yml"
+CONFIG_FILE="$CONFIG_FOLDER/config.json"
 
-CONFIG_FOLDER="dummy"
-TEMPLATE_FILE="config/$CONFIG_FOLDER/docker-compose.yml"
-CONFIG_FILE="config/$CONFIG_FOLDER/config.json"
+if [ ! -n $1 ]; then
+  echo "Error: Provide config folder"
+  exit 1
+fi
+
+if [ ! -d "$CONFIG_FOLDER" ]; then
+  echo "Error: Folder does not exist"
+  exit 1
+fi
 
 END_LINE=$(grep -n "^services:" "$TEMPLATE_FILE" | cut -d: -f1)
 START_LINE=$(($END_LINE - 1))
