@@ -1,6 +1,6 @@
 #!/bin/sh
 CONFIG_FOLDER="config/$1"
-TEMPLATE_FILE="$CONFIG_FOLDER/docker-compose.yml"
+TEMPLATE_FILE="config/docker-compose.yml"
 CONFIG_FILE="$CONFIG_FOLDER/config.json"
 
 if [ ! -n "$1" ]; then
@@ -28,6 +28,15 @@ EOF
   )"
 done
 
-echo "$(head -n $START_LINE "$TEMPLATE_FILE")" >docker-compose.yml
+CONFIG_ANCHOR="\n$(
+  cat <<EOF
+x-cctv-config: 
+  - &config ./$CONFIG_FOLDER:/cctv/config
+EOF
+)"
+
+echo "$(head -n 1 "$TEMPLATE_FILE")" >docker-compose.yml
+echo "$CONFIG_ANCHOR" >>docker-compose.yml
+echo "$(head -n $START_LINE "$TEMPLATE_FILE" | tail -n +2)" >>docker-compose.yml
 echo "$WORKERS\n" >>docker-compose.yml
 echo "$(tail -n +$END_LINE "$TEMPLATE_FILE")" >>docker-compose.yml
