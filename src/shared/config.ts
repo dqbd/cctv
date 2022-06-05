@@ -54,8 +54,8 @@ export const AuthConfigDto = z.object({
 })
 
 export const EnvDto = z.object({
-  CONFIG_PATH: z.string().default("/config/config.json"),
-  AUTH_CONFIG_PATH: z.string().default("/config/config.auth.json"),
+  CONFIG_PATH: z.string().default("/cctv/config/config.json"),
+  AUTH_CONFIG_PATH: z.string().default("/cctv/config/config.auth.json"),
 })
 
 export type EnvTypes = z.infer<typeof EnvDto>
