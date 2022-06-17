@@ -53,6 +53,7 @@ export const AuthConfigDto = z.object({
 
 export const EnvDto = z.object({
   CONFIG_PATH: z.string().default("/cctv/config/config.json"),
+  CONFIG_BASE64: z.string().optional(),
   MYSQL_HOST: z.string(),
   MYSQL_PORT: z.string(),
   MYSQL_USER: z.string(),
@@ -69,7 +70,9 @@ export async function loadServerConfig() {
   const env = EnvDto.parse(process.env)
 
   const config = JSON.parse(
-    await fs.readFile(path.resolve(env.CONFIG_PATH), { encoding: "utf-8" })
+    env.CONFIG_BASE64 != null
+      ? Buffer.from(env.CONFIG_BASE64, "base64").toString("utf-8")
+      : await fs.readFile(path.resolve(env.CONFIG_PATH), { encoding: "utf-8" })
   )
 
   return {
