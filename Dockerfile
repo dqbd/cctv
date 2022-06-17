@@ -10,7 +10,7 @@ COPY . .
 RUN yarn build
 
 FROM node:16-alpine3.16 AS runner
-RUN apk add --update --no-cache tzdata
+RUN apk add --update --no-cache tzdata ffmpeg
 RUN mkdir -p /cctv/config && mkdir -p /cctv/storage
 WORKDIR /app
 
