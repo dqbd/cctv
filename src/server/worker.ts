@@ -92,7 +92,10 @@ async function launchWorker(cameraKey: string | undefined) {
 
   if ("onvif" in target) {
     address = await getStreamUrl(target.onvif)
-    timeSync = timeSyncLoop(authConfig.onvif, new URL(address).hostname)
+    timeSync = timeSyncLoop(
+      { password: target.password, username: target.username },
+      new URL(address).hostname
+    )
   } else if ("rtsp" in target) {
     address = target.rtsp
   }

@@ -40,3 +40,4 @@ tsconfig.tsbuildinfo
 
 data
 /docker-compose.yml
+/config.json

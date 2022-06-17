@@ -15,6 +15,8 @@ export const ConfigDto = z.object({
       z.object({
         name: z.string(),
         onvif: z.string(),
+        username: z.string(),
+        password: z.string(),
       }),
       z.object({
         name: z.string(),
@@ -47,15 +49,15 @@ export const AuthConfigDto = z.object({
       }),
     }),
   ]),
-  onvif: z.object({
-    username: z.string(),
-    password: z.string(),
-  }),
 })
 
 export const EnvDto = z.object({
   CONFIG_PATH: z.string().default("/cctv/config/config.json"),
-  AUTH_CONFIG_PATH: z.string().default("/cctv/config/config.auth.json"),
+  MYSQL_HOST: z.string(),
+  MYSQL_PORT: z.string(),
+  MYSQL_USER: z.string(),
+  MYSQL_PASSWORD: z.string(),
+  MYSQL_DATABASE: z.string(),
 })
 
 export type EnvTypes = z.infer<typeof EnvDto>
@@ -70,13 +72,20 @@ export async function loadServerConfig() {
     await fs.readFile(path.resolve(env.CONFIG_PATH), { encoding: "utf-8" })
   )
 
-  const authConfig = JSON.parse(
-    await fs.readFile(path.resolve(env.AUTH_CONFIG_PATH), { encoding: "utf-8" })
-  )
-
   return {
     config: ConfigDto.parse(config),
-    authConfig: AuthConfigDto.parse(authConfig),
+    authConfig: AuthConfigDto.parse({
+      database: {
+        client: "mysql2",
+        connection: {
+          host: env.MYSQL_HOST,
+          port: Number.parseInt(env.MYSQL_PORT, 10),
+          user: env.MYSQL_USER,
+          password: env.MYSQL_PASSWORD,
+          database: env.MYSQL_DATABASE,
+        },
+      },
+    }),
   }
 }
 
