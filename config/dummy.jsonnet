@@ -1,6 +1,6 @@
 local template = import '../scripts/config.jsonnet';
 
-local targets = {
+template.generate({
   VENKU: {
     name: 'dummy',
     rtsp: 'rtsp://172.16.1.160:8554/dummy',
@@ -9,6 +9,4 @@ local targets = {
     name: 'dummy',
     rtsp: 'rtsp://172.16.1.160:8554/dummy',
   },
-};
-
-template.generate(targets)
+})

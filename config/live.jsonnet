@@ -1,6 +1,6 @@
 local template = import '../scripts/config.jsonnet';
 
-local targets = {
+template.generate({
   VENKU: {
     name: 'Venku',
     onvif: 'http://192.168.2.168:8899',
@@ -37,6 +37,4 @@ local targets = {
     username: 'admin',
     password: '',
   },
-};
-
-template.generate(targets)
+})
