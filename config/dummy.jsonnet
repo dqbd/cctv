@@ -10,18 +10,22 @@ template.generate({
     rtsp: 'rtsp://172.16.1.160:8554/dummy',
   },
 }, {
-  database: {},
-  storage: {
-    driver: 'local',
-    driver_opts: {
-      type: 'none',
-      device: '/media/cctv',
-      o: 'bind',
+  volumes: {
+    storage: {
+      driver: 'local',
+      driver_opts: {
+        type: 'none',
+        device: '/media/cctv',
+        o: 'bind',
+      },
     },
   },
-}, {
-  driver: 'loki',
-  options: {
-    'loki-url': 'http://127.0.0.1:3100/loki/api/v1/push',
+  cctv: {
+    logging: {
+      driver: 'loki',
+      options: {
+        'loki-url': 'http://127.0.0.1:3100/loki/api/v1/push',
+      },
+    },
   },
 })

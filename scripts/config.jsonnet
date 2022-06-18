@@ -1,17 +1,14 @@
-local mysql = {
-  host: 'db',
-  port: 3306,
-  user: 'cctv',
-  password: 'mysql',
-  rootPassword: 'mysql',
-  database: 'cctv',
-};
-
 {
-  generate(targets, volumes={
-    database: {},
-    storage: {},
-  }, logging={})::
+  generate(targets, overrides={})::
+    local mysql = {
+      host: 'db',
+      port: 3306,
+      user: 'cctv',
+      password: 'mysql',
+      rootPassword: 'mysql',
+      database: 'cctv',
+    } + std.get(overrides, 'mysql', {});
+
     local config = {
       base: '/cctv/storage',
       manifest: 'manifest.m3u8',
@@ -20,17 +17,14 @@ local mysql = {
       cleanupPolling: 60,
       segmentSize: 3,
       targets: targets,
-    };
+    } + std.get(overrides, 'config', {});
 
     local cctv = {
-      // build: '.',
-      // image: "cctv",
       image: 'ghcr.io/dqbd/cctv:master',
       restart: 'unless-stopped',
-      logging: logging,
       environment: {
         TZ: 'Europe/Prague',
-        CONFIG_BASE64: std.base64(std.manifestJsonMinified(config)),
+        CONFIG_BASE64: std.base64(std.encodeUTF8(std.manifestJsonMinified(config))),
         MYSQL_HOST: mysql.host,
         MYSQL_PORT: mysql.port,
         MYSQL_USER: mysql.user,
@@ -40,13 +34,17 @@ local mysql = {
       volumes: [
         'storage:/cctv/storage',
       ],
-    };
+    } + std.get(overrides, 'cctv', {});
+
+    local workers = std.foldl(function(result, name) result {
+      [name]: cctv { command: ['yarn', 'start:worker', name], ports: [9229] },
+    }, std.objectFields(targets), {});
 
     {
       'config.json': std.manifestJsonMinified(config),
       'docker-compose.yml': std.manifestYamlDoc({
         version: '3.9',
-        services: {
+        services: workers {
           sync: cctv { command: ['yarn', 'start:sync'], ports: [9229] },
           server: cctv { command: ['yarn', 'start'], ports: [9229, '3000:3000'] },
           db: {
@@ -68,12 +66,10 @@ local mysql = {
               'database:/config',
             ],
           },
-        } + std.foldl(function(result, name) result {
-          [name]: cctv { command: ['yarn', 'start:worker', name], ports: [9229] },
-        }, std.objectFields(targets), {}),
+        },
         volumes: {
-          database: volumes.database,
-          storage: volumes.storage,
+          database: std.get(std.get(overrides, 'volumes', {}), 'database', {}),
+          storage: std.get(std.get(overrides, 'volumes', {}), 'storage', {}),
         },
       }),
     },

@@ -10,6 +10,5 @@ template.generate({
     rtsp: 'rtsp://172.16.1.160:8554/dummy',
   },
 }, {
-  database: {},
-  storage: {},
+  cctv: { build: '.' },
 })
