@@ -23,6 +23,8 @@ local mysql = {
     };
 
     local cctv = {
+      // build: '.',
+      // image: "cctv",
       image: 'ghcr.io/dqbd/cctv:master',
       restart: 'unless-stopped',
       logging: logging,
@@ -67,7 +69,7 @@ local mysql = {
             ],
           },
         } + std.foldl(function(result, name) result {
-          [name]: cctv { command: ['yarn', 'start:worker', name] },
+          [name]: cctv { command: ['yarn', 'start:worker', name], ports: [9229] },
         }, std.objectFields(targets), {}),
         volumes: {
           database: volumes.database,
