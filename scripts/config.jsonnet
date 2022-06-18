@@ -47,8 +47,8 @@ local mysql = {
       'docker-compose.yml': std.manifestYamlDoc({
         version: '3.9',
         services: {
-          sync: cctv { command: ['yarn', 'start:sync'] },
-          server: cctv { command: ['yarn', 'start'], ports: ['3000:3000'] },
+          sync: cctv { command: ['yarn', 'start:sync'], ports: [9229] },
+          server: cctv { command: ['yarn', 'start'], ports: [9229, '3000:3000'] },
           db: {
             restart: 'unless-stopped',
             image: 'linuxserver/mariadb',
