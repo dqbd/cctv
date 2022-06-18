@@ -1,9 +1,11 @@
 import { NextApiRequest, NextApiResponse } from "next"
 
-import { Database } from "shared/database"
+import { createPersistentDatabase } from "shared/database"
 import { getManifest } from "shared/manifest"
 import { createSegments } from "shared/segment"
 import { loadServerConfig } from "shared/config"
+
+const dbRef = createPersistentDatabase()
 
 function parseNumberQuery(value: string | string[] | undefined) {
   if (typeof value === "string") {
@@ -16,7 +18,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const { config, authConfig } = await loadServerConfig()
-  const db = new Database(authConfig.database)
+  const db = dbRef.create(authConfig.database)
 
   const folder = req.query.folder as string
   if (!folder) return res.status(400).send("Missing from parameter")

@@ -37,4 +37,19 @@ template.generate({
     username: 'admin',
     password: '',
   },
+}, {
+  database: {},
+  storage: {
+    driver: 'local',
+    driver_opts: {
+      type: 'none',
+      device: '/media/cctv',
+      o: 'bind',
+    },
+  },
+}, {
+  driver: 'loki',
+  options: {
+    'loki-url': 'http://127.0.0.1:3100/loki/api/v1/push',
+  },
 })

@@ -2,18 +2,19 @@ import fs from "fs"
 import path from "path"
 import { NextApiRequest, NextApiResponse } from "next"
 import { loadServerConfig } from "shared/config"
-import { Database } from "shared/database"
+import { createPersistentDatabase } from "shared/database"
 import { Smooth } from "shared/smooth"
 import { getManifest } from "shared/manifest"
 
 const smooth = new Smooth()
+const dbRef = createPersistentDatabase()
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   const { config, authConfig } = await loadServerConfig()
-  const db = new Database(authConfig.database)
+  const db = dbRef.create(authConfig.database)
 
   const folder = req.query.folder as string
   const shift = Number(req.query.shift || 0)

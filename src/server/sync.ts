@@ -55,7 +55,7 @@ async function sync() {
 
       for (const item of toInsert) {
         const relative = path.relative(baseFolder, item)
-        logger.info(`[${cameraKey}]`, relative)
+        logger.info(`[${cameraKey}]: ${relative}`)
         return db.insert(cameraKey, relative)
       }
     }

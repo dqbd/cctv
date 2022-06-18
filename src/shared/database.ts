@@ -1,6 +1,7 @@
 import fsPath from "path"
 import { createSegment } from "shared/segment"
 import knex, { Knex } from "knex"
+import { GlobalRef } from "utils/global"
 
 interface CameraTable {
   timestamp: Date
@@ -118,5 +119,21 @@ export class Database {
     return this.knex<CameraTable>(camera)
       .where("timestamp", "<=", new Date(Date.now() - maxAge))
       .delete()
+  }
+}
+
+export function createPersistentDatabase() {
+  const dbRef = new GlobalRef<Database | null>("database")
+
+  if (dbRef.value != null) {
+    dbRef.value.destroy()
+    dbRef.value = null
+  }
+
+  return {
+    create(config: Knex.Config) {
+      if (dbRef.value != null) return dbRef.value
+      return (dbRef.value = new Database(config))
+    },
   }
 }
