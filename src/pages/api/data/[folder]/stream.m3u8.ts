@@ -23,9 +23,7 @@ export default async function handler(
 
   if (shift === 0) {
     const target = path.resolve(baseFolder, folder, MANIFEST)
-    if (!target.startsWith(baseFolder)) {
-      return res.status(400).end()
-    }
+    if (!target.startsWith(baseFolder)) return res.status(400).end()
 
     const file = await fs.promises.readFile(target, { encoding: "utf-8" })
     const transformed = file
@@ -42,19 +40,13 @@ export default async function handler(
     const timestampSec = Math.floor((Date.now() - shift * 1000) / 1000)
     const segments = (await db.seekFrom(folder, timestampSec))
       .map((item) =>
-        Segment.parseSegment(
-          item.path,
-          item.targetDuration,
-          item.timestamp.valueOf()
-        )
+        Segment.parseSegment(item.path, item.targetDuration, item.pdt)
       )
       .filter(isSegment)
 
-    const offset = Math.max(
-      0,
-      timestampSec - segments[0].getDate().valueOf() / 1000
-    )
+    const firstSegmentSec = segments[0].getDate().valueOf() / 1000
+    const offsetSec = Math.max(0, timestampSec - firstSegmentSec)
 
-    res.send(getManifest(segments, { offset }))
+    res.send(getManifest(segments, { offset: offsetSec }))
   }
 }

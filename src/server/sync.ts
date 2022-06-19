@@ -61,7 +61,7 @@ async function sync() {
           cameraKey,
           manifest.targetDuration,
           relative,
-          manifest.dates[index]
+          manifest.pdts[index]
         )
       }
     }

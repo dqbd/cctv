@@ -23,7 +23,7 @@ describe("manifest", () => {
         "example/sg_1655599918_1655599911_8333333.ts",
         "example/sg_1655599926_1655599912_6033333.ts",
       ],
-      dates: [null, null, null],
+      pdts: [null, null, null],
     })
   })
 
@@ -55,7 +55,7 @@ describe("manifest", () => {
         "example/sg_1655615635_1655615619_8333333.ts",
         "example/sg_1655615643_1655615620_8333333.ts",
       ],
-      dates: [
+      pdts: [
         "2022-06-19T07:13:37.433+0200",
         "2022-06-19T07:13:45.766+0200",
         "2022-06-19T07:13:54.100+0200",
@@ -90,7 +90,7 @@ describe("manifest", () => {
         "example/sg_1655615635_1655615619_8333333.ts",
         "example/sg_1655615643_1655615620_8333333.ts",
       ],
-      dates: [
+      pdts: [
         "2022-06-19T07:13:37.433+0200",
         null,
         "2022-06-19T07:13:54.100+0200",
@@ -112,22 +112,21 @@ describe("manifest", () => {
     expect(segment?.getExtInf()).toBe("8.333333")
   })
 
-  it("parse segment", () => {
+  it("parse segment with pdts", () => {
     const segment = Segment.parseSegment(
       "sg_1655599910_0_8333333.ts",
       8,
-      Date.parse("2022-06-19T07:13:54.100+0200")
+      new Date(Date.parse("2022-06-19T07:13:54.100+0200"))
     )
     expect(segment).toMatchObject({
       filename: "sg_1655599910_0_8333333.ts",
       sequence: "0",
       duration: "8333333",
+      pdt: new Date(Date.parse("2022-06-19T07:13:54.100+0200")),
       targetDuration: 8,
     })
 
-    expect(segment?.getDate().valueOf()).toBe(
-      Date.parse("2022-06-19T07:13:54.100+0200")
-    )
+    expect(segment?.getDate().valueOf()).toBe(1655599910 * 1000)
     expect(segment?.getExtInf()).toBe("8.333333")
   })
 
@@ -151,6 +150,65 @@ sg_1655599910_1655599910_8333333.ts
 sg_1655599918_1655599911_8333333.ts
 #EXTINF:8.333333,
 sg_1655599926_1655599912_8333333.ts
+`
+    )
+  })
+
+  it("get manifest with pdts", () => {
+    const segments = [
+      new Segment(
+        "sg_1655599910_1655599910_8333333.ts",
+        10,
+        new Date(Date.parse("2022-06-19T07:13:54.100+0200"))
+      ),
+      new Segment("sg_1655599918_1655599911_8333333.ts", 8, null),
+      new Segment("sg_1655599926_1655599912_8333333.ts", 8, null),
+    ]
+
+    const manifest = getManifest(segments)
+
+    expect(manifest).toEqual(
+      `#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:8
+#EXT-X-MEDIA-SEQUENCE:1655599910
+#EXT-X-PROGRAM-DATE-TIME:2022-06-19T05:13:54.100Z
+#EXTINF:8.333333,
+sg_1655599910_1655599910_8333333.ts
+#EXTINF:8.333333,
+sg_1655599918_1655599911_8333333.ts
+#EXTINF:8.333333,
+sg_1655599926_1655599912_8333333.ts
+`
+    )
+  })
+
+  it("get manifest with end", () => {
+    const segments = [
+      new Segment(
+        "sg_1655599910_1655599910_8333333.ts",
+        10,
+        new Date(Date.parse("2022-06-19T07:13:54.100+0200"))
+      ),
+      new Segment("sg_1655599918_1655599911_8333333.ts", 8, null),
+      new Segment("sg_1655599926_1655599912_8333333.ts", 8, null),
+    ]
+
+    const manifest = getManifest(segments, { end: true })
+
+    expect(manifest).toEqual(
+      `#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:8
+#EXT-X-MEDIA-SEQUENCE:1655599910
+#EXT-X-PROGRAM-DATE-TIME:2022-06-19T05:13:54.100Z
+#EXTINF:8.333333,
+sg_1655599910_1655599910_8333333.ts
+#EXTINF:8.333333,
+sg_1655599918_1655599911_8333333.ts
+#EXTINF:8.333333,
+sg_1655599926_1655599912_8333333.ts
+#EXT-X-ENDLIST
 `
     )
   })

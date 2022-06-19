@@ -40,11 +40,7 @@ export default async function handler(
 
   const items = (await db.seek(folder, from, to))
     .map((item) =>
-      Segment.parseSegment(
-        item.path,
-        item.targetDuration,
-        item.timestamp.valueOf()
-      )
+      Segment.parseSegment(item.path, item.targetDuration, item.pdt)
     )
     .filter(isSegment)
 

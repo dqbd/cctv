@@ -5,6 +5,7 @@ import { GlobalRef } from "utils/global"
 
 interface CameraTable {
   timestamp: Date
+  pdt: Date | null
   targetDuration: number
   path: string
 }
@@ -24,6 +25,7 @@ export class Database {
     if (!(await this.knex.schema.hasTable(cameraKey))) {
       return this.knex.schema.createTable(cameraKey, (table) => {
         table.dateTime("timestamp", { precision: 3 }).primary()
+        table.dateTime("pdt", { precision: 3 }).nullable()
         table.integer("targetDuration")
         table.string("path")
       })
@@ -56,6 +58,7 @@ export class Database {
 
       memo.push({
         timestamp: segment.getDate(),
+        pdt: segment.pdt,
         targetDuration: segment.targetDuration,
         path: target,
       })
@@ -74,13 +77,14 @@ export class Database {
     const segment = Segment.parseSegment(
       fsPath.basename(path),
       targetDuration,
-      pdt ? Date.parse(pdt) : null
+      pdt ? new Date(Date.parse(pdt)) : null
     )
     if (!segment) return null
 
     return this.knex<CameraTable>(camera)
       .insert({
         timestamp: segment.getDate(),
+        pdt: segment.pdt,
         targetDuration,
         path,
       })
