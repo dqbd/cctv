@@ -7,7 +7,7 @@
     "start": "NODE_OPTIONS='--inspect=0.0.0.0:9229' next start",
     "build": "next build",
     "start:init": "node ./.next/server/init.js",
-    "start:cleanup": "node ./.next/server/cleanup.js",
+    "start:cleanup": "node --inspect=0.0.0.0:9229 ./.next/server/cleanup.js",
     "start:sync": "node --inspect=0.0.0.0:9229 ./.next/server/sync.js",
     "start:worker": "node --inspect=0.0.0.0:9229 ./.next/server/worker.js",
     "fix": "run-p -lsc fix:*",

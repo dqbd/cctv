@@ -43,6 +43,7 @@
         version: '3.9',
         services: workers {
           sync: cctv { command: ['yarn', 'start:sync'], ports: [9229] },
+          cleanup: cctv { command: ['yarn', 'start:cleanup'], ports: [9229] },
           server: cctv { command: ['yarn', 'start'], ports: [9229, '3000:3000'] },
           db: {
             restart: 'unless-stopped',
