@@ -170,6 +170,7 @@ function Timeline(props: {
   color: string
   value: number
   onChange: (shift: number) => void
+  onMove: () => void
 }) {
   const config = useContext(ConfigContext)
   const [scrollShift, setScrollShift] = useState<number | null>(null)
@@ -203,7 +204,10 @@ function Timeline(props: {
         </S.Center>
       </S.Timeline>
       <Slider
-        onScroll={setScrollShift}
+        onScroll={(value) => {
+          setScrollShift(value)
+          props.onMove()
+        }}
         onScrollEnd={onShiftCommit}
         value={props.value}
         color={props.color}
@@ -226,8 +230,8 @@ export function Scrobber(props: {
   return (
     <S.Main
       css={{ opacity: visible ? 1 : 0 }}
-      onTouchStart={show.current}
-      onMouseMove={show.current}
+      onTouchStart={() => show.current()}
+      onMouseMove={() => show.current()}
     >
       <S.Top>
         <Link href="/">
@@ -251,7 +255,11 @@ export function Scrobber(props: {
       </S.Top>
       <Timeline
         value={props.value}
-        onChange={props.onChange}
+        onChange={(shift) => {
+          props.onChange(shift)
+          show.current()
+        }}
+        onMove={() => show.current()}
         color={props.stream.color}
       />
     </S.Main>
