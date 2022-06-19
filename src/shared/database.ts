@@ -22,8 +22,8 @@ export class Database {
 
   async initFolder(cameraKey: string) {
     if (!(await this.knex.schema.hasTable(cameraKey))) {
-      return this.knex.schema.createTableIfNotExists(cameraKey, (table) => {
-        table.dateTime("timestamp").primary()
+      return this.knex.schema.createTable(cameraKey, (table) => {
+        table.dateTime("timestamp", { precision: 3 }).primary()
         table.integer("targetDuration")
         table.string("path")
       })
@@ -42,7 +42,7 @@ export class Database {
   ) {
     const inferTargetDuration = Math.floor(
       filenames
-        .map((i) => Segment.parseSegment(i, -1)?.getExtInf())
+        .map((i) => Segment.parseSegment(i, -1, null)?.getExtInf())
         .filter((i): i is string => i != null)
         .map((i) => Number.parseFloat(i))
         .filter((i) => !Number.isNaN(i))
@@ -50,7 +50,7 @@ export class Database {
     )
 
     const segments = filenames.reduce<CameraTable[]>((memo, filename) => {
-      const segment = Segment.parseSegment(filename, inferTargetDuration)
+      const segment = Segment.parseSegment(filename, inferTargetDuration, null)
       const target = fsPath.join(keyBase, fsPath.basename(filename))
       if (!segment) return memo
 
@@ -65,8 +65,17 @@ export class Database {
     return this.knex.batchInsert<CameraTable>(camera, segments, chunkSize)
   }
 
-  async insert(camera: string, targetDuration: number, path: string) {
-    const segment = Segment.parseSegment(fsPath.basename(path), targetDuration)
+  async insert(
+    camera: string,
+    targetDuration: number,
+    path: string,
+    pdt: string | null
+  ) {
+    const segment = Segment.parseSegment(
+      fsPath.basename(path),
+      targetDuration,
+      pdt ? Date.parse(pdt) : null
+    )
     if (!segment) return null
 
     return this.knex<CameraTable>(camera)

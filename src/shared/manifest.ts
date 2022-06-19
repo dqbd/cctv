@@ -1,11 +1,15 @@
 import path from "path"
 
 export class Segment {
-  timestamp: string
+  private timestamp: string
   sequence: string
   duration: string
 
-  constructor(public filename: string, public targetDuration: number) {
+  constructor(
+    public filename: string,
+    public targetDuration: number,
+    pdt: number | null
+  ) {
     if (filename.indexOf(".ts") < 0) throw new Error("File is not a .ts file")
     const [_, timestamp, sequence, duration] = path
       .basename(filename)
@@ -15,14 +19,18 @@ export class Segment {
     if (timestamp == null || sequence == null || duration == null)
       throw new Error("Missing sections from segment")
 
-    this.timestamp = timestamp
+    this.timestamp = pdt?.toString() ?? timestamp
     this.sequence = sequence
     this.duration = duration
   }
 
-  static parseSegment(filename: string, targetDuration: number) {
+  static parseSegment(
+    filename: string,
+    targetDuration: number,
+    pdt: number | null
+  ) {
     try {
-      return new Segment(filename, targetDuration)
+      return new Segment(filename, targetDuration, pdt)
     } catch (error) {
       return null
     }
@@ -37,7 +45,7 @@ export class Segment {
   }
 
   getDate(): Date {
-    return new Date(Number.parseInt(this.timestamp, 10) * 1000)
+    return new Date(Number.parseInt(this.timestamp.padEnd(10 + 3, "0"), 10))
   }
 }
 
@@ -68,6 +76,7 @@ export function getManifest(
   }
 
   segments.forEach((segment) => {
+    buffer.push(`#EXT-X-PROGRAM-DATE-TIME:${segment.getDate().toISOString()}`)
     buffer.push(`#EXTINF:${segment.getExtInf()},`)
     buffer.push(segment.filename)
   })

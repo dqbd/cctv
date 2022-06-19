@@ -39,7 +39,13 @@ export default async function handler(
   if (to == null) return res.status(400).send("Missing to parameter")
 
   const items = (await db.seek(folder, from, to))
-    .map((item) => Segment.parseSegment(item.path, item.targetDuration))
+    .map((item) =>
+      Segment.parseSegment(
+        item.path,
+        item.targetDuration,
+        item.timestamp.valueOf()
+      )
+    )
     .filter(isSegment)
 
   res.setHeader("Content-Type", "application/x-mpegURL")

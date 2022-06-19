@@ -54,9 +54,15 @@ async function sync() {
       const toInsert = rightDiff(cache[cameraKey], manifest.files)
 
       for (const item of toInsert) {
+        const index = manifest.files.indexOf(item)
         const relative = path.relative(cameraFolder, item)
-        logger.debug(`[${cameraKey}]: ${relative}`)
-        return db.insert(cameraKey, manifest.targetDuration, relative)
+        logger.debug(`[${cameraKey}]: ${relative} ${index}`)
+        return db.insert(
+          cameraKey,
+          manifest.targetDuration,
+          relative,
+          manifest.dates[index]
+        )
       }
     }
 

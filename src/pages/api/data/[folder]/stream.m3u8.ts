@@ -41,7 +41,13 @@ export default async function handler(
   } else {
     const timestampSec = Math.floor((Date.now() - shift * 1000) / 1000)
     const segments = (await db.seekFrom(folder, timestampSec))
-      .map((item) => Segment.parseSegment(item.path, item.targetDuration))
+      .map((item) =>
+        Segment.parseSegment(
+          item.path,
+          item.targetDuration,
+          item.timestamp.valueOf()
+        )
+      )
       .filter(isSegment)
 
     const offset = Math.max(
