@@ -6,6 +6,7 @@ import { GlobalRef } from "utils/global"
 interface CameraTable {
   timestamp: Date
   pdt: Date | null
+  duration: number
   targetDuration: number
   path: string
 }
@@ -26,6 +27,7 @@ export class Database {
       return this.knex.schema.createTable(cameraKey, (table) => {
         table.dateTime("timestamp", { precision: 3 }).primary()
         table.dateTime("pdt", { precision: 3 }).nullable()
+        table.decimal("duration", 12, 6)
         table.integer("targetDuration")
         table.string("path")
       })
@@ -60,6 +62,7 @@ export class Database {
         timestamp: segment.getDate(),
         pdt: segment.pdt,
         targetDuration: segment.targetDuration,
+        duration: Number.parseFloat(segment.getExtInf()),
         path: target,
       })
       return memo
@@ -79,6 +82,7 @@ export class Database {
       targetDuration,
       pdt ? new Date(Date.parse(pdt)) : null
     )
+
     if (!segment) return null
 
     return this.knex<CameraTable>(camera)
@@ -86,6 +90,7 @@ export class Database {
         timestamp: segment.getDate(),
         pdt: segment.pdt,
         targetDuration,
+        duration: Number.parseFloat(segment.getExtInf()),
         path,
       })
       .onConflict("timestamp")

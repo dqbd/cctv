@@ -2,8 +2,8 @@ import path from "path"
 
 export class Segment {
   private timestamp: string
+  private duration: string
   sequence: string
-  duration: string
 
   constructor(
     public filename: string,
