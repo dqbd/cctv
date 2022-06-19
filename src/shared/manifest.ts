@@ -79,22 +79,39 @@ export function getManifest(
   return buffer.join("\n") + "\n"
 }
 
+function isManifestPDT(x: string | null) {
+  return x?.startsWith("#EXT-X-PROGRAM-DATE-TIME") ?? false
+}
+
+function parseManifestTag(x: string | null) {
+  return x?.split(":").slice(1).join(":") ?? null
+}
+
 export function parseManifest(manifest: string) {
   const lines = manifest
     .split("\n")
     .map((line) => line.trim())
     .filter((line) => Boolean(line))
 
-  const files = lines.filter((line) => line.indexOf(".ts") >= 0)
   const targetDuration = lines
     .filter((line) => line.startsWith("#EXT-X-TARGETDURATION"))
-    .map((i) => Number.parseInt(i.split(":").pop() ?? "", 10))
+    .map((i) => Number.parseInt(parseManifestTag(i) ?? "", 10))
     .filter((i) => !Number.isNaN(i))
     .shift()
 
-  if (targetDuration == null || lines == null) return null
-  return {
-    targetDuration,
-    files,
+  if (targetDuration == null) return null
+  const pairs: Array<string | null> = lines.filter(
+    (line) => line.indexOf(".ts") >= 0 || isManifestPDT(line)
+  )
+
+  for (let i = pairs.length - 1; i >= 0; i--) {
+    const prev = isManifestPDT(pairs[i - 1])
+    const curr = isManifestPDT(pairs[i])
+    if (prev === curr) pairs.splice(i, 0, null)
+    if (curr) pairs[i] = parseManifestTag(pairs[i]) ?? null
   }
+
+  const files = pairs.filter((x, i): x is string => i % 2 === 1 && x != null)
+  const dates = pairs.filter((_, i) => i % 2 === 0)
+  return { targetDuration, files, dates }
 }
