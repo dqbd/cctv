@@ -6,18 +6,16 @@ import { wait } from "utils/wait"
 import { logger } from "utils/logger"
 import { loadEnvConfig } from "@next/env"
 import { loadServerConfig } from "shared/config"
+import { MANIFEST } from "utils/constants"
+import { parseManifest } from "shared/manifest"
 
 async function sync() {
   loadEnvConfig(path.resolve("."), false, logger)
-  const { config, authConfig } = await loadServerConfig()
+  const { baseFolder, config, authConfig } = await loadServerConfig()
   const db = new Database(authConfig.database)
 
   logger.info("Sync start")
   const cache: Record<string, string[]> = {}
-
-  function getFilesInManifest(manifest: string) {
-    return manifest.split("\n").filter((line) => line.indexOf(".ts") >= 0)
-  }
 
   function rightDiff(left: string[], right: string[]) {
     return right.filter((val) => !left.includes(val))
@@ -28,7 +26,7 @@ async function sync() {
     let attempts = 0
 
     const delay = 100
-    const maxAttempts = (config.segmentSize * 1000) / delay
+    const maxAttempts = (10 * 1000) / delay
 
     while (!content && attempts < maxAttempts) {
       content = await fs.promises.readFile(target, "utf-8")
@@ -40,35 +38,37 @@ async function sync() {
 
   async function handleChange(targetFile: string) {
     const cameraKey = path
-      .relative(config.base, targetFile)
+      .relative(baseFolder, targetFile)
       .split(path.sep)
       .shift()
 
     if (!cameraKey) return
 
     const file = await readManifest(targetFile)
-    const manifest = getFilesInManifest(file)
-    const baseFolder = path.resolve(config.base, cameraKey)
+    const manifest = parseManifest(file)
+    if (manifest == null) return
+
+    const cameraFolder = path.resolve(baseFolder, cameraKey)
 
     if (cache[cameraKey]) {
-      const toInsert = rightDiff(cache[cameraKey], manifest)
+      const toInsert = rightDiff(cache[cameraKey], manifest.files)
 
       for (const item of toInsert) {
-        const relative = path.relative(baseFolder, item)
+        const relative = path.relative(cameraFolder, item)
         logger.debug(`[${cameraKey}]: ${relative}`)
-        return db.insert(cameraKey, relative)
+        return db.insert(cameraKey, manifest.targetDuration, relative)
       }
     }
 
-    if (manifest.length > 0) {
-      cache[cameraKey] = manifest
+    if (manifest.files.length > 0) {
+      cache[cameraKey] = manifest.files
     }
   }
 
   chokidar
     .watch(
       Object.keys(config.targets).map((cameraKey) =>
-        path.resolve(config.base, cameraKey, config.manifest)
+        path.resolve(baseFolder, cameraKey, MANIFEST)
       )
     )
     .on("add", handleChange)

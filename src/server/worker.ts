@@ -1,4 +1,4 @@
-import { getStreamUrl } from "shared/onvif"
+import { convertToXaddr, getStreamUrl } from "shared/onvif"
 import { setSystemTime } from "shared/clocksync"
 import { logger } from "utils/logger"
 
@@ -8,17 +8,17 @@ import ffmpeg from "fluent-ffmpeg"
 
 import { loadEnvConfig } from "@next/env"
 import { loadServerConfig } from "shared/config"
+import { MANIFEST } from "utils/constants"
 
-function timeSyncLoop(
-  credential: { username: string; password: string },
-  hostname: string | null
-) {
+function timeSyncLoop(credential: {
+  username: string
+  password: string
+  hostname: string
+}) {
   let timeSyncTimer: NodeJS.Timeout
 
   async function timeSync() {
-    if (hostname != null) {
-      await setSystemTime(credential, hostname)
-    }
+    await setSystemTime(credential, credential.hostname)
   }
 
   async function loop() {
@@ -76,28 +76,24 @@ function staleFrameLoop() {
 
 async function launchWorker(cameraKey: string | undefined) {
   loadEnvConfig(path.resolve("."), false, logger)
-  const { config, authConfig } = await loadServerConfig()
+  const { baseFolder, config } = await loadServerConfig()
 
   if (!cameraKey) throw Error("Invalid camera key")
 
   const target = config.targets[cameraKey]
   if (!target) throw Error("Invalid camera target")
 
-  const baseFolder = path.resolve(config.base, cameraKey)
-  mkdirp.sync(baseFolder)
+  const cameraFolder = path.resolve(baseFolder, cameraKey)
+  mkdirp.sync(cameraFolder)
 
-  let address: string | undefined
+  let address = target.source
   let timeSync: ReturnType<typeof timeSyncLoop> | undefined
   let staleFrame: ReturnType<typeof staleFrameLoop> | undefined
 
-  if ("onvif" in target) {
-    address = await getStreamUrl(target.onvif)
-    timeSync = timeSyncLoop(
-      { password: target.password, username: target.username },
-      new URL(address).hostname
-    )
-  } else if ("rtsp" in target) {
-    address = target.rtsp
+  const onvif = convertToXaddr(target.source)
+  if (onvif != null) {
+    address = await getStreamUrl(onvif.xaddr)
+    timeSync = timeSyncLoop(onvif)
   }
 
   if (address == null) throw new Error("No address received")
@@ -106,18 +102,17 @@ async function launchWorker(cameraKey: string | undefined) {
   const main = ffmpeg()
     .addInput(address)
     .inputOptions(["-timeout 30000000", "-rtsp_transport tcp"])
-    .addOutput(path.resolve(baseFolder, config.manifest))
+    .addOutput(path.resolve(cameraFolder, MANIFEST))
     .audioCodec("copy")
     .videoCodec("copy")
     .outputOptions([
-      `-hls_time ${config.segmentSize}`,
       `-strftime_mkdir 1`,
       `-strftime 1`,
       `-hls_start_number_source epoch`,
-      `-hls_flags second_level_segment_duration`,
+      `-hls_flags second_level_segment_index+second_level_segment_duration`,
       `-hls_segment_filename ${path.resolve(
-        baseFolder,
-        "%Y_%m_%d_%H/sg_%s_%%t.ts"
+        cameraFolder,
+        "%Y_%m_%d_%H/sg_%s_%%d_%%t.ts"
       )}`,
     ])
 

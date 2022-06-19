@@ -7,19 +7,18 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { config } = await loadServerConfig()
+  const { baseFolder } = await loadServerConfig()
 
   const folder = req.query.folder as string
-  const date = req.query.date as string
-  const file = req.query.file as string
+  const file = req.query.file as string[]
+  const target = path.join(folder, ...file)
 
-  if (file.indexOf(".ts") < 0) {
+  if (path.parse(target).ext !== ".ts") {
     return res.status(404).end()
   }
 
-  const target = path.join(folder, date, file)
   await new Promise((resolve, reject) => {
-    const stream = send(req, target, { root: config.base })
+    const stream = send(req, target, { root: baseFolder })
     stream.on("end", resolve)
     stream.on("error", (err) => {
       if (err.statusCode) {

@@ -3,17 +3,16 @@ import path from "path"
 import { NextApiRequest, NextApiResponse } from "next"
 import { loadServerConfig } from "shared/config"
 import { createPersistentDatabase } from "shared/database"
-import { Smooth } from "shared/smooth"
-import { getManifest } from "shared/manifest"
+import { getManifest, isSegment, Segment } from "shared/manifest"
+import { MANIFEST } from "utils/constants"
 
-const smooth = new Smooth()
 const dbRef = createPersistentDatabase()
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { config, authConfig } = await loadServerConfig()
+  const { baseFolder, authConfig } = await loadServerConfig()
   const db = dbRef.create(authConfig.database)
 
   const folder = req.query.folder as string
@@ -23,8 +22,8 @@ export default async function handler(
   res.setHeader("Content-Type", "application/x-mpegURL")
 
   if (shift === 0) {
-    const target = path.resolve(config.base, folder, config.manifest)
-    if (!target.startsWith(config.base)) {
+    const target = path.resolve(baseFolder, folder, MANIFEST)
+    if (!target.startsWith(baseFolder)) {
       return res.status(400).end()
     }
 
@@ -32,15 +31,24 @@ export default async function handler(
     const transformed = file
       .split("\n")
       .map((line) =>
-        line.startsWith(config.base)
-          ? path.relative(path.join(config.base, folder), line)
+        line.startsWith(baseFolder)
+          ? path.relative(path.join(baseFolder, folder), line)
           : line
       )
       .join("\n")
 
     res.send(transformed)
   } else {
-    const { segments, seq, offset } = await smooth.seek(db, folder, shift)
-    res.send(getManifest(config, segments, seq, { offset }))
+    const timestampSec = Math.floor((Date.now() - shift * 1000) / 1000)
+    const segments = (await db.seekFrom(folder, timestampSec))
+      .map((item) => Segment.parseSegment(item.path, item.targetDuration))
+      .filter(isSegment)
+
+    const offset = Math.max(
+      0,
+      timestampSec - segments[0].getDate().valueOf() / 1000
+    )
+
+    res.send(getManifest(segments, { offset }))
   }
 }

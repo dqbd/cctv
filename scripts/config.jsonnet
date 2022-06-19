@@ -10,12 +10,8 @@
     } + std.get(overrides, 'mysql', {});
 
     local config = {
-      base: '/cctv/storage',
-      manifest: 'manifest.m3u8',
-      maxAge: 604800,
-      syncInterval: 3600,
-      cleanupPolling: 60,
-      segmentSize: 3,
+      maxAge: 7 * 24 * 60 * 60,  // in seconds
+      cleanupPolling: 60,  // in seconds
       targets: targets,
     } + std.get(overrides, 'config', {});
 
@@ -25,6 +21,7 @@
       environment: {
         TZ: 'Europe/Prague',
         CONFIG_BASE64: std.base64(std.encodeUTF8(std.manifestJsonMinified(config))),
+        CCTV_BASE_FOLDER: '/cctv/storage',
         MYSQL_HOST: mysql.host,
         MYSQL_PORT: mysql.port,
         MYSQL_USER: mysql.user,

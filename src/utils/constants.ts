@@ -9,3 +9,5 @@ export const COLORS = [
   "#56CCF2",
   "#9B51E0",
 ]
+
+export const MANIFEST = "manifest.m3u8"

@@ -38,6 +38,6 @@ sql.db
 media
 tsconfig.tsbuildinfo
 
-data
+/data
 /docker-compose.yml
 /config.json

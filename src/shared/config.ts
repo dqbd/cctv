@@ -4,25 +4,13 @@ import * as path from "path"
 import { createContext } from "react"
 
 export const ConfigDto = z.object({
-  base: z.string(),
-  manifest: z.string(),
   maxAge: z.number(),
-  syncInterval: z.number(),
   cleanupPolling: z.number(),
-  segmentSize: z.number(),
   targets: z.record(
-    z.union([
-      z.object({
-        name: z.string(),
-        onvif: z.string(),
-        username: z.string(),
-        password: z.string(),
-      }),
-      z.object({
-        name: z.string(),
-        rtsp: z.string(),
-      }),
-    ])
+    z.object({
+      name: z.string(),
+      source: z.string(),
+    })
   ),
 })
 
@@ -54,6 +42,7 @@ export const AuthConfigDto = z.object({
 export const EnvDto = z.object({
   CONFIG_PATH: z.string().default("/cctv/config/config.json"),
   CONFIG_BASE64: z.string().optional(),
+  CCTV_BASE_FOLDER: z.string(),
   MYSQL_HOST: z.string(),
   MYSQL_PORT: z.string(),
   MYSQL_USER: z.string(),
@@ -76,6 +65,7 @@ export async function loadServerConfig() {
   )
 
   return {
+    baseFolder: env.CCTV_BASE_FOLDER,
     config: ConfigDto.parse(config),
     authConfig: AuthConfigDto.parse({
       database: {

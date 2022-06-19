@@ -8,7 +8,7 @@ import { loadServerConfig } from "shared/config"
 
 async function cleanup() {
   loadEnvConfig(path.resolve("."), false, logger)
-  const { config, authConfig } = await loadServerConfig()
+  const { baseFolder, config, authConfig } = await loadServerConfig()
   const db = new Database(authConfig.database)
 
   async function taskCamera(cameraKey: string) {
@@ -23,7 +23,7 @@ async function cleanup() {
     const cleanupThreshold = nowTime - config.maxAge * 1000
     await db.remove(cameraKey, config.maxAge)
 
-    const cameraFolder = path.resolve(config.base, cameraKey)
+    const cameraFolder = path.resolve(baseFolder, cameraKey)
     await fs.promises.stat(cameraFolder)
 
     const folders = (await fs.promises.readdir(cameraFolder))
@@ -39,10 +39,7 @@ async function cleanup() {
     await Promise.all(
       folders.map(
         (target) => () =>
-          fs.promises.rm(target, {
-            recursive: true,
-            force: true,
-          })
+          fs.promises.rm(target, { recursive: true, force: true })
       )
     )
   }

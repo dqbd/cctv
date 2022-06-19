@@ -1,8 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next"
 
 import { createPersistentDatabase } from "shared/database"
-import { getManifest } from "shared/manifest"
-import { createSegments } from "shared/segment"
+import { Segment, getManifest, isSegment } from "shared/manifest"
 import { loadServerConfig } from "shared/config"
 
 const dbRef = createPersistentDatabase()
@@ -17,7 +16,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { config, authConfig } = await loadServerConfig()
+  const { authConfig } = await loadServerConfig()
   const db = dbRef.create(authConfig.database)
 
   const folder = req.query.folder as string
@@ -39,10 +38,10 @@ export default async function handler(
 
   if (to == null) return res.status(400).send("Missing to parameter")
 
-  const items = createSegments(
-    (await db.seek(folder, from, to)).map((item) => item.path)
-  )
+  const items = (await db.seek(folder, from, to))
+    .map((item) => Segment.parseSegment(item.path, item.targetDuration))
+    .filter(isSegment)
 
   res.setHeader("Content-Type", "application/x-mpegURL")
-  res.send(getManifest(config, items, 1, { end: true }))
+  res.send(getManifest(items, { end: true }))
 }

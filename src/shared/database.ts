@@ -1,10 +1,11 @@
 import fsPath from "path"
-import { createSegment } from "shared/segment"
+import { Segment } from "shared/manifest"
 import knex, { Knex } from "knex"
 import { GlobalRef } from "utils/global"
 
 interface CameraTable {
   timestamp: Date
+  targetDuration: number
   path: string
 }
 
@@ -23,6 +24,7 @@ export class Database {
     if (!(await this.knex.schema.hasTable(cameraKey))) {
       return this.knex.schema.createTableIfNotExists(cameraKey, (table) => {
         table.dateTime("timestamp").primary()
+        table.integer("targetDuration")
         table.string("path")
       })
     }
@@ -38,31 +40,39 @@ export class Database {
     filenames: string[],
     chunkSize = 256
   ) {
-    const segments = filenames.reduce<{ timestamp: Date; path: string }[]>(
-      (memo, filename) => {
-        const segment = createSegment(filename)
-        const target = fsPath.join(keyBase, fsPath.basename(filename))
-        if (!segment) return memo
-
-        memo.push({
-          timestamp: segment.timestamp,
-          path: target,
-        })
-        return memo
-      },
-      []
+    const inferTargetDuration = Math.floor(
+      filenames
+        .map((i) => Segment.parseSegment(i, -1)?.getExtInf())
+        .filter((i): i is string => i != null)
+        .map((i) => Number.parseFloat(i))
+        .filter((i) => !Number.isNaN(i))
+        .reduce((min, i) => Math.min(min, i), Infinity)
     )
+
+    const segments = filenames.reduce<CameraTable[]>((memo, filename) => {
+      const segment = Segment.parseSegment(filename, inferTargetDuration)
+      const target = fsPath.join(keyBase, fsPath.basename(filename))
+      if (!segment) return memo
+
+      memo.push({
+        timestamp: segment.getDate(),
+        targetDuration: segment.targetDuration,
+        path: target,
+      })
+      return memo
+    }, [])
 
     return this.knex.batchInsert<CameraTable>(camera, segments, chunkSize)
   }
 
-  async insert(camera: string, path: string) {
-    const segment = createSegment(fsPath.basename(path))
-    if (!segment || segment.duration <= 0) return null
+  async insert(camera: string, targetDuration: number, path: string) {
+    const segment = Segment.parseSegment(fsPath.basename(path), targetDuration)
+    if (!segment) return null
 
     return this.knex<CameraTable>(camera)
       .insert({
-        timestamp: segment.timestamp,
+        timestamp: segment.getDate(),
+        targetDuration,
         path,
       })
       .onConflict("timestamp")
@@ -83,7 +93,11 @@ export class Database {
       .select()
   }
 
-  async seekFrom(camera: string, fromSec: number, limit = 5) {
+  async seekFrom(
+    camera: string,
+    fromSec: number,
+    limit = 5
+  ): Promise<CameraTable[]> {
     const from = new Date(fromSec * 1000)
 
     return this.knex

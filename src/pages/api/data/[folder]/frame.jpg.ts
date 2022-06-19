@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next"
 import { loadServerConfig } from "shared/config"
+import { convertToXaddr } from "shared/onvif"
 
 import { getScreenshot } from "shared/preview"
 import { logger } from "utils/logger"
@@ -17,12 +18,13 @@ export default async function handler(
     return res.status(404).end()
   }
 
-  if (!("onvif" in target)) {
+  const onvif = convertToXaddr(target.source)
+  if (onvif == null) {
     return res.status(422).end()
   }
 
   try {
-    const payload = await getScreenshot(target.onvif, !!refresh)
+    const payload = await getScreenshot(onvif.xaddr, !!refresh)
     res.setHeader("Content-Type", "image/jpeg")
     res.setHeader("Content-Transfer-Encoding", "binary")
     res.send(payload)

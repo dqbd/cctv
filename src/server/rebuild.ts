@@ -7,7 +7,7 @@ import { Database } from "shared/database"
 
 const main = async () => {
   loadEnvConfig(path.resolve("."), false, logger)
-  const { config, authConfig } = await loadServerConfig()
+  const { baseFolder, config, authConfig } = await loadServerConfig()
   const db = new Database(authConfig.database)
 
   for (const cameraKey in config.targets) {
@@ -17,7 +17,7 @@ const main = async () => {
     await db.initFolder(cameraKey)
 
     logger.info("- Creating folder")
-    const folderTarget = path.resolve(config.base, cameraKey)
+    const folderTarget = path.resolve(baseFolder, cameraKey)
     await fs.promises.mkdir(folderTarget, { recursive: true })
 
     logger.info("- Reset folder")

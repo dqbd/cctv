@@ -6,6 +6,7 @@
     "dev": "next dev",
     "start": "NODE_OPTIONS='--inspect=0.0.0.0:9229' next start",
     "build": "next build",
+    "start:init": "node ./.next/server/init.js",
     "start:cleanup": "node ./.next/server/cleanup.js",
     "start:sync": "node --inspect=0.0.0.0:9229 ./.next/server/sync.js",
     "start:worker": "node --inspect=0.0.0.0:9229 ./.next/server/worker.js",
@@ -15,7 +16,9 @@
     "lint": "run-p -lsc lint:*",
     "lint:ts": "tsc --noEmit",
     "lint:eslint": "eslint src",
-    "lint:prettier": "prettier -l \"src/**/*.ts*\""
+    "lint:prettier": "prettier -l \"src/**/*.ts*\"",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "@emotion/babel-plugin": "^11.2.0",
@@ -50,6 +53,7 @@
   "devDependencies": {
     "@types/fluent-ffmpeg": "^2.1.16",
     "@types/hls.js": "^1.0.0",
+    "@types/jest": "^28.1.2",
     "@types/mime-types": "^2.1.0",
     "@types/mkdirp": "^1.0.1",
     "@types/moment": "^2.13.0",
@@ -67,10 +71,37 @@
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
+    "jest": "^28.1.1",
     "prettier": "^2.2.1",
+    "ts-jest": "^28.0.5",
     "typescript": "^4.2.3"
   },
   "prettier": {
     "semi": false
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ],
+    "testPathIgnorePatterns": [
+      "lib/",
+      "test/rules/",
+      "node_modules/"
+    ],
+    "testEnvironment": "node",
+    "moduleDirectories": [
+      "node_modules",
+      "src"
+    ],
+    "maxConcurrency": 1
   }
 }
