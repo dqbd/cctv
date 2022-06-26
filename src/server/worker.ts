@@ -32,18 +32,10 @@ function timeSyncLoop(credential: {
     timeSyncTimer = setTimeout(timeSync, 60 * 1000)
   }
 
+  loop()
   return {
-    destroy: () => clearTimeout(timeSyncTimer),
-
-    launch: () => {
-      new Promise((_, reject) => {
-        try {
-          loop()
-        } catch (err) {
-          reject(err)
-        }
-      })
-    },
+    loop,
+    destroy: () => clearTimeout(timeSyncTimer)
   }
 }
 
