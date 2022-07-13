@@ -38,7 +38,7 @@ async function cleanup() {
 
     await Promise.all(
       folders.map(
-        (target) => () =>
+        (target) =>
           fs.promises.rm(target, { recursive: true, force: true })
       )
     )
