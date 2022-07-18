@@ -29,7 +29,7 @@ function timeSyncLoop(credential: {
       logger.error(err)
     }
 
-    timeSyncTimer = setTimeout(timeSync, 60 * 1000)
+    timeSyncTimer = setTimeout(loop, 60 * 1000)
   }
 
   loop()
