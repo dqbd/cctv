@@ -75,10 +75,17 @@ async function sync() {
     .watch(
       Object.keys(config.targets).map((cameraKey) =>
         path.resolve(baseFolder, cameraKey, MANIFEST)
-      )
+      ),
+      // use polling instead, as sometimes chokidar
+      // just stops detecting new changes
+      // this might not work...
+      { usePolling: true }
     )
     .on("add", handleChange)
     .on("change", handleChange)
+    .on("error", (error) => {
+      logger.error(error)
+    })
 }
 
 process.on("unhandledRejection", (err) => {
