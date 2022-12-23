@@ -2,6 +2,7 @@ import Link from "next/link"
 import { SBack, SColor, SInfo, SMain, SName, STop } from "./Controls.styled"
 import { useVisibleTimer } from "./Controls.utils"
 import { Scrobber } from "../Scrobber/Scrobber"
+import { ManifestArgs } from "utils/stream"
 
 function ControlsHeader(props: {
   stream: {
@@ -35,8 +36,8 @@ function ControlsHeader(props: {
 }
 
 export function Controls(props: {
-  onChange: (shift: number) => void
-  value: number
+  onChange: (args: ManifestArgs) => void
+  value: ManifestArgs
   stream: {
     key: string
     name: string
@@ -54,12 +55,12 @@ export function Controls(props: {
       <ControlsHeader stream={props.stream} />
       <Scrobber
         value={props.value}
+        onMove={() => show.current()}
+        color={props.stream.color}
         onChange={(shift) => {
           props.onChange(shift)
           show.current()
         }}
-        onMove={() => show.current()}
-        color={props.stream.color}
       />
     </SMain>
   )

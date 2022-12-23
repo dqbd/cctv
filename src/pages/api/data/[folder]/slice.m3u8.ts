@@ -22,23 +22,23 @@ export default async function handler(
   const folder = req.query.folder as string
   if (!folder) return res.status(400).send("Missing from parameter")
 
-  const from = parseNumberQuery(req.query.from)
-  let to = parseNumberQuery(req.query.to)
+  const fromSec = parseNumberQuery(req.query.from)
+  let toSec = parseNumberQuery(req.query.to)
   const length = parseNumberQuery(req.query.length)
 
-  if (from == null || (to == null && length == null))
+  if (fromSec == null || (toSec == null && length == null))
     return res.status(400).send("No query parameters set")
 
-  if (to != null && length != null)
+  if (toSec != null && length != null)
     return res
       .status(400)
       .send("Invalid parameters, can't have `to` and `length` at the same time")
 
-  if (length) to = from + length
+  if (length) toSec = fromSec + length
 
-  if (to == null) return res.status(400).send("Missing to parameter")
+  if (toSec == null) return res.status(400).send("Missing to parameter")
 
-  const items = (await db.seek(folder, from, to))
+  const items = (await db.seek(folder, fromSec, toSec))
     .map((item) =>
       Segment.parseSegment(item.path, item.targetDuration, item.pdt)
     )

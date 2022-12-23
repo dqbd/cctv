@@ -5,43 +5,73 @@ import { ConfigContext } from "shared/config"
 import { ScrobberShift } from "components/Scrobber/ScrobberShift"
 import { SContainer, SWrapper } from "./Scrobber.styled"
 import { ScrobberRange } from "./ScrobberRange"
+import { ManifestArgs } from "utils/stream"
 
 export function Scrobber(props: {
   color: string
-  value: number
-  onChange: (shift: number) => void
+  value: ManifestArgs
+  onChange: (value: ManifestArgs) => void
   onMove: () => void
 }) {
   const config = useContext(ConfigContext)
 
-  const [scrollShift, setScrollShift] = useState<number | null>(null)
+  const [mode, setMode] = useState<"shift" | "range">("shift")
+  const [intentShift, setIntentShift] = useState<number | null>(null)
+
   const onShiftChange = vibrateDecorator((shift: number) => {
-    setScrollShift(null)
-    props.onChange(Math.max(0, Math.min(config.maxAge * 1000, shift)))
+    setIntentShift(null)
+
+    props.onChange({
+      shift: Math.max(0, Math.min(config.maxAge * 1000, shift)),
+    })
   })
+
+  const onRangeChange = vibrateDecorator(
+    (range: { from: number; to: number } | null) => {
+      if (range != null) {
+        props.onChange(range)
+      }
+    }
+  )
 
   return (
     <>
       <SWrapper>
-        <SContainer>
-          <ScrobberShift
-            value={props.value}
-            intentValue={scrollShift}
-            onChange={onShiftChange}
-          />
+        <SContainer mode={mode}>
+          {mode === "shift" && (
+            <ScrobberShift
+              value={"shift" in props.value ? props.value.shift : 0}
+              intentValue={intentShift}
+              onChange={onShiftChange}
+              onModeChange={() => setMode("range")}
+            />
+          )}
 
-          <ScrobberRange />
+          {mode === "range" && (
+            <ScrobberRange
+              value={
+                "from" in props.value && "to" in props.value
+                  ? props.value
+                  : null
+              }
+              onChange={onRangeChange}
+              onModeChange={() => setMode("shift")}
+            />
+          )}
         </SContainer>
       </SWrapper>
-      <ScrobberSlider
-        onScroll={(value) => {
-          setScrollShift(value)
-          props.onMove()
-        }}
-        onScrollEnd={onShiftChange}
-        value={props.value}
-        color={props.color}
-      />
+
+      {mode === "shift" && (
+        <ScrobberSlider
+          onScroll={(value) => {
+            setIntentShift(value)
+            props.onMove()
+          }}
+          onScrollEnd={onShiftChange}
+          value={"shift" in props.value ? props.value.shift : 0}
+          color={props.color}
+        />
+      )}
     </>
   )
 }

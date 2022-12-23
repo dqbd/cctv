@@ -101,6 +101,7 @@ export function ScrobberShift(props: {
   value: number
   intentValue: number | null
   onChange: (value: number) => void
+  onModeChange: () => void
 }) {
   const contentValue =
     props.intentValue != null ? props.intentValue : props.value
@@ -120,6 +121,8 @@ export function ScrobberShift(props: {
       </div>
 
       <ScrobberShiftDate value={contentValue} onChange={props.onChange} />
+
+      <Pill onClick={props.onModeChange}>Range</Pill>
     </>
   )
 }

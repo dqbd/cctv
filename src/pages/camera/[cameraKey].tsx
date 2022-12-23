@@ -5,7 +5,7 @@ import { Controls } from "components/Controls/Controls"
 
 import { css, Global } from "@emotion/react"
 import { useRouter } from "next/dist/client/router"
-import { StreamContext } from "utils/stream"
+import { ManifestArgs, StreamContext } from "utils/stream"
 import { NextSeo } from "next-seo"
 import { encodeQuery } from "utils/query"
 import Head from "next/head"
@@ -13,18 +13,18 @@ import { GetServerSideProps } from "next"
 import { loadServerConfig } from "shared/config"
 import { theme } from "utils/theme"
 
-function generateUrl(
-  name: string,
-  args: {
-    from?: number
-    to?: number
-    shift: number
-  }
-): string | null {
-  if ((args.from ?? 0) > 0) {
+function generateUrl(name: string, args: ManifestArgs): string | null {
+  if ("from" in args && "to" in args) {
     return encodeQuery(`/api/data/${name}/slice.m3u8`, {
-      from: args.from,
-      to: args.to,
+      from: Math.floor(args.from / 1000),
+      to: Math.floor(args.to / 1000),
+    })
+  }
+
+  if ("from" in args && "length" in args) {
+    return encodeQuery(`/api/data/${name}/slice.m3u8`, {
+      from: Math.floor(args.from / 1000),
+      length: args.length,
     })
   }
 
@@ -34,14 +34,14 @@ function generateUrl(
 }
 
 export default function Page() {
-  const [shift, setShift] = useState(0)
+  const [args, setArgs] = useState<ManifestArgs>({ shift: 0 })
 
   const { query } = useRouter()
   const name = query.cameraKey as string | undefined
   const data = useContext(StreamContext)
   const stream = data.streams.find(({ key }) => key === name)
 
-  const url = name ? generateUrl(name, { shift }) : null
+  const url = name ? generateUrl(name, args) : null
 
   return (
     <Fragment>
@@ -85,9 +85,7 @@ export default function Page() {
         `}
       >
         {url && <HLSPlayer source={url} />}
-        {stream && (
-          <Controls onChange={setShift} value={shift} stream={stream} />
-        )}
+        {stream && <Controls onChange={setArgs} value={args} stream={stream} />}
       </div>
     </Fragment>
   )

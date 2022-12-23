@@ -1,3 +1,4 @@
+import { css } from "@emotion/react"
 import styled from "@emotion/styled"
 import { theme } from "utils/theme"
 
@@ -14,7 +15,7 @@ export const SWrapper = styled.div`
   background: ${theme.gradients.bottom};
 `
 
-export const SContainer = styled.div`
+export const SContainer = styled.div<{ mode: "shift" | "range" }>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -42,4 +43,16 @@ export const SContainer = styled.div`
   & > *:not(:last-child) {
     margin-right: 1em;
   }
+
+  ${({ mode }) => {
+    if (mode === "range") {
+      return css`
+        &::after {
+          display: none;
+        }
+      `
+    }
+
+    return null
+  }}
 `
