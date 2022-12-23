@@ -6,7 +6,7 @@ import {
   LocalizationProvider,
   MobileTimePicker,
 } from "@material-ui/lab"
-import AdapterMoment from "@material-ui/lab/AdapterMoment"
+import AdapterDayjs from "@material-ui/lab/AdapterDayjs"
 import { Pill, PillInput } from "components/PillInput/PillInput"
 import { STimeOffset, SLive } from "./ScrobberShift.styled"
 import { useServerTimeDiff } from "./ScrobberShift.utils"
@@ -22,7 +22,7 @@ function ScrobberShiftTime(props: {
   const activeDate = dayjs(new Date(current - props.value + serverDiff))
 
   return (
-    <LocalizationProvider dateAdapter={AdapterMoment}>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Pill className={props.className}>
         <MobileTimePicker
           ampm={false}
@@ -39,7 +39,7 @@ function ScrobberShiftTime(props: {
               )
             }
           }}
-          onOpen={() => setInputDate(activeDate.clone())}
+          onOpen={() => setInputDate(activeDate)}
           renderInput={({ inputProps, inputRef }) => (
             <PillInput {...inputProps} ref={inputRef} />
           )}
@@ -66,7 +66,7 @@ function ScrobberShiftDate(props: {
   const activeDate = dayjs(new Date(current - props.value))
 
   return (
-    <LocalizationProvider dateAdapter={AdapterMoment} locale="cs">
+    <LocalizationProvider dateAdapter={AdapterDayjs} locale="cs">
       <Pill className={props.className}>
         <MobileDatePicker
           value={inputDate}

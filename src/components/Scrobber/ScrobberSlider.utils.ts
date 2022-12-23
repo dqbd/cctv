@@ -24,10 +24,10 @@ export function drawCanvas(
 
   ctx.scale(2, 2)
 
+  const { width, height } = canvas.getBoundingClientRect()
+
   // draws the line, receving arguments as px, not relative to time
   const drawLine = (xFrom: number, xTo: number) => {
-    const { width, height } = canvas.getBoundingClientRect()
-
     ctx.lineWidth = LINE_HEIGHT
     ctx.strokeStyle = color
 
@@ -41,95 +41,48 @@ export function drawCanvas(
     ctx.stroke()
   }
 
-  // hide progress bar when necessary [-inf, 0] in seconds
+  // converts a specific date to a relative px position
+  const toCoordX = (pov: dayjs.Dayjs, date: dayjs.Dayjs) => {
+    return width / 2 - pov.diff(date, "second")
+  }
+
   const drawDayBoundedLine = (shift: number) => {
-    const { width, height } = canvas.getBoundingClientRect()
-    const viewOffset = width / 2
-
     const now = dayjs()
-    const shiftedNow = now.add(shift, "seconds")
+    const pov = now.add(shift, "seconds")
 
-    const startOfDay = shiftedNow.startOf("day")
-    const endOfDay = shiftedNow.endOf("day")
+    const povStartOfDay = pov.startOf("day")
+    const povEndOfDay = pov.endOf("day")
 
-    // We use now instead of shiftedNow, why?
-    const startDayX = Math.min(options.maxAge, now.diff(startOfDay, "second"))
-    const endDayX = Math.max(0, now.diff(endOfDay, "second"))
+    const recordStart = now.subtract(options.maxAge, "second")
+    const recordEnd = now
 
-    drawLine(viewOffset - startDayX - shift, viewOffset - endDayX - shift)
+    drawLine(
+      toCoordX(pov, dayjs.max(recordStart, povStartOfDay)),
+      toCoordX(pov, dayjs.min(recordEnd, povEndOfDay))
+    )
 
-    /*
-      startDayX = now.diff(startOfDay, "second")
-      startDayX = now - startOfDay
-      startDayX = now - (now + shift).startOf("day")
-
-      output = startDayX + shift
-      output = now - (now + shift).startOf("day") + shift
-      output = now - (now + shift).startOf("day") + shift
-
-
-      now > now + shift/2 > now + shift
-
-      shift: 120s
-      now: 00:00:00 1/1/2022
-      now + shift: 23:58:00 31/12/2021
-
-      (now + shift).startOf("day"): 00:00:00 31/12/2021
-
-      now - (now + shift).startOf("day") = 00:00:00 1/1/2022 - 00:00:00 31/12/2021 = full day?
-
-    */
-
-    // draw text markers
+    // draw markers
     ctx.fillStyle = "white"
     ctx.textBaseline = "middle"
     ctx.textAlign = "center"
-
-    const zeroAtX = viewOffset - shiftedNow.diff(startOfDay, "second")
-
-    /*
-    input = 120 -> 00:02:00 of same day
-
-    shift = 0 (seconds from [-inf, 0])
-    viewOffset = width / 2
-
-    shiftedNow = moment().add(shift, "seconds")
-    startOfDay = shiftedNow.startOf("day")
-
-    zeroAtX = viewOffset - shiftedNow.diff(startOfDay, "second")
-    zeroAtX = viewOffset - 
-      moment().add(shift, "seconds")
-        .diff(
-          moment().add(shift, "seconds")
-            .startOf("day"), 
-          "second"
-        )
-
-    (shiftedNow - shiftedNow.startOf("day")) in seconds
-
-    output = zeroAtX + input
-    */
-
-    for (let x = 0; x < SECONDS_PER_DAY; x += 5 * 60) {
-      const minutes = Math.floor((x / 60) % 60)
-      const hours = Math.floor(x / (60 * 60))
-
-      const text = [hours, minutes]
-        .map((i) => i.toString().padStart(2, "0"))
-        .join(":")
-
-      const textX = zeroAtX + x
-
-      ctx.fillText(text, textX, height / 2 + LINE_HEIGHT * 1.75)
-    }
-
-    // draw minute line markers
     ctx.lineWidth = 2
-    for (let x = 0; x < SECONDS_PER_DAY; x += 1 * 60) {
-      const textX = zeroAtX + x
+    for (let x = 0; x <= SECONDS_PER_DAY; x += 1 * 60) {
+      const textX = toCoordX(pov, povStartOfDay.add(x, "second"))
 
-      ctx.strokeStyle =
-        Math.floor((x / 60) % 60) === 0 ? "white" : "rgba(0,0,0,0.3)"
+      // every 5 minutes draw a text
+      if (x % (5 * 60) === 0) {
+        const minutes = Math.floor((x / 60) % 60)
+        const hours = Math.floor(x / (60 * 60)) % 24
+
+        const text = [hours, minutes]
+          .map((i) => i.toString().padStart(2, "0"))
+          .join(":")
+
+        ctx.fillText(text, textX, height / 2 + LINE_HEIGHT * 1.75)
+      }
+
+      // every 60 minutes draw a white line
+      ctx.strokeStyle = x % (60 * 60) === 0 ? "white" : "rgba(0,0,0,0.3)"
 
       ctx.beginPath()
       ctx.moveTo(textX, (height - LINE_HEIGHT) / 2)
@@ -137,14 +90,6 @@ export function drawCanvas(
       ctx.closePath()
       ctx.stroke()
     }
-
-    // ctx.strokeStyle = "red"
-
-    // ctx.beginPath()
-    // ctx.moveTo(zeroAtX, height / 2 - 10)
-    // ctx.lineTo(zeroAtX + 60, height / 2 - 10)
-    // ctx.closePath()
-    // ctx.stroke()
   }
 
   drawDayBoundedLine(valueOffset + userOffset)
