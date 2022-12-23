@@ -1,13 +1,13 @@
 export const theme = {
   colors: {
-    blue400: "#3b4252",
-    blue500: "#434c5e",
-    blue600: "#545f75",
-    blue700: "#687590",
-    lightBlue900: "#d8dee9",
-    red500: "#eb5757",
-    gray100: "#090909",
-    white: "#fff",
+    blue400: "hsl(220, 16%, 27%)",
+    blue500: "hsl(220, 16%, 31%)",
+    blue600: "hsl(220, 16%, 39%)",
+    blue700: "hsl(220, 16%, 48%)",
+    lightBlue900: "hsl(220, 28%, 88%)",
+    red500: "hsl(0, 78%, 63%)",
+    gray100: "hsl(0, 0%, 3%)",
+    white: "hsl(0, 0%, 100%)",
   },
   gradients: {
     top: "linear-gradient(rgba(10, 10, 10, 1), rgba(10, 10, 10, 0))",
