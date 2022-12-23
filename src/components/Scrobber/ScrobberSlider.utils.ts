@@ -1,5 +1,5 @@
 import moment from "moment"
-import { MutableRefObject, useCallback, useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef } from "react"
 
 const SECONDS_PER_DAY = 24 * 60 * 60
 const LINE_HEIGHT = 10
@@ -41,7 +41,7 @@ export function drawCanvas(
     ctx.stroke()
   }
 
-  // hide progress bar when necessary [-inf, 0]
+  // hide progress bar when necessary [-inf, 0] in seconds
   const drawDayBoundedLine = (shift: number) => {
     const { width, height } = canvas.getBoundingClientRect()
     const viewOffset = width / 2
@@ -52,7 +52,10 @@ export function drawCanvas(
     const startOfDay = shiftedNow.clone().startOf("day")
     const endOfDay = shiftedNow.clone().endOf("day")
 
+    // (now - startOfDay) in seconds
     const startDayX = Math.min(options.maxAge, now.diff(startOfDay, "second"))
+
+    // (now - endOfDay) in seconds
     const endDayX = Math.max(0, now.diff(endOfDay, "second"))
 
     // invert direction, as we want to line to act as a timeline

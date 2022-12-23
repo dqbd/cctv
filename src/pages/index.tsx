@@ -7,6 +7,7 @@ import { useRouter } from "next/router"
 import Head from "next/head"
 import { GetServerSideProps } from "next"
 import { loadServerConfig } from "shared/config"
+import { theme } from "utils/theme"
 
 export default function Page() {
   const router = useRouter()
@@ -19,7 +20,7 @@ export default function Page() {
   return (
     <Fragment>
       <Head>
-        <meta name="theme-color" content="#d8dee9" />
+        <meta name="theme-color" content="#434c5e" />
         <meta
           name="apple-mobile-web-app-status-bar-style"
           content="black-translucent"
@@ -28,7 +29,7 @@ export default function Page() {
       <Global
         styles={css`
           html {
-            background-color: #434c5e;
+            background-color: ${theme.colors.blue500};
           }
         `}
       />
@@ -64,11 +65,7 @@ export default function Page() {
                   overflow: hidden;
                   transition: all 0.2s;
 
-                  box-shadow: 0 3.4px 2.7px rgba(0, 0, 0, 0.019),
-                    0 8.7px 6.9px rgba(0, 0, 0, 0.027),
-                    0 17.7px 14.2px rgba(0, 0, 0, 0.033),
-                    0 36.5px 29.2px rgba(0, 0, 0, 0.041),
-                    0 100px 80px rgba(0, 0, 0, 0.06);
+                  box-shadow: ${theme.shadows.md};
 
                   @media (hover: hover) {
                     &:hover {
@@ -128,7 +125,7 @@ export default function Page() {
                         display: flex;
                         align-items: center;
                         margin: 0;
-                        color: #fff;
+                        color: ${theme.colors.white};
                         text-decoration: none;
                       `}
                     >

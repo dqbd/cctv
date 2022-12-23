@@ -1,4 +1,5 @@
 import styled from "@emotion/styled"
+import { theme } from "utils/theme"
 
 export const SMain = styled.div`
   user-select: none;
@@ -25,19 +26,19 @@ export const STop = styled.div`
   display: flex;
   align-items: center;
   padding: 2em;
-  background: linear-gradient(rgba(10, 10, 10, 1), rgba(10, 10, 10, 0));
+  background: ${theme.gradients.top};
 `
 
 export const SBack = styled.a`
-  color: #d8dee9;
-  background: #434c5e;
+  color: ${theme.colors.lightBlue900};
+  background: ${theme.colors.blue500};
   width: 4em;
   height: 4em;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 100%;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: ${theme.shadows.sm};
 
   & svg {
     width: 2em;
@@ -47,14 +48,14 @@ export const SBack = styled.a`
 
 export const SInfo = styled.div`
   display: flex;
-  background: #434c5e;
+  background: ${theme.colors.blue500};
   border-radius: 1em;
   padding: 0.75em;
   padding-right: 1em;
   align-items: center;
 
   margin-left: 1.5em;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: ${theme.shadows.sm};
 `
 
 export const SName = styled.span`
@@ -62,7 +63,7 @@ export const SName = styled.span`
   display: flex;
   align-items: center;
   margin: 0;
-  color: #d8dee9;
+  color: ${theme.colors.lightBlue900};
   text-decoration: none;
   font-size: 1em;
 `
@@ -72,11 +73,11 @@ export const SColor = styled.span`
   height: 1.5em;
   border-radius: 8px;
   margin-right: 0.75em;
-  background: #eb5757;
+  background: ${theme.colors.red500};
 `
 
 export const STimeOffset = styled.div`
-  background: #3b4252;
+  background: ${theme.colors.blue400};
   height: 2.5em;
   border-radius: 1.25em 0 0 1.25em;
   display: flex;
@@ -102,7 +103,7 @@ export const SLive = styled.span`
     height: 8px;
     margin-top: 1px;
 
-    background: #eb5757;
+    background: ${theme.colors.red500};
     border-radius: 100%;
   }
 `
@@ -117,18 +118,16 @@ export const STimeline = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(rgba(10, 10, 10, 0), rgba(10, 10, 10, 1));
+  background: ${theme.gradients.bottom};
 `
 
 export const SCenter = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #d8dee9;
-  background: #434c5e;
-  box-shadow: 0 3.4px 2.7px rgba(0, 0, 0, 0.019),
-    0 8.7px 6.9px rgba(0, 0, 0, 0.027), 0 17.7px 14.2px rgba(0, 0, 0, 0.033),
-    0 36.5px 29.2px rgba(0, 0, 0, 0.041), 0 100px 80px rgba(0, 0, 0, 0.06);
+  color: ${theme.colors.lightBlue900};
+  background: ${theme.colors.blue500};
+  box-shadow: ${theme.shadows.md};
 
   padding: 0.8em;
   border-radius: 2.25em;
@@ -141,7 +140,7 @@ export const SCenter = styled.div`
     border: 1.25em solid transparent;
     border-left-width: 0.8em;
     border-right-width: 0.8em;
-    border-top-color: #434c5e;
+    border-top-color: ${theme.colors.blue500};
     border-bottom-width: 0;
     position: absolute;
     top: 100%;

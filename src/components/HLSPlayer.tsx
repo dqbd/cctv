@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import Hls from "hls.js"
 import { css } from "@emotion/react"
+import { theme } from "utils/theme"
 
 export function HLSPlayer(props: { source: string }) {
   const ref = useRef<HTMLVideoElement | null>(null)
@@ -89,11 +90,11 @@ export function HLSPlayer(props: { source: string }) {
           <button
             type="button"
             css={css`
-              background: #434c5e;
+              background: ${theme.colors.blue500};
               width: 100px;
               height: 100px;
               pointer-events: all;
-              color: #fff;
+              color: ${theme.colors.white};
               border-radius: 100%;
               border: none;
             `}

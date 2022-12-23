@@ -11,6 +11,7 @@ import { encodeQuery } from "utils/query"
 import Head from "next/head"
 import { GetServerSideProps } from "next"
 import { loadServerConfig } from "shared/config"
+import { theme } from "utils/theme"
 
 function generateUrl(
   name: string,
@@ -58,7 +59,7 @@ export default function Page() {
       <Global
         styles={css`
           html {
-            background: #090909;
+            background: ${theme.colors.gray100};
           }
         `}
       />
