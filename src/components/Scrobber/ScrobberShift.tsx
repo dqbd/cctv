@@ -122,7 +122,7 @@ export function ScrobberShift(props: {
 
       <ScrobberShiftDate value={contentValue} onChange={props.onChange} />
 
-      <Pill onClick={props.onModeChange}>Range</Pill>
+      <Pill onClick={props.onModeChange}>Rozsah</Pill>
     </>
   )
 }

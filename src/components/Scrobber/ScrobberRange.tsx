@@ -94,7 +94,7 @@ export function ScrobberRange(props: {
         />
       </div>
 
-      <Pill onClick={props.onModeChange}>Shift</Pill>
+      <Pill onClick={props.onModeChange}>Živě</Pill>
     </>
   )
 }
