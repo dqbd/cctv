@@ -1,7 +1,7 @@
 import { Fragment, useContext, useState } from "react"
 
 import { HLSPlayer } from "components/HLSPlayer"
-import { Scrobber } from "components/Scrobber/Scrobber"
+import { Controls } from "components/Controls/Controls"
 
 import { css, Global } from "@emotion/react"
 import { useRouter } from "next/dist/client/router"
@@ -86,7 +86,7 @@ export default function Page() {
       >
         {url && <HLSPlayer source={url} />}
         {stream && (
-          <Scrobber onChange={setShift} value={shift} stream={stream} />
+          <Controls onChange={setShift} value={shift} stream={stream} />
         )}
       </div>
     </Fragment>

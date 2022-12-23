@@ -37,9 +37,8 @@ async function cleanup() {
       .map((folder) => path.resolve(cameraFolder, folder))
 
     await Promise.all(
-      folders.map(
-        (target) =>
-          fs.promises.rm(target, { recursive: true, force: true })
+      folders.map((target) =>
+        fs.promises.rm(target, { recursive: true, force: true })
       )
     )
   }

@@ -1,4 +1,4 @@
-import styled from "@emotion/styled";
+import styled from "@emotion/styled"
 
 export const SContainer = styled.div`
   position: absolute;
@@ -7,7 +7,8 @@ export const SContainer = styled.div`
   right: 0;
   cursor: all-scroll;
   height: 5em;
-`;
+`
+
 export const SCanvas = styled.canvas`
   position: absolute;
   top: 0;
@@ -15,4 +16,4 @@ export const SCanvas = styled.canvas`
   left: 0;
   right: 0;
   touch-action: none;
-`;
+`

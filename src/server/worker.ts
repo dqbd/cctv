@@ -35,7 +35,7 @@ function timeSyncLoop(credential: {
   loop()
   return {
     loop,
-    destroy: () => clearTimeout(timeSyncTimer)
+    destroy: () => clearTimeout(timeSyncTimer),
   }
 }
 

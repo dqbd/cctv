@@ -1,54 +1,47 @@
-import Link from "next/link"
-import { SBack, SColor, SInfo, SMain, SName, STop } from "./Scrobber.styled"
-import { useVisibleTimer } from "./Scrobber.utils"
-import { ScrobberTimeline } from "./ScrobberTimeline"
+import { useContext, useState } from "react"
+import { ScrobberSlider } from "components/Scrobber/ScrobberSlider"
+import { vibrateDecorator } from "utils/input"
+import { ConfigContext } from "shared/config"
+import { ScrobberTimelineShift } from "components/Scrobber/ScrobberTimelineShift"
+import { SContainer, SWrapper } from "./Scrobber.styled"
+import { ScrobberTimelineRange } from "./ScrobberTimelineRange"
 
 export function Scrobber(props: {
-  onChange: (shift: number) => void
+  color: string
   value: number
-  stream: {
-    key: string
-    name: string
-    color: string
-  }
+  onChange: (shift: number) => void
+  onMove: () => void
 }) {
-  const { visible, show } = useVisibleTimer(5 * 99999 * 1000)
+  const config = useContext(ConfigContext)
+
+  const [scrollShift, setScrollShift] = useState<number | null>(null)
+  const onShiftChange = vibrateDecorator((shift: number) => {
+    setScrollShift(null)
+    props.onChange(Math.max(0, Math.min(config.maxAge * 1000, shift)))
+  })
 
   return (
-    <SMain
-      css={{ opacity: visible ? 1 : 0 }}
-      onTouchStart={() => show.current()}
-      onMouseMove={() => show.current()}
-    >
-      <STop>
-        <Link href="/">
-          <SBack>
-            <svg
-              viewBox="0 0 29 21"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M25 9.17424V11.8258H9.09091L16.3826 19.1174L14.5 21L4 10.5L14.5 0L16.3826 1.88258L9.09091 9.17424H25Z"
-                fill="currentColor"
-              />
-            </svg>
-          </SBack>
-        </Link>
-        <SInfo>
-          <SColor css={{ backgroundColor: props.stream?.color }} />
-          <SName>{props.stream?.name}</SName>
-        </SInfo>
-      </STop>
-      <ScrobberTimeline
-        value={props.value}
-        onChange={(shift) => {
-          props.onChange(shift)
-          show.current()
+    <>
+      <SWrapper>
+        <SContainer>
+          <ScrobberTimelineShift
+            value={props.value}
+            intentValue={scrollShift}
+            onChange={onShiftChange}
+          />
+
+          <ScrobberTimelineRange />
+        </SContainer>
+      </SWrapper>
+      <ScrobberSlider
+        onScroll={(value) => {
+          setScrollShift(value)
+          props.onMove()
         }}
-        onMove={() => show.current()}
-        color={props.stream.color}
+        onScrollEnd={onShiftChange}
+        value={props.value}
+        color={props.color}
       />
-    </SMain>
+    </>
   )
 }

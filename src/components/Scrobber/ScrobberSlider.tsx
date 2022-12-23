@@ -1,5 +1,5 @@
 import { useRef, useLayoutEffect, useContext } from "react"
-import { useGesture } from "@use-gesture/react"
+import { useGesture, DragState } from "@use-gesture/react"
 import {
   drawCanvas,
   usePropsRef,
@@ -25,7 +25,7 @@ export function ScrobberSlider(props: {
   })
 
   const bind = useGesture({
-    onDrag(data) {
+    onDrag(data: DragState) {
       data.event.stopPropagation()
       data.event.preventDefault()
 
