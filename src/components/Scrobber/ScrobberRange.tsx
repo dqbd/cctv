@@ -5,7 +5,7 @@ import AdapterMoment from "@material-ui/lab/AdapterMoment"
 import moment from "moment"
 import { Pill, PillInput } from "components/PillInput/PillInput"
 
-function ScrobberTimelineRangeDateTime(props: {
+function ScrobberRangeDateTime(props: {
   value: moment.Moment | null
   minDateTime?: moment.Moment | null
   maxDateTime?: moment.Moment | null
@@ -35,7 +35,7 @@ function ScrobberTimelineRangeDateTime(props: {
   )
 }
 
-export function ScrobberTimelineRange() {
+export function ScrobberRange() {
   const [from, setFrom] = useState<moment.Moment | null>(null)
   const [to, setTo] = useState<moment.Moment | null>(null)
   return (
@@ -45,16 +45,8 @@ export function ScrobberTimelineRange() {
         gap: 8px;
       `}
     >
-      <ScrobberTimelineRangeDateTime
-        value={from}
-        onChange={setFrom}
-        maxDateTime={to}
-      />
-      <ScrobberTimelineRangeDateTime
-        value={to}
-        onChange={setTo}
-        minDateTime={from}
-      />
+      <ScrobberRangeDateTime value={from} onChange={setFrom} maxDateTime={to} />
+      <ScrobberRangeDateTime value={to} onChange={setTo} minDateTime={from} />
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { useState } from "react"
 import moment, { Moment } from "moment"
-import { formatTime, useTimer } from "./ScrobberTimelineShift.utils"
+import { formatTime, useTimer } from "./ScrobberShift.utils"
 import {
   MobileDatePicker,
   LocalizationProvider,
@@ -8,10 +8,10 @@ import {
 } from "@material-ui/lab"
 import AdapterMoment from "@material-ui/lab/AdapterMoment"
 import { Pill, PillInput } from "components/PillInput/PillInput"
-import { STimeOffset, SLive } from "./ScrobberTimelineShift.styled"
-import { useServerTimeDiff } from "./ScrobberTimelineShift.utils"
+import { STimeOffset, SLive } from "./ScrobberShift.styled"
+import { useServerTimeDiff } from "./ScrobberShift.utils"
 
-function ScrobberTimelineShiftTime(props: {
+function ScrobberShiftTime(props: {
   onChange?: (shift: number) => void
   value: number
   className?: string
@@ -55,7 +55,7 @@ function ScrobberTimelineShiftTime(props: {
   )
 }
 
-function ScrobberTimelineShiftDate(props: {
+function ScrobberShiftDate(props: {
   onChange?: (shift: number) => void
   value: number
   className?: string
@@ -97,7 +97,7 @@ function ScrobberTimelineShiftDate(props: {
   )
 }
 
-export function ScrobberTimelineShift(props: {
+export function ScrobberShift(props: {
   value: number
   intentValue: number | null
   onChange: (value: number) => void
@@ -112,17 +112,14 @@ export function ScrobberTimelineShift(props: {
           {!contentValue ? <SLive>Živě</SLive> : formatTime(-contentValue)}
         </STimeOffset>
 
-        <ScrobberTimelineShiftTime
+        <ScrobberShiftTime
           value={contentValue}
           onChange={props.onChange}
           css={{ marginLeft: "-1.25em", padding: "0rem 3em" }}
         />
       </div>
 
-      <ScrobberTimelineShiftDate
-        value={contentValue}
-        onChange={props.onChange}
-      />
+      <ScrobberShiftDate value={contentValue} onChange={props.onChange} />
     </>
   )
 }

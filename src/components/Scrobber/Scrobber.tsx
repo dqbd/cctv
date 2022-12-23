@@ -2,9 +2,9 @@ import { useContext, useState } from "react"
 import { ScrobberSlider } from "components/Scrobber/ScrobberSlider"
 import { vibrateDecorator } from "utils/input"
 import { ConfigContext } from "shared/config"
-import { ScrobberTimelineShift } from "components/Scrobber/ScrobberTimelineShift"
+import { ScrobberShift } from "components/Scrobber/ScrobberShift"
 import { SContainer, SWrapper } from "./Scrobber.styled"
-import { ScrobberTimelineRange } from "./ScrobberTimelineRange"
+import { ScrobberRange } from "./ScrobberRange"
 
 export function Scrobber(props: {
   color: string
@@ -24,13 +24,13 @@ export function Scrobber(props: {
     <>
       <SWrapper>
         <SContainer>
-          <ScrobberTimelineShift
+          <ScrobberShift
             value={props.value}
             intentValue={scrollShift}
             onChange={onShiftChange}
           />
 
-          <ScrobberTimelineRange />
+          <ScrobberRange />
         </SContainer>
       </SWrapper>
       <ScrobberSlider
