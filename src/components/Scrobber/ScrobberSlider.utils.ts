@@ -1,4 +1,4 @@
-import moment from "moment"
+import dayjs from "dayjs"
 import { useCallback, useEffect, useRef } from "react"
 
 const SECONDS_PER_DAY = 24 * 60 * 60
@@ -46,27 +46,69 @@ export function drawCanvas(
     const { width, height } = canvas.getBoundingClientRect()
     const viewOffset = width / 2
 
-    const now = moment()
-    const shiftedNow = now.clone().add(shift, "seconds")
+    const now = dayjs()
+    const shiftedNow = now.add(shift, "seconds")
 
-    const startOfDay = shiftedNow.clone().startOf("day")
-    const endOfDay = shiftedNow.clone().endOf("day")
+    const startOfDay = shiftedNow.startOf("day")
+    const endOfDay = shiftedNow.endOf("day")
 
-    // (now - startOfDay) in seconds
+    // We use now instead of shiftedNow, why?
     const startDayX = Math.min(options.maxAge, now.diff(startOfDay, "second"))
-
-    // (now - endOfDay) in seconds
     const endDayX = Math.max(0, now.diff(endOfDay, "second"))
 
-    // invert direction, as we want to line to act as a timeline
-    drawLine(-(endDayX + shift) + viewOffset, -(startDayX + shift) + viewOffset)
+    drawLine(viewOffset - startDayX - shift, viewOffset - endDayX - shift)
+
+    /*
+      startDayX = now.diff(startOfDay, "second")
+      startDayX = now - startOfDay
+      startDayX = now - (now + shift).startOf("day")
+
+      output = startDayX + shift
+      output = now - (now + shift).startOf("day") + shift
+      output = now - (now + shift).startOf("day") + shift
+
+
+      now > now + shift/2 > now + shift
+
+      shift: 120s
+      now: 00:00:00 1/1/2022
+      now + shift: 23:58:00 31/12/2021
+
+      (now + shift).startOf("day"): 00:00:00 31/12/2021
+
+      now - (now + shift).startOf("day") = 00:00:00 1/1/2022 - 00:00:00 31/12/2021 = full day?
+
+    */
 
     // draw text markers
     ctx.fillStyle = "white"
     ctx.textBaseline = "middle"
     ctx.textAlign = "center"
 
-    const zeroAtX = -shiftedNow.diff(startOfDay, "second") + viewOffset
+    const zeroAtX = viewOffset - shiftedNow.diff(startOfDay, "second")
+
+    /*
+    input = 120 -> 00:02:00 of same day
+
+    shift = 0 (seconds from [-inf, 0])
+    viewOffset = width / 2
+
+    shiftedNow = moment().add(shift, "seconds")
+    startOfDay = shiftedNow.startOf("day")
+
+    zeroAtX = viewOffset - shiftedNow.diff(startOfDay, "second")
+    zeroAtX = viewOffset - 
+      moment().add(shift, "seconds")
+        .diff(
+          moment().add(shift, "seconds")
+            .startOf("day"), 
+          "second"
+        )
+
+    (shiftedNow - shiftedNow.startOf("day")) in seconds
+
+    output = zeroAtX + input
+    */
 
     for (let x = 0; x < SECONDS_PER_DAY; x += 5 * 60) {
       const minutes = Math.floor((x / 60) % 60)

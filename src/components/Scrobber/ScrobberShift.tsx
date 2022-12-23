@@ -1,5 +1,5 @@
 import { useState } from "react"
-import moment, { Moment } from "moment"
+import dayjs, { Dayjs } from "dayjs"
 import { formatTime, useTimer } from "./ScrobberShift.utils"
 import {
   MobileDatePicker,
@@ -18,8 +18,8 @@ function ScrobberShiftTime(props: {
 }) {
   const current = useTimer()
   const serverDiff = useServerTimeDiff()
-  const [inputDate, setInputDate] = useState<Moment | null>(null)
-  const activeDate = moment(new Date(current - props.value + serverDiff))
+  const [inputDate, setInputDate] = useState<dayjs.Dayjs | null>(null)
+  const activeDate = dayjs(new Date(current - props.value + serverDiff))
 
   return (
     <LocalizationProvider dateAdapter={AdapterMoment}>
@@ -29,14 +29,15 @@ function ScrobberShiftTime(props: {
           value={inputDate}
           onChange={setInputDate}
           onAccept={(date) => {
-            props.onChange?.(
-              moment().diff(
-                activeDate.clone().set({
-                  hour: date?.hour(),
-                  minute: date?.minute(),
-                })
+            if (date != null) {
+              props.onChange?.(
+                dayjs().diff(
+                  activeDate
+                    .set("hour", date.hour())
+                    .set("minute", date.minute())
+                )
               )
-            )
+            }
           }}
           onOpen={() => setInputDate(activeDate.clone())}
           renderInput={({ inputProps, inputRef }) => (
@@ -61,8 +62,8 @@ function ScrobberShiftDate(props: {
   className?: string
 }) {
   const current = useTimer()
-  const [inputDate, setInputDate] = useState<Moment | null>(null)
-  const activeDate = moment(new Date(current - props.value))
+  const [inputDate, setInputDate] = useState<Dayjs | null>(null)
+  const activeDate = dayjs(new Date(current - props.value))
 
   return (
     <LocalizationProvider dateAdapter={AdapterMoment} locale="cs">
@@ -71,17 +72,18 @@ function ScrobberShiftDate(props: {
           value={inputDate}
           onChange={setInputDate}
           onAccept={(date) => {
-            props.onChange?.(
-              moment().diff(
-                activeDate.clone().set({
-                  year: date?.year(),
-                  month: date?.month(),
-                  date: date?.date(),
-                })
+            if (date != null) {
+              props.onChange?.(
+                dayjs().diff(
+                  activeDate
+                    .set("year", date.year())
+                    .set("month", date.month())
+                    .set("date", date.date())
+                )
               )
-            )
+            }
           }}
-          onOpen={() => setInputDate(activeDate.clone())}
+          onOpen={() => setInputDate(activeDate)}
           renderInput={({ inputProps, inputRef }) => (
             <PillInput {...inputProps} ref={inputRef} />
           )}

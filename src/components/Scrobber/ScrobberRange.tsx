@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react"
 import { css } from "@emotion/react"
 import { LocalizationProvider, MobileDateTimePicker } from "@material-ui/lab"
-import AdapterMoment from "@material-ui/lab/AdapterMoment"
-import moment from "moment"
+import AdapterDayjs from "@material-ui/lab/AdapterDayjs"
+import dayjs from "dayjs"
 import { Pill, PillInput } from "components/PillInput/PillInput"
 
 function ScrobberRangeDateTime(props: {
-  value: moment.Moment | null
-  onChange: (date: moment.Moment | null) => void
-  minDateTime?: moment.Moment | null
-  maxDateTime?: moment.Moment | null
+  value: dayjs.Dayjs | null
+  onChange: (date: dayjs.Dayjs | null) => void
+  minDateTime?: dayjs.Dayjs | null
+  maxDateTime?: dayjs.Dayjs | null
 }) {
-  const [tempValue, setTempValue] = useState<moment.Moment | null>(null)
+  const [tempValue, setTempValue] = useState<dayjs.Dayjs | null>(null)
 
   return (
     <Pill>
-      <LocalizationProvider dateAdapter={AdapterMoment}>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
         <MobileDateTimePicker
           ampm={false}
           value={tempValue}
@@ -44,12 +44,12 @@ export function ScrobberRange(props: {
   onChange: (value: { from: number; to: number } | null) => void
   onModeChange: () => void
 }) {
-  const [from, setFrom] = useState<moment.Moment | null>(null)
-  const [to, setTo] = useState<moment.Moment | null>(null)
+  const [from, setFrom] = useState<dayjs.Dayjs | null>(null)
+  const [to, setTo] = useState<dayjs.Dayjs | null>(null)
 
   const handleScrobberChange = (
-    from: moment.Moment | null,
-    to: moment.Moment | null
+    from: dayjs.Dayjs | null,
+    to: dayjs.Dayjs | null
   ) => {
     if (from != null && to != null) {
       props.onChange({ from: from.valueOf(), to: to.valueOf() })
@@ -60,11 +60,11 @@ export function ScrobberRange(props: {
 
   useEffect(() => {
     if (props.value?.from != null) {
-      setFrom(moment(props.value.from))
+      setFrom(dayjs(props.value.from))
     }
 
     if (props.value?.to != null) {
-      setTo(moment(props.value.to))
+      setTo(dayjs(props.value.to))
     }
   }, [props.value?.from, props.value?.to])
 
