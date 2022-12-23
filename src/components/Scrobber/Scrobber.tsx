@@ -55,7 +55,10 @@ export function Scrobber(props: {
                   : null
               }
               onChange={onRangeChange}
-              onModeChange={() => setMode("shift")}
+              onModeChange={() => {
+                props.onChange({ shift: 0 })
+                setMode("shift")
+              }}
             />
           )}
         </SContainer>
