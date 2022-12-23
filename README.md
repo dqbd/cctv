@@ -12,7 +12,7 @@ jsonnet config/live.jsonnet -Sm .
 
 ```
 docker context use [context name]
-docker compose pull
-docker compose down
-docker compose up -d
+docker-compose pull
+docker-compose down
+docker-compose up -d
 ```
