@@ -3,6 +3,8 @@ import { NextApiRequest, NextApiResponse } from "next"
 import { createPersistentDatabase } from "shared/database"
 import { Segment, getManifest, isSegment } from "shared/manifest"
 import { loadServerConfig } from "shared/config"
+import { runMiddleware } from "utils/middleware"
+import cors from "cors"
 
 const dbRef = createPersistentDatabase()
 
@@ -16,6 +18,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  await runMiddleware(req, res, cors({ methods: ["GET", "HEAD"] }))
+
   const { authConfig } = await loadServerConfig()
   const db = dbRef.create(authConfig.database)
 

@@ -28,6 +28,7 @@
     "@material-ui/lab": "^5.0.0-alpha.21",
     "@use-gesture/react": "^10.2.23",
     "chokidar": "^3.5.1",
+    "cors": "^2.8.5",
     "dayjs": "^1.11.7",
     "fluent-ffmpeg": "^2.1.2",
     "hls.js": "1.1.2",
@@ -50,6 +51,7 @@
     "zod": "^3.11.6"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.13",
     "@types/fluent-ffmpeg": "^2.1.16",
     "@types/hls.js": "^1.0.0",
     "@types/jest": "^28.1.2",

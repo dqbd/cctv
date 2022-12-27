@@ -4,11 +4,15 @@ import { convertToXaddr } from "shared/onvif"
 
 import { getScreenshot } from "shared/preview"
 import { logger } from "utils/logger"
+import { runMiddleware } from "utils/middleware"
+import cors from "cors"
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  await runMiddleware(req, res, cors({ methods: ["GET", "HEAD"] }))
+
   const { config } = await loadServerConfig()
   const folder = req.query.folder as string
   const refresh = req.query.refresh as string
