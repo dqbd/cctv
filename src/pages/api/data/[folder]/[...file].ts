@@ -10,7 +10,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   await runMiddleware(req, res, cors({ methods: ["GET", "HEAD"] }))
-  
+
   const { baseFolder } = await loadServerConfig()
 
   const folder = req.query.folder as string
