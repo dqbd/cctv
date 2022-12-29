@@ -1,15 +1,20 @@
 import dayjs from "dayjs"
 import { useCallback, useEffect, useRef } from "react"
+import { fitDateInBounds, PlaybackType } from "utils/stream"
 
-const SECONDS_PER_DAY = 24 * 60 * 60
+const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000
 const LINE_HEIGHT = 10
 
 export function drawCanvas(
   canvas: HTMLCanvasElement | null,
-  valueOffset: number,
+  now: dayjs.Dayjs,
+  valueOffset: PlaybackType,
   userOffset: number,
   color: string,
-  options: { maxAge: number; sticky: { start?: number; end?: number } }
+  options: {
+    maxAge: number
+    bounds: { shift: [number, number] } | { pov: [dayjs.Dayjs, dayjs.Dayjs] }
+  }
 ) {
   if (!canvas || !canvas.parentElement) return
   const ctx = canvas.getContext("2d")
@@ -46,9 +51,15 @@ export function drawCanvas(
     return width / 2 - pov.diff(date, "second")
   }
 
-  const drawDayBoundedLine = (shift: number) => {
-    const now = dayjs()
-    const pov = now.add(shift, "seconds")
+  const drawDayBoundedLine = (playback: PlaybackType, user: number) => {
+    const pov = fitDateInBounds(
+      ("playing" in playback
+        ? now.add(playback.playing, "millisecond")
+        : playback.paused
+      ).add(user, "millisecond"),
+      now,
+      options.bounds
+    )
 
     const povStartOfDay = pov.startOf("day")
     const povEndOfDay = pov.endOf("day")
@@ -66,13 +77,13 @@ export function drawCanvas(
     ctx.textBaseline = "middle"
     ctx.textAlign = "center"
     ctx.lineWidth = 2
-    for (let x = 0; x <= SECONDS_PER_DAY; x += 1 * 60) {
-      const textX = toCoordX(pov, povStartOfDay.add(x, "second"))
+    for (let x = 0; x <= MILLISECONDS_PER_DAY; x += 1 * 60 * 1000) {
+      const textX = toCoordX(pov, povStartOfDay.add(x, "millisecond"))
 
       // every 5 minutes draw a text
-      if (x % (5 * 60) === 0) {
-        const minutes = Math.floor((x / 60) % 60)
-        const hours = Math.floor(x / (60 * 60)) % 24
+      if (x % (5 * 60 * 1000) === 0) {
+        const minutes = Math.floor((x / (60 * 1000)) % 60)
+        const hours = Math.floor(x / (60 * 60 * 1000)) % 24
 
         const text = [hours, minutes]
           .map((i) => i.toString().padStart(2, "0"))
@@ -82,7 +93,7 @@ export function drawCanvas(
       }
 
       // every 60 minutes draw a white line
-      ctx.strokeStyle = x % (60 * 60) === 0 ? "white" : "rgba(0,0,0,0.3)"
+      ctx.strokeStyle = x % (60 * 60 * 1000) === 0 ? "white" : "rgba(0,0,0,0.3)"
 
       ctx.beginPath()
       ctx.moveTo(textX, (height - LINE_HEIGHT) / 2)
@@ -92,7 +103,7 @@ export function drawCanvas(
     }
   }
 
-  drawDayBoundedLine(valueOffset + userOffset)
+  drawDayBoundedLine(valueOffset, userOffset)
 }
 
 export function usePropsRef<Props extends Record<string, unknown>>(
@@ -106,27 +117,4 @@ export function usePropsRef<Props extends Record<string, unknown>>(
   }, Object.values(props))
 
   return ref
-}
-
-export function useUserOffsetRef(props: { value: number; maxAge: number }) {
-  const ref = useRef<number>(0)
-
-  const reset = useCallback(() => {
-    const user = ref.current
-    ref.current = 0
-    return { value: props.value, user }
-  }, [props.value])
-
-  const update = useCallback(
-    (newUser: number) => ({
-      value: props.value,
-      user: (ref.current = Math.min(
-        -props.value,
-        Math.max(-props.maxAge - props.value, newUser)
-      )),
-    }),
-    [props.maxAge, props.value]
-  )
-
-  return { ref, reset, update }
 }

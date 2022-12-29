@@ -7,6 +7,7 @@ export const SContainer = styled.div`
   right: 0;
   cursor: all-scroll;
   height: 5em;
+  overscroll-behavior: contain;
 `
 
 export const SCanvas = styled.canvas`

@@ -1,6 +1,6 @@
 import { useState } from "react"
 import dayjs, { Dayjs } from "dayjs"
-import { formatTime, useTimer } from "./ScrobberShift.utils"
+import { formatTime } from "./ScrobberShift.utils"
 import {
   MobileDatePicker,
   LocalizationProvider,
@@ -10,16 +10,15 @@ import AdapterDayjs from "@material-ui/lab/AdapterDayjs"
 import { Pill, PillInput } from "components/PillInput/PillInput"
 import { STimeOffset, SLive } from "./ScrobberShift.styled"
 import { useServerTimeDiff } from "./ScrobberShift.utils"
+import { fitDateInBounds, PlaybackType, useStreamStore } from "utils/stream"
 
 function ScrobberShiftTime(props: {
-  onChange?: (shift: number) => void
-  value: number
+  onShiftSet?: (shift: number) => void
+  value: PlaybackType
+  displayDate: Dayjs
   className?: string
 }) {
-  const current = useTimer()
-  const serverDiff = useServerTimeDiff()
   const [inputDate, setInputDate] = useState<dayjs.Dayjs | null>(null)
-  const activeDate = dayjs(new Date(current - props.value + serverDiff))
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -30,16 +29,16 @@ function ScrobberShiftTime(props: {
           onChange={setInputDate}
           onAccept={(date) => {
             if (date != null) {
-              props.onChange?.(
+              props.onShiftSet?.(
                 dayjs().diff(
-                  activeDate
+                  props.displayDate
                     .set("hour", date.hour())
                     .set("minute", date.minute())
                 )
               )
             }
           }}
-          onOpen={() => setInputDate(activeDate)}
+          onOpen={() => setInputDate(props.displayDate)}
           renderInput={({ inputProps, inputRef }) => (
             <PillInput {...inputProps} ref={inputRef} />
           )}
@@ -49,7 +48,7 @@ function ScrobberShiftTime(props: {
         />
 
         <span css={{ fontSize: "1.25em" }}>
-          {activeDate.format("HH:mm:ss")}
+          {props.displayDate.format("HH:mm:ss")}
         </span>
       </Pill>
     </LocalizationProvider>
@@ -57,13 +56,12 @@ function ScrobberShiftTime(props: {
 }
 
 function ScrobberShiftDate(props: {
-  onChange?: (shift: number) => void
-  value: number
+  onShiftSet?: (shift: number) => void
+  value: PlaybackType
+  displayDate: Dayjs
   className?: string
 }) {
-  const current = useTimer()
   const [inputDate, setInputDate] = useState<Dayjs | null>(null)
-  const activeDate = dayjs(new Date(current - props.value))
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} locale="cs">
@@ -73,9 +71,9 @@ function ScrobberShiftDate(props: {
           onChange={setInputDate}
           onAccept={(date) => {
             if (date != null) {
-              props.onChange?.(
+              props.onShiftSet?.(
                 dayjs().diff(
-                  activeDate
+                  props.displayDate
                     .set("year", date.year())
                     .set("month", date.month())
                     .set("date", date.date())
@@ -83,7 +81,7 @@ function ScrobberShiftDate(props: {
               )
             }
           }}
-          onOpen={() => setInputDate(activeDate)}
+          onOpen={() => setInputDate(props.displayDate)}
           renderInput={({ inputProps, inputRef }) => (
             <PillInput {...inputProps} ref={inputRef} />
           )}
@@ -92,7 +90,7 @@ function ScrobberShiftDate(props: {
           toolbarTitle="Vybrat datum"
         />
         <span css={{ fontSize: "1em" }}>
-          {activeDate.format("DD. MMMM YYYY")}
+          {props.displayDate.format("DD. MMMM YYYY")}
         </span>
       </Pill>
     </LocalizationProvider>
@@ -100,29 +98,49 @@ function ScrobberShiftDate(props: {
 }
 
 export function ScrobberShift(props: {
-  value: number
-  intentValue: number | null
-  onChange: (value: number) => void
+  intentShift: number | null
+  bounds: { shift: [number, number] } | { pov: [dayjs.Dayjs, dayjs.Dayjs] }
+  onShiftSet: (value: number) => void
   onModeChange: () => void
 }) {
-  const contentValue =
-    props.intentValue != null ? props.intentValue : props.value
+  const serverDiff = useServerTimeDiff()
+  const now = useStreamStore((state) => state.now)
+  const playback = useStreamStore((state) => state.playback)
+
+  const displayDate = fitDateInBounds(
+    ("playing" in playback
+      ? now.add(playback.playing, "millisecond")
+      : playback.paused
+    )
+      .add(serverDiff, "millisecond")
+      .add(props.intentShift ?? 0, "millisecond"),
+    now,
+    props.bounds
+  )
+
+  const displayShift = displayDate.diff(now, "millisecond")
+  const isLive = Math.floor(Math.abs(displayShift) / 1000) === 0
 
   return (
     <>
       <div css={{ display: "flex" }}>
-        <STimeOffset onClick={() => props.onChange(0)}>
-          {!contentValue ? <SLive>Živě</SLive> : formatTime(-contentValue)}
+        <STimeOffset onClick={() => props.onShiftSet(0)}>
+          {isLive ? <SLive>Živě</SLive> : formatTime(-displayShift)}
         </STimeOffset>
 
         <ScrobberShiftTime
-          value={contentValue}
-          onChange={props.onChange}
+          value={playback}
+          displayDate={displayDate}
+          onShiftSet={props.onShiftSet}
           css={{ marginLeft: "-1.25em", padding: "0rem 3em" }}
         />
       </div>
 
-      <ScrobberShiftDate value={contentValue} onChange={props.onChange} />
+      <ScrobberShiftDate
+        value={playback}
+        displayDate={displayDate}
+        onShiftSet={props.onShiftSet}
+      />
 
       <Pill onClick={props.onModeChange}>Rozsah</Pill>
     </>

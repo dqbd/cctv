@@ -12,6 +12,12 @@ export const SMain = styled.div`
   left: 0;
   right: 0;
 
+  pointer-events: none;
+
+  & > * {
+    pointer-events: all;
+  }
+
   @media (max-width: 768px) {
     font-size: 12px;
   }

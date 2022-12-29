@@ -1685,6 +1685,13 @@ convert-source-map@^1.4.0, convert-source-map@^1.5.0, convert-source-map@^1.6.0,
   dependencies:
     safe-buffer "~5.1.1"
 
+copy-anything@^3.0.2:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/copy-anything/-/copy-anything-3.0.3.tgz#206767156f08da0e02efd392f71abcdf79643559"
+  integrity sha512-fpW2W/BqEzqPp29QS+MwwfisHCQZtiduTe/m8idFo0xbti9fIZ2WVhAsCv4ggFVH3AgCkVdpoOCtQC6gBrdhjw==
+  dependencies:
+    is-what "^4.1.8"
+
 core-util-is@~1.0.0:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.3.tgz#a6042d3634c2b27e9328f837b965fac83808db85"
@@ -2731,6 +2738,11 @@ is-weakref@^1.0.1:
   integrity sha512-qctsuLZmIQ0+vSSMfoVvyFe2+GSEvnmZ2ezTup1SBse9+twCCeial6EEi3Nc2KFcf6+qz2FBPnjXsk8xhKSaPQ==
   dependencies:
     call-bind "^1.0.2"
+
+is-what@^4.1.8:
+  version "4.1.8"
+  resolved "https://registry.yarnpkg.com/is-what/-/is-what-4.1.8.tgz#0e2a8807fda30980ddb2571c79db3d209b14cbe4"
+  integrity sha512-yq8gMao5upkPoGEU9LsB2P+K3Kt8Q3fQFCGyNCWOAnJAMzEXVV9drYb0TXr42TTliLLhKIBvulgAXgtLLnwzGA==
 
 isarray@~1.0.0:
   version "1.0.0"
@@ -4436,6 +4448,13 @@ stylis@4.0.13:
   resolved "https://registry.yarnpkg.com/stylis/-/stylis-4.0.13.tgz#f5db332e376d13cc84ecfe5dace9a2a51d954c91"
   integrity sha512-xGPXiFVl4YED9Jh7Euv2V220mriG9u4B2TA6Ybjc1catrstKD2PpIdU3U0RKpkVBC2EhmL/F0sPCr9vrFTNRag==
 
+superjson@^1.12.1:
+  version "1.12.1"
+  resolved "https://registry.yarnpkg.com/superjson/-/superjson-1.12.1.tgz#35e8c08e5a4c2bb65b1c63a6ff00414f3c364fca"
+  integrity sha512-HMTj43zvwW5bD+JCZCvFf4DkZQCmiLTen4C+W1Xogj0SPOpnhxsriogM04QmBVGH5b3kcIIOr6FqQ/aoIDx7TQ==
+  dependencies:
+    copy-anything "^3.0.2"
+
 supports-color@^5.3.0:
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-5.5.0.tgz#e2e69a44ac8772f78a1ec0b35b689df6530efc8f"
@@ -4623,6 +4642,11 @@ use-subscription@1.5.1:
   dependencies:
     object-assign "^4.1.1"
 
+use-sync-external-store@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.2.0.tgz#7dbefd6ef3fe4e767a0cf5d7287aacfb5846928a"
+  integrity sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==
+
 util-deprecate@^1.0.1, util-deprecate@~1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
@@ -4774,3 +4798,10 @@ zod@^3.11.6:
   version "3.11.6"
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.11.6.tgz#e43a5e0c213ae2e02aefe7cb2b1a6fa3d7f1f483"
   integrity sha512-daZ80A81I3/9lIydI44motWe6n59kRBfNzTuS2bfzVh1nAXi667TOTWWtatxyG+fwgNUiagSj/CWZwRRbevJIg==
+
+zustand@^4.1.5:
+  version "4.1.5"
+  resolved "https://registry.yarnpkg.com/zustand/-/zustand-4.1.5.tgz#7402b511f5b23ccb0f9ba6d20ae01ec817e16eb6"
+  integrity sha512-PsdRT8Bvq22Yyh1tvpgdHNE7OAeFKqJXUxtJvj1Ixw2B9O2YZ1M34ImQ+xyZah4wZrR4lENMoDUutKPpyXCQ/Q==
+  dependencies:
+    use-sync-external-store "1.2.0"

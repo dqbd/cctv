@@ -2,23 +2,29 @@ import { useEffect, useRef, useState } from "react"
 import Hls from "hls.js"
 import { css } from "@emotion/react"
 import { theme } from "utils/theme"
+import { useStreamStore } from "utils/stream"
 
 export function HLSPlayer(props: { source: string }) {
   const ref = useRef<HTMLVideoElement | null>(null)
   const [paused, setPaused] = useState(false)
+
+  const updatePlayback = useStreamStore((state) => state.updatePlayback)
 
   useEffect(() => {
     const videoRef = ref.current
     let hls: Hls | undefined
 
     let onPauseListener: () => void
-    const onPlayListener = () => setPaused(false)
+    const onPlayListener = () => {
+      setPaused(false)
+      updatePlayback("playing")
+    }
 
     videoRef?.addEventListener("playing", onPlayListener)
 
     if (props.source && videoRef) {
       if (Hls.isSupported()) {
-        hls = new Hls({ debug: false, startPosition: 0 })
+        hls = new Hls()
         hls.attachMedia(videoRef)
 
         hls.on(Hls.Events.MEDIA_ATTACHED, () => {
@@ -48,7 +54,7 @@ export function HLSPlayer(props: { source: string }) {
 
           onPauseListener = () => {
             setPaused(true)
-            hls?.recoverMediaError()
+            updatePlayback("paused")
           }
 
           videoRef.addEventListener("pause", onPauseListener)
@@ -59,6 +65,7 @@ export function HLSPlayer(props: { source: string }) {
 
         onPauseListener = () => {
           setPaused(true)
+          updatePlayback("paused")
         }
 
         videoRef.addEventListener("pause", onPauseListener)
@@ -70,11 +77,23 @@ export function HLSPlayer(props: { source: string }) {
       videoRef?.removeEventListener("playing", onPlayListener)
       hls?.destroy?.()
     }
-  }, [props.source])
+  }, [props.source, updatePlayback])
 
   return (
     <>
-      <video ref={ref} autoPlay playsInline muted />
+      <video
+        ref={ref}
+        autoPlay
+        playsInline
+        muted
+        onClick={() => {
+          if (paused) {
+            ref.current?.play()
+          } else {
+            ref.current?.pause()
+          }
+        }}
+      />
       {paused && (
         <div
           css={css`
@@ -93,16 +112,10 @@ export function HLSPlayer(props: { source: string }) {
               background: ${theme.colors.blue500};
               width: 100px;
               height: 100px;
-              pointer-events: all;
               color: ${theme.colors.white};
               border-radius: 100%;
               border: none;
             `}
-            onClick={() => {
-              try {
-                ref.current?.play()
-              } catch {}
-            }}
           >
             <svg
               width="64"

@@ -1,47 +1,36 @@
-import { Fragment, useContext, useState } from "react"
+import { Fragment, useContext, useEffect, useState } from "react"
 
 import { HLSPlayer } from "components/HLSPlayer"
 import { Controls } from "components/Controls/Controls"
 
 import { css, Global } from "@emotion/react"
 import { useRouter } from "next/dist/client/router"
-import { ManifestArgs, StreamContext } from "utils/stream"
+import {
+  StreamType,
+  StreamContext,
+  useStreamStore,
+  useStreamPeriodicRefreshNow,
+  generateUrl,
+} from "utils/stream"
 import { NextSeo } from "next-seo"
-import { encodeQuery } from "utils/query"
 import Head from "next/head"
 import { GetServerSideProps } from "next"
 import { loadServerConfig } from "shared/config"
 import { theme } from "utils/theme"
 
-function generateUrl(name: string, args: ManifestArgs): string | null {
-  if ("from" in args && "to" in args) {
-    return encodeQuery(`/api/data/${name}/slice.m3u8`, {
-      from: Math.floor(args.from / 1000),
-      to: Math.floor(args.to / 1000),
-    })
-  }
-
-  if ("from" in args && "length" in args) {
-    return encodeQuery(`/api/data/${name}/slice.m3u8`, {
-      from: Math.floor(args.from / 1000),
-      length: args.length,
-    })
-  }
-
-  return encodeQuery(`/api/data/${name}/stream.m3u8`, {
-    shift: Math.floor(args.shift / 1000),
-  })
-}
-
 export default function Page() {
-  const [args, setArgs] = useState<ManifestArgs>({ shift: 0 })
+  useStreamPeriodicRefreshNow()
 
   const { query } = useRouter()
   const name = query.cameraKey as string | undefined
   const data = useContext(StreamContext)
-  const stream = data.streams.find(({ key }) => key === name)
+  const meta = data.streams.find(({ key }) => key === name)
 
-  const url = name ? generateUrl(name, args) : null
+  const stream = useStreamStore((state) => state.stream)
+  const url = name ? generateUrl(name, stream) : null
+
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
   return (
     <Fragment>
@@ -63,7 +52,7 @@ export default function Page() {
           }
         `}
       />
-      <NextSeo title={stream?.name} />
+      <NextSeo title={meta?.name} />
       <div
         css={css`
           display: flex;
@@ -85,7 +74,7 @@ export default function Page() {
         `}
       >
         {url && <HLSPlayer source={url} />}
-        {stream && <Controls onChange={setArgs} value={args} stream={stream} />}
+        {meta && mounted && <Controls stream={meta} />}
       </div>
     </Fragment>
   )

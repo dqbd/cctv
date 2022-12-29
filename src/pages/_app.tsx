@@ -40,11 +40,6 @@ export default function App(props: AppProps) {
         <StreamContext.Provider value={{ streams }}>
           <Head>
             <link
-              rel="stylesheet"
-              href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
-            />
-
-            <link
               rel="apple-touch-icon"
               sizes="180x180"
               href="/apple-touch-icon.png"

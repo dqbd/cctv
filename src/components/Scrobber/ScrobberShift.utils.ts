@@ -3,7 +3,7 @@ import { useEffect, useLayoutEffect, useState } from "react"
 async function getServerTimeDiff() {
   const clientStart = Date.now(),
     timeBefore = performance.now()
-  const serverReq = await fetch("/api/time")
+  const serverReq = await fetch("http://192.168.2.152:3000/api/time")
   const timeAfter = performance.now()
 
   const roundTripTime = timeAfter - timeBefore
@@ -47,25 +47,4 @@ export const formatTime = (time: number) => {
   }
 
   return `${Math.sign(time) < 0 ? "-" : ""}${result.join(" ")}`
-}
-
-export const useTimer = () => {
-  const [current, setCurrent] = useState(Date.now())
-  useLayoutEffect(() => {
-    let timer: number
-
-    const tick = () => {
-      const now = Date.now()
-      const nextTimer = Math.max(1000 - new Date(now).getMilliseconds(), 0)
-      setCurrent(now)
-
-      window.clearTimeout(timer)
-      timer = window.setTimeout(tick, nextTimer)
-    }
-    tick()
-
-    return () => void window.clearTimeout(timer)
-  }, [])
-
-  return current
 }

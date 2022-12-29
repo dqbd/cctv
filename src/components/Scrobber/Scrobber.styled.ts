@@ -15,7 +15,7 @@ export const SWrapper = styled.div`
   background: ${theme.gradients.bottom};
 `
 
-export const SContainer = styled.div<{ mode: "shift" | "range" }>`
+export const SContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -43,16 +43,4 @@ export const SContainer = styled.div<{ mode: "shift" | "range" }>`
   & > *:not(:last-child) {
     margin-right: 1em;
   }
-
-  ${({ mode }) => {
-    if (mode === "range") {
-      return css`
-        &::after {
-          display: none;
-        }
-      `
-    }
-
-    return null
-  }}
 `
