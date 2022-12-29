@@ -115,6 +115,8 @@ export function HLSPlayer(props: { source: string }) {
               color: ${theme.colors.white};
               border-radius: 100%;
               border: none;
+
+              box-shadow: ${theme.shadows.sm};
             `}
           >
             <svg
