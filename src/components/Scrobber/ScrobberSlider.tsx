@@ -24,6 +24,8 @@ export function ScrobberSlider(props: {
     { shift: [number, number] } | { pov: [dayjs.Dayjs, dayjs.Dayjs] }
   >(props.bounds)
 
+  useEffect(() => void (boundsRef.current = props.bounds), [props.bounds])
+
   const propsRef = usePropsRef({
     onScroll: props.onScroll,
     onScrollEnd: props.onScrollEnd,

@@ -10,7 +10,12 @@ import AdapterDayjs from "@material-ui/lab/AdapterDayjs"
 import { Pill, PillInput } from "components/PillInput/PillInput"
 import { STimeOffset, SLive } from "./ScrobberShift.styled"
 import { useServerTimeDiff } from "./ScrobberShift.utils"
-import { fitDateInBounds, PlaybackType, useStreamStore } from "utils/stream"
+import {
+  fitDateInBounds,
+  getDateBounds,
+  PlaybackType,
+  useStreamStore,
+} from "utils/stream"
 
 function ScrobberShiftTime(props: {
   onShiftSet?: (shift: number) => void
@@ -114,8 +119,7 @@ export function ScrobberShift(props: {
     )
       .add(serverDiff, "millisecond")
       .add(props.intentShift ?? 0, "millisecond"),
-    now,
-    props.bounds
+    getDateBounds(now, props.bounds)
   )
 
   const displayShift = displayDate.diff(now, "millisecond")

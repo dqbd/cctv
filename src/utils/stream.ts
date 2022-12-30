@@ -43,6 +43,7 @@ type PlaybackState = {
   refreshNow: () => number
   updatePlayback: (playback: "paused" | "playing") => void
   updateStream: (stream: StreamType) => void
+  updateRangeSeek: (delta: number) => void
 }
 
 export const useStreamStore = create<PlaybackState>()(
@@ -128,6 +129,43 @@ export const useStreamStore = create<PlaybackState>()(
             return {}
           })
         },
+        updateRangeSeek(delta) {
+          set((state) => {
+            if ("from" in state.stream && "to" in state.stream) {
+              const dateFrom = dayjs(state.stream.from)
+              const dateTo = dayjs(state.stream.to)
+
+              if ("playing" in state.playback) {
+                const shiftFrom = dateFrom.diff(state.now, "millisecond")
+                const shiftTo = dateTo.diff(state.now, "millisecond")
+
+                return {
+                  playback: {
+                    playing: Math.min(
+                      shiftTo,
+                      Math.max(shiftFrom, state.playback.playing + delta)
+                    ),
+                  },
+                }
+              }
+
+              if ("paused" in state.playback) {
+                return {
+                  playback: {
+                    paused: dayjs.min(
+                      dateTo,
+                      dayjs.max(
+                        dateFrom,
+                        state.playback.paused.add(delta, "millisecond")
+                      )
+                    ),
+                  },
+                }
+              }
+            }
+            return {}
+          })
+        },
       }
     },
     {
@@ -185,23 +223,30 @@ export const StreamContext = createContext<{
   streams: { key: string; name: string; color: string }[]
 }>({ streams: [] })
 
-export const fitDateInBounds = (
-  pov: dayjs.Dayjs,
+export const getDateBounds = (
   now: dayjs.Dayjs,
   bounds: { shift: [number, number] } | { pov: [dayjs.Dayjs, dayjs.Dayjs] }
 ) => {
   if ("shift" in bounds) {
     const [min, max] = bounds.shift
-    return dayjs.max([
-      now.add(min, "millisecond"),
-      dayjs.min([now.add(max, "millisecond"), pov]),
-    ])
+    return {
+      min: now.add(min, "millisecond"),
+      max: now.add(max, "millisecond"),
+    }
   }
 
   if ("pov" in bounds) {
     const [min, max] = bounds.pov
-    return dayjs.max([min, dayjs.min([max, pov])])
+    return { min, max }
   }
 
-  return pov
+  return null
+}
+
+export const fitDateInBounds = (
+  pov: dayjs.Dayjs,
+  bounds: { min: dayjs.Dayjs; max: dayjs.Dayjs } | null
+) => {
+  if (!bounds) return pov
+  return dayjs.max([bounds.min, dayjs.min(bounds.max, pov)])
 }

@@ -1,17 +1,18 @@
-import { useEffect, useRef, useState } from "react"
+import { MutableRefObject, useEffect, useRef, useState } from "react"
 import Hls from "hls.js"
 import { css } from "@emotion/react"
 import { theme } from "utils/theme"
 import { useStreamStore } from "utils/stream"
 
-export function HLSPlayer(props: { source: string }) {
-  const ref = useRef<HTMLVideoElement | null>(null)
+export function HLSPlayer(props: {
+  source: string
+  videoRef: MutableRefObject<HTMLVideoElement | null>
+}) {
   const [paused, setPaused] = useState(false)
-
   const updatePlayback = useStreamStore((state) => state.updatePlayback)
 
   useEffect(() => {
-    const videoRef = ref.current
+    const videoRef = props.videoRef.current
     let hls: Hls | undefined
 
     let onPauseListener: () => void
@@ -77,20 +78,20 @@ export function HLSPlayer(props: { source: string }) {
       videoRef?.removeEventListener("playing", onPlayListener)
       hls?.destroy?.()
     }
-  }, [props.source, updatePlayback])
+  }, [props.source, updatePlayback, props.videoRef])
 
   return (
     <>
       <video
-        ref={ref}
+        ref={props.videoRef}
         autoPlay
         playsInline
         muted
         onClick={() => {
           if (paused) {
-            ref.current?.play()
+            props.videoRef.current?.play()
           } else {
-            ref.current?.pause()
+            props.videoRef.current?.pause()
           }
         }}
       />

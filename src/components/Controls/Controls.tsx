@@ -40,6 +40,7 @@ export function Controls(props: {
     name: string
     color: string
   }
+  onRangeSeek: (delta: number) => void
 }) {
   const { visible, show } = useVisibleTimer(5 * 99999 * 1000)
 
@@ -50,7 +51,7 @@ export function Controls(props: {
       onMouseMove={() => show.current()}
     >
       <ControlsHeader stream={props.stream} />
-      <Scrobber color={props.stream.color} />
+      <Scrobber color={props.stream.color} onRangeSeek={props.onRangeSeek} />
     </SMain>
   )
 }

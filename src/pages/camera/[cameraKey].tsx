@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useState } from "react"
+import { Fragment, useContext, useEffect, useRef, useState } from "react"
 
 import { HLSPlayer } from "components/HLSPlayer"
 import { Controls } from "components/Controls/Controls"
@@ -20,6 +20,8 @@ import { theme } from "utils/theme"
 
 export default function Page() {
   useStreamPeriodicRefreshNow()
+
+  const videoRef = useRef<HTMLVideoElement | null>(null)
 
   const { query } = useRouter()
   const name = query.cameraKey as string | undefined
@@ -73,8 +75,17 @@ export default function Page() {
           }
         `}
       >
-        {url && <HLSPlayer source={url} />}
-        {meta && mounted && <Controls stream={meta} />}
+        {url && <HLSPlayer videoRef={videoRef} source={url} />}
+        {meta && mounted && (
+          <Controls
+            stream={meta}
+            onRangeSeek={(delta) => {
+              if (videoRef.current != null) {
+                videoRef.current.currentTime += delta / 1000
+              }
+            }}
+          />
+        )}
       </div>
     </Fragment>
   )

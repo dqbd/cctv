@@ -1,6 +1,6 @@
 import dayjs from "dayjs"
 import { useCallback, useEffect, useRef } from "react"
-import { fitDateInBounds, PlaybackType } from "utils/stream"
+import { fitDateInBounds, getDateBounds, PlaybackType } from "utils/stream"
 
 const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000
 const LINE_HEIGHT = 10
@@ -52,13 +52,13 @@ export function drawCanvas(
   }
 
   const drawDayBoundedLine = (playback: PlaybackType, user: number) => {
+    const dateBounds = getDateBounds(now, options.bounds)
     const pov = fitDateInBounds(
       ("playing" in playback
         ? now.add(playback.playing, "millisecond")
         : playback.paused
       ).add(user, "millisecond"),
-      now,
-      options.bounds
+      dateBounds
     )
 
     const povStartOfDay = pov.startOf("day")
@@ -68,8 +68,11 @@ export function drawCanvas(
     const recordEnd = now
 
     drawLine(
-      toCoordX(pov, dayjs.max(recordStart, povStartOfDay)),
-      toCoordX(pov, dayjs.min(recordEnd, povEndOfDay))
+      toCoordX(
+        pov,
+        dayjs.max(dateBounds?.min ?? pov, recordStart, povStartOfDay)
+      ),
+      toCoordX(pov, dayjs.min(dateBounds?.max ?? pov, recordEnd, povEndOfDay))
     )
 
     // draw markers
@@ -77,6 +80,7 @@ export function drawCanvas(
     ctx.textBaseline = "middle"
     ctx.textAlign = "center"
     ctx.lineWidth = 2
+
     for (let x = 0; x <= MILLISECONDS_PER_DAY; x += 1 * 60 * 1000) {
       const textX = toCoordX(pov, povStartOfDay.add(x, "millisecond"))
 
