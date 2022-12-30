@@ -36,6 +36,7 @@ export function generateUrl(name: string, args: StreamType): string | null {
 }
 
 type PlaybackState = {
+  mode: "shift" | "range"
   now: dayjs.Dayjs
   playback: PlaybackType
   stream: StreamType
@@ -44,6 +45,7 @@ type PlaybackState = {
   updatePlayback: (playback: "paused" | "playing") => void
   updateStream: (stream: StreamType) => void
   updateRangeSeek: (delta: number) => void
+  setMode: (mode: "shift" | "range") => void
 }
 
 export const useStreamStore = create<PlaybackState>()(
@@ -51,8 +53,11 @@ export const useStreamStore = create<PlaybackState>()(
     (set) => {
       return {
         now: dayjs(),
+        mode: "shift",
         playback: { playing: 0 },
         stream: { shift: 0 },
+
+        setMode: (mode) => set({ mode }),
 
         refreshNow: () => {
           const now = dayjs()
@@ -110,6 +115,7 @@ export const useStreamStore = create<PlaybackState>()(
 
             if ("shift" in stream) {
               return {
+                mode: "shift",
                 now,
                 stream,
                 playback: { playing: -stream.shift },
@@ -118,6 +124,7 @@ export const useStreamStore = create<PlaybackState>()(
 
             if ("from" in stream && "to" in stream) {
               return {
+                mode: "range",
                 now,
                 stream,
                 playback: {

@@ -12,7 +12,8 @@ export function Scrobber(props: {
   onRangeSeek: (delta: number) => void
 }) {
   const config = useContext(ConfigContext)
-  const [mode, setMode] = useState<"shift" | "range">("shift")
+  const mode = useStreamStore((state) => state.mode)
+  const setMode = useStreamStore((state) => state.setMode)
 
   const stream = useStreamStore((state) => state.stream)
   const playback = useStreamStore((state) => state.playback)
@@ -35,41 +36,20 @@ export function Scrobber(props: {
   const updateRangeSeek = useStreamStore((state) => state.updateRangeSeek)
 
   const onShiftChange = (shift: number) => {
-    setIntentShift(null)
     updateStream({
       shift: Math.max(0, Math.min(config.maxAge * 1000, shift)),
     })
-  }
-
-  const onRangeChange = (range: { from: number; to: number } | null) => {
-    if (range != null) {
-      updateStream(range)
-    }
   }
 
   return (
     <>
       <SWrapper>
         <SContainer>
-          {mode === "shift" && (
-            <ScrobberShift
-              intentShift={intentShift}
-              bounds={bounds}
-              onShiftSet={onShiftChange}
-              onModeChange={() => setMode("range")}
-            />
-          )}
-
-          {mode === "range" && (
-            <ScrobberRange
-              value={"from" in stream && "to" in stream ? stream : null}
-              onChange={onRangeChange}
-              onModeChange={() => {
-                updateStream({ shift: 0 })
-                setMode("shift")
-              }}
-            />
-          )}
+          <ScrobberShift
+            intentShift={intentShift}
+            bounds={bounds}
+            onShiftSet={onShiftChange}
+          />
         </SContainer>
       </SWrapper>
 
@@ -78,6 +58,7 @@ export function Scrobber(props: {
           setIntentShift(value)
         }}
         onScrollEnd={(delta) => {
+          setIntentShift(null)
           if ("shift" in stream) {
             onShiftChange(stream.shift - delta)
           }

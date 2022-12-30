@@ -106,7 +106,6 @@ export function ScrobberShift(props: {
   intentShift: number | null
   bounds: { shift: [number, number] } | { pov: [dayjs.Dayjs, dayjs.Dayjs] }
   onShiftSet: (value: number) => void
-  onModeChange: () => void
 }) {
   const serverDiff = useServerTimeDiff()
   const now = useStreamStore((state) => state.now)
@@ -145,8 +144,6 @@ export function ScrobberShift(props: {
         displayDate={displayDate}
         onShiftSet={props.onShiftSet}
       />
-
-      <Pill onClick={props.onModeChange}>Rozsah</Pill>
     </>
   )
 }

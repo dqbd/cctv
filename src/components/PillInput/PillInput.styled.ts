@@ -21,7 +21,7 @@ export const SPill = styled.div`
   font-variant-numeric: tabular-nums;
   transition: background 0.3s;
 
-  @media (max-width: 768px) {
+  @media (max-width: 864px) {
     padding: 0 1em;
   }
 

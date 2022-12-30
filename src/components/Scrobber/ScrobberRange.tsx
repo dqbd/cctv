@@ -42,7 +42,6 @@ function ScrobberRangeDateTime(props: {
 export function ScrobberRange(props: {
   value: { from: number; to: number } | null
   onChange: (value: { from: number; to: number } | null) => void
-  onModeChange: () => void
 }) {
   const [from, setFrom] = useState<dayjs.Dayjs | null>(null)
   const [to, setTo] = useState<dayjs.Dayjs | null>(null)
@@ -69,32 +68,28 @@ export function ScrobberRange(props: {
   }, [props.value?.from, props.value?.to])
 
   return (
-    <>
-      <div
-        css={css`
-          display: flex;
-          gap: 8px;
-        `}
-      >
-        <ScrobberRangeDateTime
-          value={from}
-          maxDateTime={to}
-          onChange={(from) => {
-            setFrom(from)
-            handleScrobberChange(from, to)
-          }}
-        />
-        <ScrobberRangeDateTime
-          value={to}
-          minDateTime={from}
-          onChange={(to) => {
-            setTo(to)
-            handleScrobberChange(from, to)
-          }}
-        />
-      </div>
-
-      <Pill onClick={props.onModeChange}>Živě</Pill>
-    </>
+    <div
+      css={css`
+        display: flex;
+        gap: 8px;
+      `}
+    >
+      <ScrobberRangeDateTime
+        value={from}
+        maxDateTime={to}
+        onChange={(from) => {
+          setFrom(from)
+          handleScrobberChange(from, to)
+        }}
+      />
+      <ScrobberRangeDateTime
+        value={to}
+        minDateTime={from}
+        onChange={(to) => {
+          setTo(to)
+          handleScrobberChange(from, to)
+        }}
+      />
+    </div>
   )
 }

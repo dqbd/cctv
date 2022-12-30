@@ -18,7 +18,7 @@ export const SMain = styled.div`
     pointer-events: all;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 864px) {
     font-size: 12px;
   }
 `
@@ -30,8 +30,9 @@ export const STop = styled.div`
   right: 0;
 
   display: flex;
-  align-items: center;
+  justify-content: space-between;
   padding: 2em;
+
   background: ${theme.gradients.top};
 `
 

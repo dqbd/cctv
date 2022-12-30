@@ -40,7 +40,10 @@ export const SContainer = styled.div`
     top: 100%;
   }
 
-  & > *:not(:last-child) {
-    margin-right: 1em;
+  gap: 1em;
+
+  @media (max-width: 864px) {
+    padding: 0.4em;
+    gap: 0.5em;
   }
 `
