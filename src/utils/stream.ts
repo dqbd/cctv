@@ -189,13 +189,13 @@ export const useStreamStore = create<PlaybackState>()(
 
           const storedValue = searchParams.get(key)
           if (storedValue == null) return null
-          return superjson.parse(window.atob(storedValue))
+          return superjson.parse(storedValue)
         },
         setItem: (key, newValue) => {
           const searchParams = new URLSearchParams(
             window.location.hash.slice(1)
           )
-          searchParams.set(key, window.btoa(superjson.stringify(newValue)))
+          searchParams.set(key, superjson.stringify(newValue))
           window.location.hash = searchParams.toString()
         },
         removeItem: (key) => {

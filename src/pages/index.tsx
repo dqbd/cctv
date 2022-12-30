@@ -43,6 +43,11 @@ export default function Page() {
           display: flex;
           flex-direction: column;
           gap: 2em;
+
+          @media (max-width: 864px) {
+            margin: 1em;
+            gap: 1em;
+          }
         `}
       >
         <div

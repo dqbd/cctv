@@ -17,6 +17,7 @@ import Head from "next/head"
 import { GetServerSideProps } from "next"
 import { loadServerConfig } from "shared/config"
 import { theme } from "utils/theme"
+import { useVisibleTimer } from "components/Controls/Controls.utils"
 
 export default function Page() {
   useStreamPeriodicRefreshNow()
@@ -33,6 +34,8 @@ export default function Page() {
 
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
+
+  const { visible, show } = useVisibleTimer(5 * 1000)
 
   return (
     <Fragment>
@@ -75,10 +78,19 @@ export default function Page() {
           }
         `}
       >
-        {url && <HLSPlayer videoRef={videoRef} source={url} />}
+        {url && (
+          <HLSPlayer
+            videoRef={videoRef}
+            source={url}
+            visible={visible}
+            show={show}
+          />
+        )}
         {meta && mounted && (
           <Controls
             stream={meta}
+            visible={visible}
+            show={show}
             onRangeSeek={(delta) => {
               if (videoRef.current != null) {
                 videoRef.current.currentTime += delta / 1000

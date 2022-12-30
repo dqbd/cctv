@@ -53,4 +53,7 @@ export const SPillInput = styled.input`
 
   cursor: pointer;
   outline: none;
+
+  font-size: 16px;
+  user-select: none;
 `

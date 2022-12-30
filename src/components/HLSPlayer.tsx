@@ -7,6 +7,8 @@ import { useStreamStore } from "utils/stream"
 export function HLSPlayer(props: {
   source: string
   videoRef: MutableRefObject<HTMLVideoElement | null>
+  visible: boolean
+  show: MutableRefObject<() => void>
 }) {
   const [paused, setPaused] = useState(false)
   const updatePlayback = useStreamStore((state) => state.updatePlayback)
@@ -105,15 +107,19 @@ export function HLSPlayer(props: {
             align-items: center;
             justify-content: center;
             pointer-events: none;
+
+            transition: opacity 0.3s;
+
+            ${props.visible ? { opacity: 1 } : { opacity: 0 }}
           `}
         >
           <button
             type="button"
             css={css`
               background: ${theme.colors.blue500};
-              width: 100px;
-              height: 100px;
-              color: ${theme.colors.white};
+              width: 6em;
+              height: 6em;
+              color: ${theme.colors.lightBlue900};
               border-radius: 100%;
               border: none;
 
@@ -121,8 +127,8 @@ export function HLSPlayer(props: {
             `}
           >
             <svg
-              width="64"
-              height="64"
+              width="4em"
+              height="4em"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"

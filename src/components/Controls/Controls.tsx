@@ -6,6 +6,7 @@ import { useStreamStore } from "utils/stream"
 import { css } from "@emotion/react"
 import { theme } from "utils/theme"
 import { ScrobberRange } from "components/Scrobber/ScrobberRange"
+import { MutableRefObject } from "react"
 
 function ControlsHeader(props: {
   stream: {
@@ -41,7 +42,16 @@ function ControlsHeader(props: {
             </svg>
           </SBack>
         </Link>
-        <SInfo>
+        <SInfo
+          css={
+            mode === "range" &&
+            css`
+              @media (max-width: 864px) {
+                display: none;
+              }
+            `
+          }
+        >
           <SColor css={{ backgroundColor: props.stream?.color }} />
           <SName>{props.stream?.name}</SName>
         </SInfo>
@@ -56,22 +66,22 @@ function ControlsHeader(props: {
         `}
       >
         {mode === "range" && (
-          <div
+          <ScrobberRange
+            value={"from" in stream && "to" in stream ? stream : null}
+            onChange={(range) => {
+              if (range != null) {
+                updateStream(range)
+              }
+            }}
             css={css`
               background: ${theme.colors.blue500};
-              border-radius: 9999px;
               padding: 0.5em;
+
+              @media (max-width: 864px) {
+                border-radius: 20px;
+              }
             `}
-          >
-            <ScrobberRange
-              value={"from" in stream && "to" in stream ? stream : null}
-              onChange={(range) => {
-                if (range != null) {
-                  updateStream(range)
-                }
-              }}
-            />
-          </div>
+          />
         )}
 
         <a
@@ -146,18 +156,22 @@ export function Controls(props: {
     name: string
     color: string
   }
+  visible: boolean
+  show: MutableRefObject<() => void>
   onRangeSeek: (delta: number) => void
 }) {
-  const { visible, show } = useVisibleTimer(5 * 99999 * 1000)
-
   return (
     <SMain
-      css={{ opacity: visible ? 1 : 0 }}
-      onTouchStart={() => show.current()}
-      onMouseMove={() => show.current()}
+      css={{ opacity: props.visible ? 1 : 0 }}
+      onTouchStart={() => props.show.current()}
+      onMouseMove={() => props.show.current()}
     >
       <ControlsHeader stream={props.stream} />
-      <Scrobber color={props.stream.color} onRangeSeek={props.onRangeSeek} />
+      <Scrobber
+        color={props.stream.color}
+        onRangeSeek={props.onRangeSeek}
+        onActivate={() => props.show.current()}
+      />
     </SMain>
   )
 }

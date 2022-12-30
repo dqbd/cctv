@@ -10,6 +10,7 @@ import dayjs from "dayjs"
 export function Scrobber(props: {
   color: string
   onRangeSeek: (delta: number) => void
+  onActivate: () => void
 }) {
   const config = useContext(ConfigContext)
   const mode = useStreamStore((state) => state.mode)
@@ -55,6 +56,7 @@ export function Scrobber(props: {
 
       <ScrobberSlider
         onScroll={(value) => {
+          props.onActivate()
           setIntentShift(value)
         }}
         onScrollEnd={(delta) => {

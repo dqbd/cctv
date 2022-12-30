@@ -42,6 +42,7 @@ function ScrobberRangeDateTime(props: {
 export function ScrobberRange(props: {
   value: { from: number; to: number } | null
   onChange: (value: { from: number; to: number } | null) => void
+  className?: string
 }) {
   const [from, setFrom] = useState<dayjs.Dayjs | null>(null)
   const [to, setTo] = useState<dayjs.Dayjs | null>(null)
@@ -69,9 +70,14 @@ export function ScrobberRange(props: {
 
   return (
     <div
+      className={props.className}
       css={css`
         display: flex;
         gap: 8px;
+
+        @media (max-width: 864px) {
+          flex-direction: column;
+        }
       `}
     >
       <ScrobberRangeDateTime
