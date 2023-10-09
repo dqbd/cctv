@@ -19,6 +19,8 @@ interface LogTable {
 export class Database {
   private knex: Knex
 
+  private logTime = 0
+
   constructor(config: Knex.Config) {
     this.knex = knex(config)
   }
@@ -47,8 +49,11 @@ export class Database {
   }
 
   async insertLog(cameraKey: string, json: string) {
+    const newNow = Date.now()
+    this.logTime += newNow + (newNow === this.logTime ? 1 : 0)
+
     return this.knex<LogTable>(`${cameraKey}_log`).insert({
-      timestamp: new Date(),
+      timestamp: new Date(this.logTime),
       json,
     })
   }
