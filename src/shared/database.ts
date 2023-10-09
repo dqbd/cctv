@@ -135,6 +135,17 @@ export class Database {
       .select()
   }
 
+  async logRange(camera: string, fromSec: number, toSec: number) {
+    const from = new Date(fromSec * 1000)
+    const to = new Date(toSec * 1000)
+
+    return this.knex
+      .select("*")
+      .from<LogTable>(`${camera}_log`)
+      .whereBetween("timestamp", [from, to])
+      .orderBy("timestamp", "asc")
+  }
+
   async seekFrom(
     camera: string,
     fromSec: number,
