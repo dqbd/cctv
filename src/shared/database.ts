@@ -11,6 +11,11 @@ interface CameraTable {
   path: string
 }
 
+interface LogTable {
+  timestamp: Date
+  json: string
+}
+
 export class Database {
   private knex: Knex
 
@@ -32,6 +37,20 @@ export class Database {
         table.string("path")
       })
     }
+
+    if (!(await this.knex.schema.hasTable(`${cameraKey}_log`))) {
+      return this.knex.schema.createTable(`${cameraKey}_log`, (table) => {
+        table.dateTime("timestamp", { precision: 3 }).primary()
+        table.string("json")
+      })
+    }
+  }
+
+  async insertLog(cameraKey: string, json: string) {
+    return this.knex<LogTable>(`${cameraKey}_log`).insert({
+      timestamp: new Date(),
+      json,
+    })
   }
 
   async resetFolder(cameraKey: string) {
@@ -148,7 +167,11 @@ export class Database {
   async remove(camera: string, maxAgeSec: number) {
     const maxAge = maxAgeSec * 1000
 
-    return this.knex<CameraTable>(camera)
+    await this.knex<CameraTable>(camera)
+      .where("timestamp", "<=", new Date(Date.now() - maxAge))
+      .delete()
+
+    await this.knex<LogTable>(`${camera}_log`)
       .where("timestamp", "<=", new Date(Date.now() - maxAge))
       .delete()
   }
