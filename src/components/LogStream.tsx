@@ -62,7 +62,7 @@ export function LogStream(props: {
     "playing" in playback
       ? now.add(playback.playing, "millisecond")
       : playback.paused
-  ).add(serverDiff, "millisecond")
+  ).add?.(serverDiff, "millisecond")
 
   const currentItem = log.data?.find(
     ({ timestamp }) => dayjs(timestamp).valueOf() <= displayDate.valueOf()
@@ -125,7 +125,10 @@ export function LogStream(props: {
             })}
             {sum !== 0 && <div>Celkem: ... {sum} Kč</div>}
             {currentItem.data.paid !== 0 && (
-              <div>Vrátit: ... {currentItem.data.paid} Kč</div>
+              <>
+                <div>Zaplaceno: ... {currentItem.data.paid} Kč</div>
+                <div>Vrátit: ... {currentItem.data.paid - sum} Kč</div>
+              </>
             )}
           </div>
         )}
