@@ -68,10 +68,11 @@ export function LogStream(props: {
     ({ timestamp }) => dayjs(timestamp).valueOf() <= displayDate.valueOf()
   )
 
-  const sum = currentItem?.data.cart.items.reduce(
-    (memo, item) => item.price * item.qty + memo,
-    0
-  )
+  const sum =
+    currentItem?.data.cart.items.reduce(
+      (memo, item) => item.price * item.qty + memo,
+      0
+    ) ?? 0
 
   return (
     <div
