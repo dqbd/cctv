@@ -6,7 +6,7 @@ import cors from "cors"
 
 const dbRef = createPersistentDatabase()
 
-const RANGE = 10 * 2 // 20s
+const RANGE = 10 * 60 // 20s
 
 export default async function handler(
   req: NextApiRequest,

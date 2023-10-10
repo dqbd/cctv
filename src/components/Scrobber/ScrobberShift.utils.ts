@@ -3,7 +3,7 @@ import { useEffect, useLayoutEffect, useState } from "react"
 async function getServerTimeDiff() {
   const clientStart = Date.now(),
     timeBefore = performance.now()
-  const serverReq = await fetch("http://192.168.2.152:3000/api/time")
+  const serverReq = await fetch("/api/time")
   const timeAfter = performance.now()
 
   const roundTripTime = timeAfter - timeBefore

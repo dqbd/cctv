@@ -6,7 +6,8 @@ import { useStreamStore } from "utils/stream"
 import { css } from "@emotion/react"
 import { theme } from "utils/theme"
 import { ScrobberRange } from "components/Scrobber/ScrobberRange"
-import { MutableRefObject } from "react"
+import { MutableRefObject, useEffect } from "react"
+import { useQuery } from "@tanstack/react-query"
 
 function ControlsHeader(props: {
   stream: {

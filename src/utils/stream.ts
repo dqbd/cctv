@@ -21,16 +21,13 @@ export type PlaybackType = { playing: number } | { paused: dayjs.Dayjs }
 
 export function generateUrl(name: string, args: StreamType): string | null {
   if ("from" in args && "to" in args) {
-    return encodeQuery(
-      `http://192.168.2.152:3000/api/data/${name}/slice.m3u8`,
-      {
-        from: Math.floor(args.from / 1000),
-        to: Math.floor(args.to / 1000),
-      }
-    )
+    return encodeQuery(`/api/data/${name}/slice.m3u8`, {
+      from: Math.floor(args.from / 1000),
+      to: Math.floor(args.to / 1000),
+    })
   }
 
-  return encodeQuery(`http://192.168.2.152:3000/api/data/${name}/stream.m3u8`, {
+  return encodeQuery(`/api/data/${name}/stream.m3u8`, {
     shift: Math.floor(args.shift / 1000),
   })
 }

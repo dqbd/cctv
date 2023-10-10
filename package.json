@@ -26,6 +26,7 @@
     "@emotion/styled": "^11.1.5",
     "@material-ui/core": "^5.0.0-alpha.21",
     "@material-ui/lab": "^5.0.0-alpha.21",
+    "@tanstack/react-query": "^4.36.1",
     "@use-gesture/react": "^10.2.23",
     "chokidar": "^3.5.1",
     "cors": "^2.8.5",
