@@ -50,7 +50,7 @@ export class Database {
 
   async insertLog(cameraKey: string, json: string) {
     const newNow = Date.now()
-    this.logTime += newNow + (newNow === this.logTime ? 1 : 0)
+    this.logTime = newNow + (newNow === this.logTime ? 1 : 0)
 
     return this.knex<LogTable>(`${cameraKey}_log`).insert({
       timestamp: new Date(this.logTime),
