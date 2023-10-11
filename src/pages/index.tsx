@@ -222,7 +222,10 @@ export default function Page() {
                       }
                     `}
                   >
-                    <RefreshImg src={`/api/data/${key}/frame.jpg`} alt={name} />
+                    <RefreshImg
+                      src={`/api/data/${key}/framestream.jpg`}
+                      alt={name}
+                    />
                   </div>
                 </div>
               ))
