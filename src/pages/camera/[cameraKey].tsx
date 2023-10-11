@@ -75,6 +75,7 @@ export default function Page() {
           bottom: 0;
           left: 0;
           min-height: 100vh;
+          min-height: 100dvh;
 
           & > video {
             width: 100%;
