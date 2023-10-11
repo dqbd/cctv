@@ -6,11 +6,14 @@ import { SContainer, SWrapper } from "./Scrobber.styled"
 import { ScrobberRange } from "./ScrobberRange"
 import { useStreamStore } from "utils/stream"
 import dayjs from "dayjs"
+import { css } from "@emotion/react"
+import { theme } from "utils/theme"
 
 export function Scrobber(props: {
   color: string
   onRangeSeek: (delta: number) => void
   onActivate: () => void
+  className?: string
 }) {
   const config = useContext(ConfigContext)
   const mode = useStreamStore((state) => state.mode)
@@ -43,37 +46,56 @@ export function Scrobber(props: {
   }
 
   return (
-    <>
-      <SWrapper>
-        <SContainer>
-          <ScrobberShift
-            intentShift={intentShift}
-            bounds={bounds}
-            onShiftSet={onShiftChange}
-          />
-        </SContainer>
-      </SWrapper>
+    <div
+      className={props.className}
+      css={css`
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: ${theme.gradients.bottom};
 
-      <ScrobberSlider
-        onScroll={(value) => {
-          props.onActivate()
-          setIntentShift(value)
-        }}
-        onScrollEnd={(delta) => {
-          setIntentShift(null)
-          if ("shift" in stream) {
-            onShiftChange(stream.shift - delta)
-          }
+        padding-bottom: max(2em, env(safe-area-inset-bottom));
+      `}
+    >
+      <div
+        css={css`
+          position: relative;
+          display: flex;
+          flex-direction: column;
+        `}
+      >
+        <SWrapper>
+          <SContainer>
+            <ScrobberShift
+              intentShift={intentShift}
+              bounds={bounds}
+              onShiftSet={onShiftChange}
+            />
+          </SContainer>
+        </SWrapper>
 
-          if ("from" in stream && "to" in stream) {
-            updateRangeSeek(delta)
-            props.onRangeSeek(delta)
-          }
-        }}
-        bounds={bounds}
-        value={playback}
-        color={props.color}
-      />
-    </>
+        <ScrobberSlider
+          onScroll={(value) => {
+            props.onActivate()
+            setIntentShift(value)
+          }}
+          onScrollEnd={(delta) => {
+            setIntentShift(null)
+            if ("shift" in stream) {
+              onShiftChange(stream.shift - delta)
+            }
+
+            if ("from" in stream && "to" in stream) {
+              updateRangeSeek(delta)
+              props.onRangeSeek(delta)
+            }
+          }}
+          bounds={bounds}
+          value={playback}
+          color={props.color}
+        />
+      </div>
+    </div>
   )
 }

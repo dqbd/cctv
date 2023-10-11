@@ -6,6 +6,7 @@ import { z } from "zod"
 import { useServerTimeDiff } from "components/Scrobber/ScrobberShift.utils"
 import dayjs from "dayjs"
 import { theme } from "utils/theme"
+import { Fragment, useState } from "react"
 
 const schema = z.object({
   cart: z.object({
@@ -74,66 +75,97 @@ export function LogStream(props: {
       0
     ) ?? 0
 
+  const [translucent, setTranslucent] = useState(false)
+
   return (
     <div
       css={css`
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        width: 100%;
 
-        position: fixed;
-        z-index: 9999;
-        color: white;
-
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        pointer-events: none;
+        @media (max-width: 864px) {
+          aspect-ratio: none;
+          width: auto;
+        }
       `}
     >
-      <div
-        css={css`
-          aspect-ratio: 16 / 9;
-          width: 100%;
-        `}
-      >
-        {currentItem && (
-          <div
-            css={css`
-              display: inline-flex;
-              flex-direction: column;
-              gap: 6px;
-              font-size: 1.5em;
-              margin: 16px;
-              padding: 0.4em;
-              border-radius: 0.5em;
-              background: ${theme.colors.blue500};
+      {currentItem && (
+        <div
+          onClick={() => setTranslucent((prev) => !prev)}
+          css={css`
+            display: inline-grid;
+            grid-template-columns: repeat(2, auto);
+            flex-direction: column;
+            gap: 6px;
+            column-gap: 32px;
+            font-size: 24px;
+            padding: 0.5em;
 
-              &:empty {
-                display: none;
-              }
-            `}
-          >
-            {currentItem.data.cart.items.map((item, idx) => {
-              const name = item.name || "Zboží"
-              return (
-                <div key={idx}>
-                  {item.qty} x {name} ... {item.price * item.qty} Kč
-                </div>
-              )
-            })}
-            {sum !== 0 && <div>Celkem: ... {sum} Kč</div>}
-            {currentItem.data.paid !== 0 && (
-              <>
-                <div>Zaplaceno: ... {currentItem.data.paid} Kč</div>
-                <div>Vrátit: ... {currentItem.data.paid - sum} Kč</div>
-              </>
-            )}
-          </div>
-        )}
-      </div>
+            border-radius: 0.5em;
+            background: ${theme.colors.blue500};
+
+            color: white;
+
+            pointer-events: all;
+
+            &:empty {
+              display: none;
+            }
+
+            @media (max-width: 864px) {
+              font-size: 14px;
+            }
+
+            transition: all 0.3s;
+
+            ${translucent && { opacity: 0.4 }}
+          `}
+        >
+          {currentItem.data.cart.items.map((item, idx) => {
+            const name = item.name || "Zboží"
+            return (
+              <Fragment key={idx}>
+                <span>
+                  {item.qty} x {name}
+                </span>
+                <span css={{ textAlign: "right" }}>
+                  {item.price * item.qty} Kč
+                </span>
+              </Fragment>
+            )
+          })}
+          {sum !== 0 && (
+            <Fragment>
+              <span
+                css={{
+                  gridColumnStart: 1,
+                  gridColumnEnd: "span 2",
+                  height: "1px",
+                  background: "white",
+                  opacity: 0.2,
+                }}
+              />
+              <span>Celkem</span>
+              <span css={{ textAlign: "right" }}>{sum} Kč</span>
+            </Fragment>
+          )}
+          {currentItem.data.paid !== 0 && (
+            <>
+              <Fragment>
+                <span>Zaplaceno</span>
+                <span css={{ textAlign: "right" }}>
+                  {currentItem.data.paid} Kč
+                </span>
+              </Fragment>
+              <Fragment>
+                <span>Vráceno</span>
+                <span css={{ textAlign: "right" }}>
+                  {currentItem.data.paid - sum} Kč
+                </span>
+              </Fragment>
+            </>
+          )}
+        </div>
+      )}
     </div>
   )
 }

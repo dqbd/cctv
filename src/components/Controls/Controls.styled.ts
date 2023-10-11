@@ -7,16 +7,11 @@ export const SMain = styled.div`
 
   position: absolute;
   top: 0;
-  top: env(safe-area-inset-top);
   bottom: 0;
   left: 0;
   right: 0;
 
   pointer-events: none;
-
-  & > * {
-    pointer-events: all;
-  }
 
   @media (max-width: 864px) {
     font-size: 12px;
@@ -31,7 +26,11 @@ export const STop = styled.div`
 
   display: flex;
   justify-content: space-between;
-  padding: 2em;
+  align-items: flex-start;
+
+  padding-top: max(env(safe-area-inset-top), 2em);
+  padding-left: max(env(safe-area-inset-left), 2em);
+  padding-right: max(env(safe-area-inset-right), 2em);
 
   background: ${theme.gradients.top};
 `

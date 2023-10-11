@@ -25,6 +25,10 @@ export default function Page() {
           name="apple-mobile-web-app-status-bar-style"
           content="black-translucent"
         />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=5.0, viewport-fit=cover"
+        />
       </Head>
       <Global
         styles={css`
@@ -37,8 +41,10 @@ export default function Page() {
       <div
         css={css`
           margin: 2em;
-          padding-top: env(safe-area-inset-top);
-          padding-bottom: env(safe-area-inset-top);
+          margin-top: max(env(safe-area-inset-top), 2em);
+          margin-bottom: max(env(safe-area-inset-bottom), 2em);
+          margin-left: max(env(safe-area-inset-left), 2em);
+          margin-right: max(env(safe-area-inset-right), 2em);
 
           display: flex;
           flex-direction: column;
@@ -46,6 +52,11 @@ export default function Page() {
 
           @media (max-width: 864px) {
             margin: 1em;
+            margin-top: max(env(safe-area-inset-top), 1em);
+            margin-bottom: max(env(safe-area-inset-bottom), 1em);
+            margin-left: max(env(safe-area-inset-left), 1em);
+            margin-right: max(env(safe-area-inset-right), 1em);
+
             gap: 1em;
           }
         `}
@@ -84,10 +95,10 @@ export default function Page() {
         <div
           css={css`
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
             gap: 1.6em;
 
-            @media (max-width: 864px) {
+            @media (max-width: 720px) {
               font-size: 10px;
               grid-template-columns: 1fr;
             }

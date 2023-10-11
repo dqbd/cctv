@@ -5,8 +5,6 @@ import { encodeQuery } from "./query"
 
 import superjson from "superjson"
 
-import { persist } from "zustand/middleware"
-
 superjson.registerCustom<dayjs.Dayjs, string>(
   {
     isApplicable: (v): v is dayjs.Dayjs => v instanceof dayjs,
@@ -45,167 +43,130 @@ type PlaybackState = {
   setMode: (mode: "shift" | "range") => void
 }
 
-export const useStreamStore = create<PlaybackState>()(
-  persist(
-    (set) => {
-      return {
-        now: dayjs(),
-        mode: "shift",
-        playback: { playing: 0 },
-        stream: { shift: 0 },
+export const useStreamStore = create<PlaybackState>()((set) => {
+  return {
+    now: dayjs(),
+    mode: "shift",
+    playback: { playing: 0 },
+    stream: { shift: 0 },
 
-        setMode: (mode) => set({ mode }),
+    setMode: (mode) => set({ mode }),
 
-        refreshNow: () => {
-          const now = dayjs()
-          const nextTimer = Math.max(1000 - now.get("millisecond"), 0)
+    refreshNow: () => {
+      const now = dayjs()
+      const nextTimer = Math.max(1000 - now.get("millisecond"), 0)
 
-          set({ now })
-          return nextTimer
-        },
-        updatePlayback(playback) {
-          set((state) => {
-            const now = dayjs()
-            if ("playing" in state.playback && playback === "paused") {
-              return {
-                now,
-                playback: {
-                  paused: now.add(state.playback.playing, "millisecond"),
-                },
-              }
-            }
-
-            if ("paused" in state.playback && playback === "playing") {
-              if ("shift" in state.stream) {
-                const newShift = state.playback.paused.diff(now, "millisecond")
-                const oldShift =
-                  "shift" in state.stream ? -state.stream.shift : 0
-
-                const pauseTime = Math.abs(newShift - oldShift)
-                if (oldShift === 0 || pauseTime > 6 * 1000) {
-                  return {
-                    now,
-                    stream: { shift: -newShift },
-                    playback: { playing: newShift },
-                  }
-                }
-              }
-
-              return {
-                now,
-                playback: {
-                  playing: state.playback.paused.diff(now, "millisecond"),
-                },
-              }
-            }
-
-            return {}
-          })
-        },
-        updateStream(stream) {
-          set((state) => {
-            const now = dayjs()
-
-            if (generateUrl("_", state.stream) === generateUrl("_", stream)) {
-              return {}
-            }
-
-            if ("shift" in stream) {
-              return {
-                mode: "shift",
-                now,
-                stream,
-                playback: { playing: -stream.shift },
-              }
-            }
-
-            if ("from" in stream && "to" in stream) {
-              return {
-                mode: "range",
-                now,
-                stream,
-                playback: {
-                  playing: dayjs(stream.from).diff(now, "millisecond"),
-                },
-              }
-            }
-
-            return {}
-          })
-        },
-        updateRangeSeek(delta) {
-          set((state) => {
-            if ("from" in state.stream && "to" in state.stream) {
-              const dateFrom = dayjs(state.stream.from)
-              const dateTo = dayjs(state.stream.to)
-
-              if ("playing" in state.playback) {
-                const shiftFrom = dateFrom.diff(state.now, "millisecond")
-                const shiftTo = dateTo.diff(state.now, "millisecond")
-
-                return {
-                  playback: {
-                    playing: Math.min(
-                      shiftTo,
-                      Math.max(shiftFrom, state.playback.playing + delta)
-                    ),
-                  },
-                }
-              }
-
-              if ("paused" in state.playback) {
-                return {
-                  playback: {
-                    paused: dayjs.min(
-                      dateTo,
-                      dayjs.max(
-                        dateFrom,
-                        state.playback.paused.add(delta, "millisecond")
-                      )
-                    ),
-                  },
-                }
-              }
-            }
-            return {}
-          })
-        },
-      }
+      set({ now })
+      return nextTimer
     },
-    {
-      name: "state",
-      partialize: (state) => ({
-        stream: state.stream,
-        playback: state.playback,
-      }),
-      getStorage: () => ({
-        getItem: (key) => {
-          const searchParams = new URLSearchParams(
-            window.location.hash.slice(1)
-          )
+    updatePlayback(playback) {
+      set((state) => {
+        const now = dayjs()
+        if ("playing" in state.playback && playback === "paused") {
+          return {
+            now,
+            playback: {
+              paused: now.add(state.playback.playing, "millisecond"),
+            },
+          }
+        }
 
-          const storedValue = searchParams.get(key)
-          if (storedValue == null) return null
-          return superjson.parse(storedValue)
-        },
-        setItem: (key, newValue) => {
-          const searchParams = new URLSearchParams(
-            window.location.hash.slice(1)
-          )
-          searchParams.set(key, superjson.stringify(newValue))
-          window.location.hash = searchParams.toString()
-        },
-        removeItem: (key) => {
-          const searchParams = new URLSearchParams(
-            window.location.hash.slice(1)
-          )
-          searchParams.delete(key)
-          window.location.hash = searchParams.toString()
-        },
-      }),
-    }
-  )
-)
+        if ("paused" in state.playback && playback === "playing") {
+          if ("shift" in state.stream) {
+            const newShift = state.playback.paused.diff(now, "millisecond")
+            const oldShift = "shift" in state.stream ? -state.stream.shift : 0
+
+            const pauseTime = Math.abs(newShift - oldShift)
+            if (oldShift === 0 || pauseTime > 6 * 1000) {
+              return {
+                now,
+                stream: { shift: -newShift },
+                playback: { playing: newShift },
+              }
+            }
+          }
+
+          return {
+            now,
+            playback: {
+              playing: state.playback.paused.diff(now, "millisecond"),
+            },
+          }
+        }
+
+        return {}
+      })
+    },
+    updateStream(stream) {
+      set((state) => {
+        const now = dayjs()
+
+        if (generateUrl("_", state.stream) === generateUrl("_", stream)) {
+          return {}
+        }
+
+        if ("shift" in stream) {
+          return {
+            mode: "shift",
+            now,
+            stream,
+            playback: { playing: -stream.shift },
+          }
+        }
+
+        if ("from" in stream && "to" in stream) {
+          return {
+            mode: "range",
+            now,
+            stream,
+            playback: {
+              playing: dayjs(stream.from).diff(now, "millisecond"),
+            },
+          }
+        }
+
+        return {}
+      })
+    },
+    updateRangeSeek(delta) {
+      set((state) => {
+        if ("from" in state.stream && "to" in state.stream) {
+          const dateFrom = dayjs(state.stream.from)
+          const dateTo = dayjs(state.stream.to)
+
+          if ("playing" in state.playback) {
+            const shiftFrom = dateFrom.diff(state.now, "millisecond")
+            const shiftTo = dateTo.diff(state.now, "millisecond")
+
+            return {
+              playback: {
+                playing: Math.min(
+                  shiftTo,
+                  Math.max(shiftFrom, state.playback.playing + delta)
+                ),
+              },
+            }
+          }
+
+          if ("paused" in state.playback) {
+            return {
+              playback: {
+                paused: dayjs.min(
+                  dateTo,
+                  dayjs.max(
+                    dateFrom,
+                    state.playback.paused.add(delta, "millisecond")
+                  )
+                ),
+              },
+            }
+          }
+        }
+        return {}
+      })
+    },
+  }
+})
 
 export const useStreamPeriodicRefreshNow = () => {
   const refreshNow = useStreamStore((state) => state.refreshNow)

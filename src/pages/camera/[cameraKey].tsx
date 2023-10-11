@@ -72,6 +72,7 @@ export default function Page() {
           right: 0;
           bottom: 0;
           left: 0;
+          min-height: 100vh;
 
           & > video {
             width: 100%;
@@ -101,8 +102,6 @@ export default function Page() {
             }}
           />
         )}
-
-        {meta && <LogStream stream={meta} />}
       </div>
     </Fragment>
   )

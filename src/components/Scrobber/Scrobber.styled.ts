@@ -3,16 +3,10 @@ import styled from "@emotion/styled"
 import { theme } from "utils/theme"
 
 export const SWrapper = styled.div`
-  position: absolute;
-  padding-bottom: calc(5em / 2 + 5px);
-  left: 0;
-  right: 0;
-  bottom: 0;
-
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${theme.gradients.bottom};
+  margin-bottom: calc(-5em / 2 + 5px);
 `
 
 export const SContainer = styled.div`
