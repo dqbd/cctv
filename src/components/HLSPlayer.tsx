@@ -8,6 +8,7 @@ export function HLSPlayer(props: {
   source: string
   videoRef: MutableRefObject<HTMLVideoElement | null>
   visible: boolean
+  muted: boolean
   show: MutableRefObject<() => void>
 }) {
   const [paused, setPaused] = useState(false)
@@ -88,7 +89,7 @@ export function HLSPlayer(props: {
         ref={props.videoRef}
         autoPlay
         playsInline
-        muted
+        muted={props.muted}
         onClick={() => {
           if (paused) {
             props.videoRef.current?.play()

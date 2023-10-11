@@ -36,6 +36,8 @@ export default function Page() {
   const url = name ? generateUrl(name, stream) : null
 
   const [mounted, setMounted] = useState(false)
+  const [muted, setMuted] = useState(true)
+
   useEffect(() => setMounted(true), [])
 
   const { visible, show } = useVisibleTimer(5 * 1000)
@@ -88,12 +90,15 @@ export default function Page() {
             source={url}
             visible={visible}
             show={show}
+            muted={muted}
           />
         )}
         {meta && mounted && (
           <Controls
             stream={meta}
             visible={visible}
+            muted={muted}
+            onMuteClick={() => setMuted((muted) => !muted)}
             show={show}
             onRangeSeek={(delta) => {
               if (videoRef.current != null) {
