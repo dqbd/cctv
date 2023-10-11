@@ -25,6 +25,10 @@ template.generate({
     name: 'Prostěradla',
     source: 'onvif://admin:@192.168.2.164:8899',
   },
+  POKLADNA: {
+    name: 'Peněženky',
+    source: 'rtsp://cctv:XAR4bwc.ukz6wax3tkd@192.168.2.198:554/h264Preview_01_main'
+  }
 }, {
   volumes: {
     storage: {
