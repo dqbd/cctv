@@ -2,12 +2,44 @@ import { useContext, useMemo, useState } from "react"
 import { ScrobberSlider } from "components/Scrobber/ScrobberSlider"
 import { ConfigContext } from "shared/config"
 import { ScrobberShift } from "components/Scrobber/ScrobberShift"
-import { SContainer, SWrapper } from "./Scrobber.styled"
-import { ScrobberRange } from "./ScrobberRange"
 import { useStreamStore } from "utils/stream"
 import dayjs from "dayjs"
 import { css } from "@emotion/react"
 import { theme } from "utils/theme"
+import styled from "@emotion/styled"
+
+const SContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${theme.colors.lightBlue900};
+  background: ${theme.colors.blue500};
+  box-shadow: ${theme.shadows.md};
+
+  padding: 0.8em;
+  border-radius: 2.25em;
+  margin-bottom: 1.25em;
+
+  position: relative;
+
+  &::after {
+    content: "";
+    border: 1.25em solid transparent;
+    border-left-width: 0.8em;
+    border-right-width: 0.8em;
+    border-top-color: ${theme.colors.blue500};
+    border-bottom-width: 0;
+    position: absolute;
+    top: 100%;
+  }
+
+  gap: 1em;
+
+  @media (max-width: 864px) {
+    padding: 0.4em;
+    gap: 0.5em;
+  }
+`
 
 export function Scrobber(props: {
   color: string
@@ -27,7 +59,7 @@ export function Scrobber(props: {
       return {
         pov: [dayjs(stream.from), dayjs(stream.to)] as [
           dayjs.Dayjs,
-          dayjs.Dayjs
+          dayjs.Dayjs,
         ],
       }
     } else {
@@ -58,14 +90,8 @@ export function Scrobber(props: {
         padding-bottom: max(2em, env(safe-area-inset-bottom));
       `}
     >
-      <div
-        css={css`
-          position: relative;
-          display: flex;
-          flex-direction: column;
-        `}
-      >
-        <SWrapper>
+      <div className="relative flex flex-col">
+        <div className="flex items-center justify-center mb-[calc(-5em/2+5px)]">
           <SContainer>
             <ScrobberShift
               intentShift={intentShift}
@@ -73,7 +99,7 @@ export function Scrobber(props: {
               onShiftSet={onShiftChange}
             />
           </SContainer>
-        </SWrapper>
+        </div>
 
         <ScrobberSlider
           onScroll={(value) => {

@@ -1,10 +1,10 @@
-import { css, Global } from "@emotion/react"
-import { AppInitialProps, AppProps } from "next/app"
+import "../global.css"
+import { AppProps } from "next/app"
 import Head from "next/head"
 
 import { COLORS } from "utils/constants"
 import { StreamContext } from "utils/stream"
-import { ConfigContext, ConfigDto, loadServerConfig } from "shared/config"
+import { ConfigContext, ConfigDto } from "shared/config"
 import { SleepContext } from "utils/sleep"
 import { useEffect, useState } from "react"
 import { DefaultSeo } from "next-seo"
@@ -34,7 +34,7 @@ export default function App(props: AppProps) {
       key,
       name,
       color: COLORS[index % COLORS.length],
-    })
+    }),
   )
 
   return (
@@ -82,21 +82,6 @@ export default function App(props: AppProps) {
               />
             </Head>
             <DefaultSeo titleTemplate="%s | Kamera" defaultTitle="Kamera" />
-            <Global
-              styles={css`
-                body {
-                  margin: 0;
-                  padding: 0;
-                  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-                    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
-                    "Droid Sans", "Helvetica Neue", sans-serif;
-                  -webkit-font-smoothing: antialiased;
-                  -moz-osx-font-smoothing: grayscale;
-
-                  overflow-x: hidden;
-                }
-              `}
-            />
 
             <Component {...pageProps} />
           </StreamContext.Provider>

@@ -11,7 +11,7 @@ import { Fragment, useState } from "react"
 const schema = z.object({
   cart: z.object({
     items: z.array(
-      z.object({ name: z.string(), price: z.number(), qty: z.number() })
+      z.object({ name: z.string(), price: z.number(), qty: z.number() }),
     ),
   }),
   paid: z.number(),
@@ -52,7 +52,7 @@ export function LogStream(props: {
         }))
         .reverse()
     },
-    { refetchInterval: 1000 }
+    { refetchInterval: 1000 },
   )
 
   const serverDiff = useServerTimeDiff()
@@ -66,13 +66,13 @@ export function LogStream(props: {
   ).add?.(serverDiff, "millisecond")
 
   const currentItem = log.data?.find(
-    ({ timestamp }) => dayjs(timestamp).valueOf() <= displayDate.valueOf()
+    ({ timestamp }) => dayjs(timestamp).valueOf() <= displayDate.valueOf(),
   )
 
   const sum =
     currentItem?.data.cart.items.reduce(
       (memo, item) => item.price * item.qty + memo,
-      0
+      0,
     ) ?? 0
 
   const [translucent, setTranslucent] = useState(false)
@@ -91,31 +91,13 @@ export function LogStream(props: {
       {currentItem && (
         <div
           onClick={() => setTranslucent((prev) => !prev)}
+          className="text-white rounded-[0.5em] transition-all pointer-events-auto inline-grid grid-cols-[repeat(2,auto)] empty:hidden gap-[6px] gap-x-[32px] text-[24px] p-[0.5em]"
           css={css`
-            display: inline-grid;
-            grid-template-columns: repeat(2, auto);
-            flex-direction: column;
-            gap: 6px;
-            column-gap: 32px;
-            font-size: 24px;
-            padding: 0.5em;
-
-            border-radius: 0.5em;
             background: ${theme.colors.blue500};
 
-            color: white;
-
-            pointer-events: all;
-
-            &:empty {
-              display: none;
-            }
-
             @media (max-width: 864px) {
-              font-size: 14px;
+              font-size: 14px !important;
             }
-
-            transition: all 0.3s;
 
             ${translucent && { opacity: 0.4 }}
           `}

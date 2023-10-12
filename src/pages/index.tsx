@@ -25,10 +25,6 @@ export default function Page() {
           name="apple-mobile-web-app-status-bar-style"
           content="black-translucent"
         />
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=5.0, viewport-fit=cover"
-        />
       </Head>
       <Global
         styles={css`
@@ -61,13 +57,7 @@ export default function Page() {
           }
         `}
       >
-        <div
-          css={css`
-            display: flex;
-            gap: 1.5em;
-            align-items: center;
-          `}
-        >
+        <div className="flex items-center gap-[1.5em]">
           <svg
             width="48"
             height="48"
@@ -93,11 +83,8 @@ export default function Page() {
         </div>
 
         <div
+          className="grid gap-[1.6em] grid-cols-[repeat(auto-fill,minmax(360px,1fr))]"
           css={css`
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-            gap: 1.6em;
-
             @media (max-width: 720px) {
               font-size: 10px;
               grid-template-columns: 1fr;
@@ -113,47 +100,19 @@ export default function Page() {
                     sleep?.enable()
                     router.push(`/camera/${key}`)
                   }}
+                  className="rounded-lg relative overflow-hidden transition-all hover:scale-[1.02] hover:z-10 active:scale-[0.98] active:z-10"
                   css={css`
-                    border-radius: 8px;
-                    text-decoration: none;
-                    position: relative;
-                    overflow: hidden;
-                    transition: all 0.2s;
-
                     box-shadow: ${theme.shadows.md};
                     background: hsl(219deg, 28%, 95%);
 
-                    @media (hover: hover) {
-                      &:hover {
-                        transform: scale(1.02);
-                        z-index: 2;
-                      }
-                    }
-
                     &:active {
-                      transform: scale(0.98);
-                      z-index: 2;
-
                       background: hsl(219deg, 28%, 95%);
                     }
                   `}
                 >
                   <section
+                    className="flex items-end align-middle absolute inset-[5px] z-10 pointer-events-none rounded-md"
                     css={css`
-                      display: flex;
-                      align-items: flex-end;
-                      vertical-align: middle;
-
-                      position: absolute;
-                      bottom: 5px;
-                      left: 5px;
-                      right: 5px;
-                      top: 5px;
-                      z-index: 3;
-
-                      pointer-events: none;
-                      border-radius: 6px;
-
                       background: linear-gradient(
                         to bottom,
                         hsla(219deg, 28%, 50%, 0.1) 0%,
@@ -161,69 +120,20 @@ export default function Page() {
                       );
                     `}
                   >
-                    <div
-                      css={css`
-                        display: flex;
-                        align-items: center;
-                        justify-content: space-between;
-                        flex-grow: 1;
-                        padding: 1.2em;
-                      `}
-                    >
-                      <h2
-                        css={css`
-                          flex-grow: 1;
-                          font-style: normal;
-                          font-weight: 500;
-                          font-size: 16px;
-                          display: flex;
-                          align-items: center;
-                          margin: 0;
-                          color: ${theme.colors.white};
-                          text-decoration: none;
-                        `}
-                      >
+                    <div className="flex items-center justify-between flex-grow p-[1.2em]">
+                      <h2 className="flex-grow font-medium text-base flex items-center m-0 text-white">
                         {name}
                       </h2>
                       <span
-                        css={css`
-                          width: 24px;
-                          height: 24px;
-                          border-radius: 8px;
-                          background-color: ${color};
-                        `}
+                        className="w-6 h-6 rounded-lg"
+                        css={{ backgroundColor: color }}
                       />
                     </div>
                   </section>
-                  <div
-                    css={css`
-                      width: 100%;
-                      padding-bottom: 56.25%;
-                      position: relative;
-                      overflow: hidden;
-
-                      & video,
-                      & img {
-                        object-fit: contain;
-                        width: calc(100% - 10px);
-                        height: calc(100% - 10px);
-
-                        position: absolute;
-                        top: 5px;
-                        bottom: 5px;
-                        left: 5px;
-                        right: 5px;
-
-                        border-radius: 6px;
-                      }
-
-                      & img {
-                        object-fit: cover;
-                      }
-                    `}
-                  >
+                  <div className="w-full relative overflow-hidden pb-[56.25%]">
                     <RefreshImg
                       src={`/api/data/${key}/framestream.jpg`}
+                      className="object-cover w-[calc(100%-10px)] h-[calc(100%-10px)] absolute inset-[5px] rounded-md"
                       alt={name}
                     />
                   </div>

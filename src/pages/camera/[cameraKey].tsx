@@ -6,13 +6,10 @@ import { Controls } from "components/Controls/Controls"
 import { css, Global } from "@emotion/react"
 import { useRouter } from "next/dist/client/router"
 import {
-  StreamType,
   StreamContext,
   useStreamStore,
   useStreamPeriodicRefreshNow,
   generateUrl,
-  fitDateInBounds,
-  getDateBounds,
 } from "utils/stream"
 import { NextSeo } from "next-seo"
 import Head from "next/head"
@@ -20,7 +17,6 @@ import { GetServerSideProps } from "next"
 import { loadServerConfig } from "shared/config"
 import { theme } from "utils/theme"
 import { useVisibleTimer } from "components/Controls/Controls.utils"
-import { LogStream } from "../../components/LogStream"
 
 export default function Page() {
   useStreamPeriodicRefreshNow()
@@ -47,10 +43,6 @@ export default function Page() {
       <Head>
         <meta name="theme-color" content="#090909" />
         <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=5.0, viewport-fit=cover"
-        />
-        <meta
           name="apple-mobile-web-app-status-bar-style"
           content="black-translucent"
         />
@@ -64,25 +56,10 @@ export default function Page() {
       />
       <NextSeo title={meta?.name} />
       <div
+        className="flex items-center justify-center absolute inset-0"
         css={css`
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          position: absolute;
-          top: 0;
-          right: 0;
-          bottom: 0;
-          left: 0;
           min-height: 100vh;
           min-height: 100dvh;
-
-          & > video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            object-position: center;
-          }
         `}
       >
         {url && (

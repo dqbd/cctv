@@ -2,7 +2,6 @@ import { useRef, useLayoutEffect, useContext, useEffect } from "react"
 import { useGesture, DragState } from "@use-gesture/react"
 import { drawCanvas, usePropsRef } from "./ScrobberSlider.utils"
 import { ConfigContext } from "shared/config"
-import { SContainer, SCanvas } from "./ScrobberSlider.styled"
 import dayjs from "dayjs"
 import { PlaybackType, useStreamStore } from "utils/stream"
 
@@ -76,8 +75,9 @@ export function ScrobberSlider(props: {
   }, [config.maxAge, props.color, props.value])
 
   return (
-    <SContainer>
-      <SCanvas
+    <div className="cursor-all-scroll h-[5em] overscroll-contain">
+      <canvas
+        className="touch-none"
         ref={canvasRef}
         height={100}
         {...bind()}
@@ -86,7 +86,7 @@ export function ScrobberSlider(props: {
           e.preventDefault()
         }}
       />
-    </SContainer>
+    </div>
   )
 }
 

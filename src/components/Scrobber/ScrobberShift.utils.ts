@@ -1,9 +1,10 @@
 import { useEffect, useLayoutEffect, useState } from "react"
+import { wrapUrl } from "utils/url"
 
 async function getServerTimeDiff() {
   const clientStart = Date.now(),
     timeBefore = performance.now()
-  const serverReq = await fetch("/api/time")
+  const serverReq = await fetch(wrapUrl("/api/time"))
   const timeAfter = performance.now()
 
   const roundTripTime = timeAfter - timeBefore

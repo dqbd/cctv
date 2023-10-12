@@ -1,4 +1,4 @@
-import { MutableRefObject, useEffect, useRef, useState } from "react"
+import { MutableRefObject, useEffect, useState } from "react"
 import Hls from "hls.js"
 import { css } from "@emotion/react"
 import { theme } from "utils/theme"
@@ -86,10 +86,11 @@ export function HLSPlayer(props: {
   return (
     <>
       <video
-        ref={props.videoRef}
+        className="w-full h-full object-contain object-center"
         autoPlay
         playsInline
         muted={props.muted}
+        ref={props.videoRef}
         onClick={() => {
           if (paused) {
             props.videoRef.current?.play()
@@ -100,30 +101,15 @@ export function HLSPlayer(props: {
       />
       {paused && (
         <div
-          css={css`
-            position: absolute;
-            z-index: 1;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-
-            transition: opacity 0.3s;
-
-            ${props.visible ? { opacity: 1 } : { opacity: 0 }}
-          `}
+          className="absolute z-[1] flex items-center justify-center pointer-events-none transition-opacity"
+          css={props.visible ? { opacity: 1 } : { opacity: 0 }}
         >
           <button
             type="button"
+            className="flex items-center justify-center w-24 h-24 rounded-full border-none"
             css={css`
-              background: ${theme.colors.blue500};
-              width: 6em;
-              height: 6em;
+              background: ${theme.colors.blue500} !important;
               color: ${theme.colors.lightBlue900};
-              border-radius: 100%;
-              border: none;
-
               box-shadow: ${theme.shadows.sm};
             `}
           >

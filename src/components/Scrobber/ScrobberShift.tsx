@@ -8,7 +8,6 @@ import {
 } from "@material-ui/lab"
 import AdapterDayjs from "@material-ui/lab/AdapterDayjs"
 import { Pill, PillInput } from "components/PillInput/PillInput"
-import { STimeOffset, SLive } from "./ScrobberShift.styled"
 import { useServerTimeDiff } from "./ScrobberShift.utils"
 import {
   fitDateInBounds,
@@ -16,6 +15,40 @@ import {
   PlaybackType,
   useStreamStore,
 } from "utils/stream"
+import styled from "@emotion/styled"
+import { theme } from "utils/theme"
+
+const STimeOffset = styled.div`
+  background: ${theme.colors.blue400};
+  height: 2.5em;
+  border-radius: 1.25em 0 0 1.25em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 calc(1em + 1.25em) 0 1em;
+  text-align: center;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+`
+
+const SLive = styled.span`
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:before {
+    content: "";
+    display: block;
+    margin-right: 0.75em;
+    width: 8px;
+    height: 8px;
+    margin-top: 1px;
+
+    background: ${theme.colors.red500};
+    border-radius: 100%;
+  }
+`
 
 function ScrobberShiftTime(props: {
   onShiftSet?: (shift: number) => void
@@ -38,8 +71,8 @@ function ScrobberShiftTime(props: {
                 dayjs().diff(
                   props.displayDate
                     .set("hour", date.hour())
-                    .set("minute", date.minute())
-                )
+                    .set("minute", date.minute()),
+                ),
               )
             }
           }}
@@ -81,8 +114,8 @@ function ScrobberShiftDate(props: {
                   props.displayDate
                     .set("year", date.year())
                     .set("month", date.month())
-                    .set("date", date.date())
-                )
+                    .set("date", date.date()),
+                ),
               )
             }
           }}
@@ -118,7 +151,7 @@ export function ScrobberShift(props: {
     )
       .add(serverDiff, "millisecond")
       .add(props.intentShift ?? 0, "millisecond"),
-    getDateBounds(now, props.bounds)
+    getDateBounds(now, props.bounds),
   )
 
   const displayShift = displayDate.diff(now, "millisecond")
