@@ -61,7 +61,7 @@ async function sync() {
           cameraKey,
           manifest.targetDuration,
           relative,
-          manifest.pdts[index]
+          manifest.pdts[index],
         )
       }
     }
@@ -74,12 +74,12 @@ async function sync() {
   chokidar
     .watch(
       Object.keys(config.targets).map((cameraKey) =>
-        path.resolve(baseFolder, cameraKey, MANIFEST)
+        path.resolve(baseFolder, cameraKey, MANIFEST),
       ),
       // use polling instead, as sometimes chokidar
       // just stops detecting new changes
       // this might not work...
-      { usePolling: true }
+      { usePolling: true },
     )
     .on("add", handleChange)
     .on("change", handleChange)

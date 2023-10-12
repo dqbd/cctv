@@ -25,7 +25,7 @@ const main = async () => {
 
     logger.info("- Reading folder list")
     const toInsert = (await fs.promises.readdir(folderTarget)).filter(
-      (folder) => folder.indexOf("_") >= 0
+      (folder) => folder.indexOf("_") >= 0,
     )
 
     for (const target of toInsert) {

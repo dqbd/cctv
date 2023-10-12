@@ -17,7 +17,7 @@ async function cleanup() {
       now.getFullYear(),
       now.getMonth(),
       now.getDate(),
-      now.getHours()
+      now.getHours(),
     ).valueOf()
 
     const cleanupThreshold = nowTime - config.maxAge * 1000
@@ -38,8 +38,8 @@ async function cleanup() {
 
     await Promise.all(
       folders.map((target) =>
-        fs.promises.rm(target, { recursive: true, force: true })
-      )
+        fs.promises.rm(target, { recursive: true, force: true }),
+      ),
     )
   }
 

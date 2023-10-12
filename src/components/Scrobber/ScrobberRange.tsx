@@ -49,7 +49,7 @@ export function ScrobberRange(props: {
 
   const handleScrobberChange = (
     from: dayjs.Dayjs | null,
-    to: dayjs.Dayjs | null
+    to: dayjs.Dayjs | null,
   ) => {
     if (from != null && to != null) {
       props.onChange({ from: from.valueOf(), to: to.valueOf() })

@@ -15,7 +15,7 @@ function parseNumberQuery(value: string | string[] | undefined) {
 }
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   await runMiddleware(req, res, cors({ methods: ["GET", "HEAD"] }))
 

@@ -11,7 +11,7 @@ superjson.registerCustom<dayjs.Dayjs, string>(
     serialize: (value) => value.toISOString(),
     deserialize: (iso) => dayjs(iso),
   },
-  "dayjs"
+  "dayjs",
 )
 
 export type StreamType = { from: number; to: number } | { shift: number }
@@ -142,7 +142,7 @@ export const useStreamStore = create<PlaybackState>()((set) => {
               playback: {
                 playing: Math.min(
                   shiftTo,
-                  Math.max(shiftFrom, state.playback.playing + delta)
+                  Math.max(shiftFrom, state.playback.playing + delta),
                 ),
               },
             }
@@ -155,8 +155,8 @@ export const useStreamStore = create<PlaybackState>()((set) => {
                   dateTo,
                   dayjs.max(
                     dateFrom,
-                    state.playback.paused.add(delta, "millisecond")
-                  )
+                    state.playback.paused.add(delta, "millisecond"),
+                  ),
                 ),
               },
             }
@@ -190,7 +190,7 @@ export const StreamContext = createContext<{
 
 export const getDateBounds = (
   now: dayjs.Dayjs,
-  bounds: { shift: [number, number] } | { pov: [dayjs.Dayjs, dayjs.Dayjs] }
+  bounds: { shift: [number, number] } | { pov: [dayjs.Dayjs, dayjs.Dayjs] },
 ) => {
   if ("shift" in bounds) {
     const [min, max] = bounds.shift
@@ -210,7 +210,7 @@ export const getDateBounds = (
 
 export const fitDateInBounds = (
   pov: dayjs.Dayjs,
-  bounds: { min: dayjs.Dayjs; max: dayjs.Dayjs } | null
+  bounds: { min: dayjs.Dayjs; max: dayjs.Dayjs } | null,
 ) => {
   if (!bounds) return pov
   return dayjs.max([bounds.min, dayjs.min(bounds.max, pov)])

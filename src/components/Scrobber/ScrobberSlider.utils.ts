@@ -14,7 +14,7 @@ export function drawCanvas(
   options: {
     maxAge: number
     bounds: { shift: [number, number] } | { pov: [dayjs.Dayjs, dayjs.Dayjs] }
-  }
+  },
 ) {
   if (!canvas || !canvas.parentElement) return
   const ctx = canvas.getContext("2d")
@@ -58,7 +58,7 @@ export function drawCanvas(
         ? now.add(playback.playing, "millisecond")
         : playback.paused
       ).add(user, "millisecond"),
-      dateBounds
+      dateBounds,
     )
 
     const povStartOfDay = pov.startOf("day")
@@ -70,9 +70,9 @@ export function drawCanvas(
     drawLine(
       toCoordX(
         pov,
-        dayjs.max(dateBounds?.min ?? pov, recordStart, povStartOfDay)
+        dayjs.max(dateBounds?.min ?? pov, recordStart, povStartOfDay),
       ),
-      toCoordX(pov, dayjs.min(dateBounds?.max ?? pov, recordEnd, povEndOfDay))
+      toCoordX(pov, dayjs.min(dateBounds?.max ?? pov, recordEnd, povEndOfDay)),
     )
 
     // draw markers
@@ -111,7 +111,7 @@ export function drawCanvas(
 }
 
 export function usePropsRef<Props extends Record<string, unknown>>(
-  props: Props
+  props: Props,
 ) {
   const ref = useRef<Props>(props)
 

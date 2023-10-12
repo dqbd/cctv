@@ -77,7 +77,7 @@ export function setSystemTime(
   credential: { username: string; password: string },
   ip: string,
   port = 34567,
-  time?: Date
+  time?: Date,
 ) {
   return new Promise<void>((resolve, reject) => {
     const socket = new net.Socket()
@@ -103,8 +103,8 @@ export function setSystemTime(
                 packetBuilder(
                   getTimePacket(sessionId, time),
                   types.SET_TIME,
-                  sessionId
-                )
+                  sessionId,
+                ),
               )
               break
             }
@@ -137,8 +137,8 @@ export function setSystemTime(
         socket.write(
           packetBuilder(
             getLoginPacket(credential.username, credential.password),
-            types.AUTH
-          )
+            types.AUTH,
+          ),
         )
       })
   })

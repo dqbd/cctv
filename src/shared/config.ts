@@ -10,7 +10,7 @@ export const ConfigDto = z.object({
     z.object({
       name: z.string(),
       source: z.string(),
-    })
+    }),
   ),
 })
 
@@ -61,7 +61,7 @@ export async function loadServerConfig() {
   const config = JSON.parse(
     env.CONFIG_BASE64 != null
       ? Buffer.from(env.CONFIG_BASE64, "base64").toString("utf-8")
-      : await fs.readFile(path.resolve(env.CONFIG_PATH), { encoding: "utf-8" })
+      : await fs.readFile(path.resolve(env.CONFIG_PATH), { encoding: "utf-8" }),
   )
 
   return {

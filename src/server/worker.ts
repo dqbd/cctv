@@ -45,7 +45,7 @@ function staleFrameLoop() {
 
   function trigger() {
     logger.error(
-      `Stale FFMPEG (frame=${lastFrameCount}), no new frames received`
+      `Stale FFMPEG (frame=${lastFrameCount}), no new frames received`,
     )
     process.exit(3)
   }
@@ -104,7 +104,7 @@ async function launchWorker(cameraKey: string | undefined) {
       `-hls_flags program_date_time+second_level_segment_index+second_level_segment_duration`,
       `-hls_segment_filename ${path.resolve(
         cameraFolder,
-        "%Y_%m_%d_%H/sg_%s_%%d_%%t.ts"
+        "%Y_%m_%d_%H/sg_%s_%%d_%%t.ts",
       )}`,
     ])
 

@@ -10,7 +10,7 @@ const RANGE = 10 * 60 // 20s
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   await runMiddleware(req, res, cors({ methods: ["GET", "HEAD"] }))
 
@@ -24,6 +24,6 @@ export default async function handler(
   const timestampSec = Math.floor((Date.now() - shift * 1000) / 1000)
 
   res.send(
-    await db.logRange(folder, timestampSec - RANGE, timestampSec + RANGE)
+    await db.logRange(folder, timestampSec - RANGE, timestampSec + RANGE),
   )
 }

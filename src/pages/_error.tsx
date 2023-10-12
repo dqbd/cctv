@@ -1,7 +1,9 @@
 import NextErrorComponent, { ErrorProps } from "next/error"
 import { loadServerConfig } from "shared/config"
 
-type ErrorContext = Parameters<typeof NextErrorComponent["getInitialProps"]>[0]
+type ErrorContext = Parameters<
+  (typeof NextErrorComponent)["getInitialProps"]
+>[0]
 
 function AppError({ statusCode }: ErrorProps) {
   return <NextErrorComponent statusCode={statusCode} />

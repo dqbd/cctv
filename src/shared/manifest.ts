@@ -8,7 +8,7 @@ export class Segment {
   constructor(
     public filename: string,
     public targetDuration: number,
-    public pdt: Date | null
+    public pdt: Date | null,
   ) {
     if (filename.indexOf(".ts") < 0) throw new Error("File is not a .ts file")
     const [_, timestamp, sequence, duration] = path
@@ -27,7 +27,7 @@ export class Segment {
   static parseSegment(
     filename: string,
     targetDuration: number,
-    pdt: Date | null
+    pdt: Date | null,
   ) {
     try {
       return new Segment(filename, targetDuration, pdt)
@@ -58,7 +58,7 @@ export function getManifest(
   options?: {
     offset?: number
     end?: boolean
-  }
+  },
 ) {
   const targetDuration = segments
     .map((i) => i.targetDuration)
@@ -112,7 +112,7 @@ export function parseManifest(manifest: string) {
 
   if (targetDuration == null) return null
   const pairs: Array<string | null> = lines.filter(
-    (line) => line.indexOf(".ts") >= 0 || isManifestPDT(line)
+    (line) => line.indexOf(".ts") >= 0 || isManifestPDT(line),
   )
 
   for (let i = pairs.length - 1; i >= 0; i--) {

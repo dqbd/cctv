@@ -12,7 +12,7 @@ const dbRef = createPersistentDatabase()
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   await runMiddleware(req, res, cors({ methods: ["GET", "HEAD"] }))
 
@@ -35,7 +35,7 @@ export default async function handler(
       .map((line) =>
         line.startsWith(baseFolder)
           ? path.relative(path.join(baseFolder, folder), line)
-          : line
+          : line,
       )
       .join("\n")
 
@@ -44,7 +44,7 @@ export default async function handler(
     const timestampSec = Math.floor((Date.now() - shift * 1000) / 1000)
     const segments = (await db.seekFrom(folder, timestampSec))
       .map((item) =>
-        Segment.parseSegment(item.path, item.targetDuration, item.pdt)
+        Segment.parseSegment(item.path, item.targetDuration, item.pdt),
       )
       .filter(isSegment)
 

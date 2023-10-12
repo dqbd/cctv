@@ -116,7 +116,7 @@ describe("manifest", () => {
     const segment = Segment.parseSegment(
       "sg_1655599910_0_8333333.ts",
       8,
-      new Date(Date.parse("2022-06-19T07:13:54.100+0200"))
+      new Date(Date.parse("2022-06-19T07:13:54.100+0200")),
     )
     expect(segment).toMatchObject({
       filename: "sg_1655599910_0_8333333.ts",
@@ -150,7 +150,7 @@ sg_1655599910_1655599910_8333333.ts
 sg_1655599918_1655599911_8333333.ts
 #EXTINF:8.333333,
 sg_1655599926_1655599912_8333333.ts
-`
+`,
     )
   })
 
@@ -159,7 +159,7 @@ sg_1655599926_1655599912_8333333.ts
       new Segment(
         "sg_1655599910_1655599910_8333333.ts",
         10,
-        new Date(Date.parse("2022-06-19T07:13:54.100+0200"))
+        new Date(Date.parse("2022-06-19T07:13:54.100+0200")),
       ),
       new Segment("sg_1655599918_1655599911_8333333.ts", 8, null),
       new Segment("sg_1655599926_1655599912_8333333.ts", 8, null),
@@ -179,7 +179,7 @@ sg_1655599910_1655599910_8333333.ts
 sg_1655599918_1655599911_8333333.ts
 #EXTINF:8.333333,
 sg_1655599926_1655599912_8333333.ts
-`
+`,
     )
   })
 
@@ -188,7 +188,7 @@ sg_1655599926_1655599912_8333333.ts
       new Segment(
         "sg_1655599910_1655599910_8333333.ts",
         10,
-        new Date(Date.parse("2022-06-19T07:13:54.100+0200"))
+        new Date(Date.parse("2022-06-19T07:13:54.100+0200")),
       ),
       new Segment("sg_1655599918_1655599911_8333333.ts", 8, null),
       new Segment("sg_1655599926_1655599912_8333333.ts", 8, null),
@@ -209,7 +209,7 @@ sg_1655599918_1655599911_8333333.ts
 #EXTINF:8.333333,
 sg_1655599926_1655599912_8333333.ts
 #EXT-X-ENDLIST
-`
+`,
     )
   })
 })
@@ -217,25 +217,25 @@ sg_1655599926_1655599912_8333333.ts
 describe("ext-inf", () => {
   it("ext-inf segment", () => {
     expect(
-      Segment.parseSegment("sg_1655599910_0_8333333.ts", 8, null)?.getExtInf()
+      Segment.parseSegment("sg_1655599910_0_8333333.ts", 8, null)?.getExtInf(),
     ).toEqual("8.333333")
   })
 
   it("ext-inf segment shorter", () => {
     expect(
-      Segment.parseSegment("sg_1655599910_0_12.ts", 8, null)?.getExtInf()
+      Segment.parseSegment("sg_1655599910_0_12.ts", 8, null)?.getExtInf(),
     ).toEqual("0.000012")
   })
 
   it("ext-inf segment multi zeroes", () => {
     expect(
-      Segment.parseSegment("sg_1655599910_0_000.ts", 8, null)?.getExtInf()
+      Segment.parseSegment("sg_1655599910_0_000.ts", 8, null)?.getExtInf(),
     ).toEqual("0.000000")
   })
 
   it("ext-inf segment equal", () => {
     expect(
-      Segment.parseSegment("sg_1655599910_0_123456.ts", 8, null)?.getExtInf()
+      Segment.parseSegment("sg_1655599910_0_123456.ts", 8, null)?.getExtInf(),
     ).toEqual("0.123456")
   })
 })

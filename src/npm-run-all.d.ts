@@ -26,7 +26,7 @@ declare module "npm-run-all" {
           stdout?: Writable | null
           stderr?: Writable | null
           taskList?: string[] | null
-        }
+        },
       ): Promise<RunnerResult[]>
     }
   }

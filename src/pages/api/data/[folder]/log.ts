@@ -9,7 +9,7 @@ const dbRef = createPersistentDatabase()
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   await runMiddleware(req, res, cors({ methods: ["POST", "HEAD"] }))
 

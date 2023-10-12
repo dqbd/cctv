@@ -1,5 +1,5 @@
 export function vibrateDecorator<T extends Array<unknown>, U>(
-  callback: (...args: T) => U
+  callback: (...args: T) => U,
 ) {
   return (...args: T): U => {
     try {

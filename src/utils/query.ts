@@ -2,7 +2,7 @@ type IQuery = string | number | boolean | undefined | null
 
 export const encodeQuery = (
   url: string,
-  args: { [key: string]: IQuery } = {}
+  args: { [key: string]: IQuery } = {},
 ): string => {
   const [baseUrl, search] = url.split("?")
   const params = [

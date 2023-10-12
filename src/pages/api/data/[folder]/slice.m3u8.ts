@@ -16,7 +16,7 @@ function parseNumberQuery(value: string | string[] | undefined) {
 }
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   await runMiddleware(req, res, cors({ methods: ["GET", "HEAD"] }))
 
@@ -44,7 +44,7 @@ export default async function handler(
 
   const items = (await db.seek(folder, fromSec, toSec))
     .map((item) =>
-      Segment.parseSegment(item.path, item.targetDuration, item.pdt)
+      Segment.parseSegment(item.path, item.targetDuration, item.pdt),
     )
     .filter(isSegment)
 

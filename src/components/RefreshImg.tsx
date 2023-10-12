@@ -9,7 +9,7 @@ export const RefreshImg = forwardRef<
   useEffect(() => {
     const interval = window.setInterval(
       () => void setSession(Date.now()),
-      15 * 1000
+      15 * 1000,
     )
     return () => void window.clearInterval(interval)
   }, [])

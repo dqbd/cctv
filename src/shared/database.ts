@@ -66,7 +66,7 @@ export class Database {
     camera: string,
     keyBase: string,
     filenames: string[],
-    chunkSize = 256
+    chunkSize = 256,
   ) {
     const inferTargetDuration = Math.floor(
       filenames
@@ -74,7 +74,7 @@ export class Database {
         .filter((i): i is string => i != null)
         .map((i) => Number.parseFloat(i))
         .filter((i) => !Number.isNaN(i))
-        .reduce((min, i) => Math.min(min, i), Infinity)
+        .reduce((min, i) => Math.min(min, i), Infinity),
     )
 
     const segments = filenames.reduce<CameraTable[]>((memo, filename) => {
@@ -99,12 +99,12 @@ export class Database {
     camera: string,
     targetDuration: number,
     path: string,
-    pdt: string | null
+    pdt: string | null,
   ) {
     const segment = Segment.parseSegment(
       fsPath.basename(path),
       targetDuration,
-      pdt ? new Date(Date.parse(pdt)) : null
+      pdt ? new Date(Date.parse(pdt)) : null,
     )
 
     if (!segment) return null
@@ -149,7 +149,7 @@ export class Database {
   async seekFrom(
     camera: string,
     fromSec: number,
-    limit = 5
+    limit = 5,
   ): Promise<CameraTable[]> {
     const from = new Date(fromSec * 1000)
 
@@ -161,7 +161,7 @@ export class Database {
           .from<CameraTable>(camera)
           .where("timestamp", "<=", from)
           .orderBy("timestamp", "desc")
-          .limit(1)
+          .limit(1),
       )
       .with(
         "remaining",
@@ -170,7 +170,7 @@ export class Database {
           .from<CameraTable>(camera)
           .where("timestamp", ">", from)
           .orderBy("timestamp", "asc")
-          .limit(limit - 1)
+          .limit(limit - 1),
       )
       .select("*")
       .from("inclusive")
