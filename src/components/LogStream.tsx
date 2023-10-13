@@ -91,7 +91,7 @@ export function LogStream(props: {
       {currentItem && (
         <div
           onClick={() => setTranslucent((prev) => !prev)}
-          className="text-white rounded-[0.5em] transition-all pointer-events-auto inline-grid grid-cols-[repeat(2,auto)] empty:hidden gap-[6px] gap-x-[32px] text-[24px] p-[0.5em]"
+          className="text-white rounded-[0.5em] transition-all pointer-events-auto inline-grid grid-cols-[repeat(3,auto)] empty:hidden gap-[6px] gap-x-[32px] text-[24px] p-[0.5em]"
           css={css`
             background: ${theme.colors.blue500};
 
@@ -106,42 +106,35 @@ export function LogStream(props: {
             const name = item.name || "Zboží"
             return (
               <Fragment key={idx}>
+                <span>{name}</span>
                 <span>
-                  {item.qty} x {name}
+                  {item.qty} x {item.price.toFixed(2)}
                 </span>
-                <span css={{ textAlign: "right" }}>
-                  {item.price * item.qty} Kč
+                <span className="text-right tabular-nums">
+                  {(item.price * item.qty).toFixed(2)}
                 </span>
               </Fragment>
             )
           })}
           {sum !== 0 && (
             <Fragment>
-              <span
-                css={{
-                  gridColumnStart: 1,
-                  gridColumnEnd: "span 2",
-                  height: "1px",
-                  background: "white",
-                  opacity: 0.2,
-                }}
-              />
-              <span>Celkem</span>
-              <span css={{ textAlign: "right" }}>{sum} Kč</span>
+              <span className="col-span-3 h-px bg-white opacity-20" />
+              <span className="col-span-2">Celkem</span>
+              <span className="text-right tabular-nums">{sum.toFixed(2)}</span>
             </Fragment>
           )}
           {currentItem.data.paid !== 0 && (
             <>
               <Fragment>
-                <span>Zaplaceno</span>
-                <span css={{ textAlign: "right" }}>
-                  {currentItem.data.paid} Kč
+                <span className="col-span-2">Zaplaceno</span>
+                <span className="text-right tabular-nums">
+                  {currentItem.data.paid.toFixed(2)}
                 </span>
               </Fragment>
               <Fragment>
-                <span>Vráceno</span>
-                <span css={{ textAlign: "right" }}>
-                  {currentItem.data.paid - sum} Kč
+                <span className="col-span-2">Vráceno</span>
+                <span className="text-right tabular-nums">
+                  {(currentItem.data.paid - sum).toFixed(2)}
                 </span>
               </Fragment>
             </>
