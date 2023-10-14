@@ -11,7 +11,7 @@ template.generate({
   },
   STARY_SPODNI: {
     name: 'Pokladna',
-    source: 'onvif://admin:@192.168.2.176:8899',
+    source: 'rtsp://cctv:XAR4bwc.ukz6wax3tkd@192.168.2.198:554/h264Preview_01_main',
   },
   VPREDU_VCHOD: {
     name: 'Vchod',
@@ -27,7 +27,7 @@ template.generate({
   },
   POKLADNA: {
     name: 'Peněženky',
-    source: 'rtsp://cctv:XAR4bwc.ukz6wax3tkd@192.168.2.198:554/h264Preview_01_main'
+    source: 'onvif://admin:@192.168.2.176:8899',
   }
 }, {
   volumes: {
